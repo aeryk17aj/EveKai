@@ -1,0 +1,17 @@
+{
+    "extends": "eslint:recommended",
+    "env": {
+        "es6": true,
+        "node": true
+    },
+    "rules": {
+        "semi": [2, "always"],
+        "indent": [2, "tab", {
+            "SwitchCase": 1
+        }],
+        "no-var": 1,
+        "prefer-const": 1,
+		"no-const-assign": 2,
+        "no-console": 0
+    }
+}

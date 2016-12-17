@@ -1,0 +1,9 @@
+.vscode/*
+node_modules/*
+settings.json
+
+logs/*
+auth.json
+userIds.json
+whitelist.json
+command.js

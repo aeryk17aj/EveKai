@@ -19,8 +19,9 @@ function addCommand (msg, c, f) {
  * @param {Function}  f   Callback function
  */
 function addCommandArgs (msg, c, f) {
-	const args = msg.replace(new RegExp(`^${c} .+`), '').split(' ');
-	if (msg.startsWith(config.prefix + c)) f(args);
+	const command = config.prefix + c;
+	const args = msg.replace(new RegExp(`^${c} (.+)`), '$1').split(' ');
+	if (msg.startsWith(command) && msg !== command) f(args);
 }
 
 module.exports = {

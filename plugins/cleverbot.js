@@ -2,8 +2,8 @@
 const apiai = require('apiai');
 const botUtil = require(process.cwd() + '/util/botUtil');
 // const msgUtil = require(process.cwd() + '/util/msgUtil');
-const auth = (botUtil.getFromRoot('auth'));
-const eve = apiai('1f467544ba80490faed2c9093f4bf0c2');
+const auth = ('../auth');
+const eve = apiai(auth.apiai);
 
 function respond (msg, client) {
 	const msgText = msg.content;

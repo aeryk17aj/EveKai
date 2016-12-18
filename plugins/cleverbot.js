@@ -2,7 +2,7 @@
 const apiai = require('apiai');
 const botUtil = require(process.cwd() + '/util/botUtil');
 // const msgUtil = require(process.cwd() + '/util/msgUtil');
-const auth = ('../auth');
+const auth = require(botUtil.getFromRoot('auth'));
 const eve = apiai(auth.apiai);
 
 function respond (msg, client) {

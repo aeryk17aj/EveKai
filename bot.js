@@ -41,8 +41,6 @@ function onMessageCreate (e) {
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);
 
-exports.onMessageCreate = onMessageCreate;
-
 /**
  * TODO
  *

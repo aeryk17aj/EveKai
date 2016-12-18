@@ -19,9 +19,11 @@ function addCommand (msg, c, f) {
  * @param {Function}  f   Callback function
  */
 function addCommandArgs (msg, c, f) {
-	const command = config.prefix + c;
-	const args = msg.replace(new RegExp(`^${c} (.+)`), '$1').split(' ');
+	const command = config.prefix + c + ' ';
+	const args = msg.replace(new RegExp('^' + command + '(.+)'), '$1').split(' ');
 	if (msg.startsWith(command) && msg !== command) f(args);
+	else return; // Uncomment to run some debug stuff when sucessful
+	// console.log(`Query: [${args.join(', ')}]`);
 }
 
 module.exports = {

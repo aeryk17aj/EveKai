@@ -16,9 +16,9 @@ function respond (msg, client) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 	const msgChannel = msg.channel;
-	// const msgGuild = msg.guild;
+	const msgGuild = msg.guild;
 	// Used in Cleverbot, not here, but just in case
-	// var botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
+	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
@@ -70,13 +70,13 @@ function respond (msg, client) {
 	addCommandSentence('eval', a => {
 		if (!senderIsOwner) return;
 		/* eslint-disable no-eval */
-		if (a === 'e.message.content' || a === 'msgText') return;
+		// if (a === 'e.message.content' || a === 'msgText') return;
 		try {
 			eval(a);
 		} catch (e) {
 			sendMessage('Error');
 			logger.logToBoth('[System] Evaluation error');
-			console.log(e);
+			// console.log(e);
 		}
 	});
 
@@ -87,8 +87,8 @@ function respond (msg, client) {
 			sendMessage(eval(a));
 		} catch (e) {
 			sendMessage('Error');
-			logger.logToBoth('[System] Evualuation error');
-			console.log(e);
+			logger.logToBoth('[System] Evaluation error');
+			// console.log(e);
 		}
 		/* eslint-enable */
 	});

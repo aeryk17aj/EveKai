@@ -17,6 +17,10 @@ function logToBoth (s) {
 	addToLog(s);
 }
 
+/**
+ * Commands for the chat logger
+ * @param  {IMessage} msg Message object
+ */
 function loggerCommands (msg) {
 	const msgChannel = msg.channel;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
@@ -76,6 +80,11 @@ function loggerCommands (msg) {
 	}
 }
 
+/**
+ * [logMsg description]
+ * @param  {IMessage} msg [description]
+ * @return {void}       [description]
+ */
 function logMsg (msg) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author; // IUser as substitute for the case of DMs

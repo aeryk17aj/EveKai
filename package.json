@@ -9,6 +9,7 @@
   "author": "Aeryk",
   "license": "MIT",
   "dependencies": {
+    "apiai": "^3.0.3",
     "discordie": "^0.10.0",
     "node-osu": "^1.2.0"
   },

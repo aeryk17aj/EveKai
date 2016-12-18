@@ -5,6 +5,7 @@ const Discordie = require('discordie');
 const messageHandler = require('./plugins/messageHandler');
 const logger = require('./plugins/logger');
 const osu = require('./plugins/osu');
+const cleverbot = require('./plugins/cleverbot');
 
 // External JSON files
 const auth = require('./auth');
@@ -28,13 +29,14 @@ client.Dispatcher.on(Events.GATEWAY_RESUMED, () => console.log('[System] Connect
 
 /**
  * Fired every time a message is received by the bot.
- * @param  Events.MESSAGE_CREATE e Event object
+ * @param  {Object} e Event object
  */
 function onMessageCreate (e) {
 	const msg = e.message;
 	logger.init(msg);
 	messageHandler.respond(msg, client);
 	osu.respond(msg);
+	cleverbot.respond(msg, client);
 }
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);
@@ -44,9 +46,7 @@ exports.onMessageCreate = onMessageCreate;
 /**
  * TODO
  *
- * Finish Message Handler
- * Add methods using the client object
- * 	Cleverbot - anti-self-response
- * 	Master Access check to include self
- * 		Alternative, store bot id
+ * Finish Message Handler (aka port over every command)
+ * Cleverbot - anti-self-response
+ * Image map: "imgPath": [alias1, alias2]
  */

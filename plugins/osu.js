@@ -19,15 +19,27 @@ function respond (msg) {
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
-	// TODO new.ppy.sh listener
-	// Sample: https://new.ppy.sh/beatmapsets/202661#osu/551348
-	// var newPpyLink = /https?:\/\/new\.ppy\.sh\/beatmapsets\/(\d+)(?:#(?:osu|taiko|fruits|mania)\/(\d+))?/g;
+	/**
+	 * $1 (\d+) Set ID
+	 * $2 (\d+) Map ID
+	 */
+	const newMapLink = /https?:\/\/new\.ppy\.sh\/beatmapsets\/(\d+)(?:#(?:osu|taiko|fruits|mania)\/(\d+))?/g;
+
+	/**
+	 * $1 ([b|s]) Set/Map Indicator
+	 * $2 (\d+) Set/Map ID
+	 */
 	const beatmapLink = /https?:\/\/osu\.ppy\.sh\/([b|s])\/(\d+)/g;
-	const isMapset = msgText.replace(beatmapLink, '$1') === 's';
-	const id = msgText.replace(beatmapLink, '$2');
+
+	const isNewMapLink = newMapLink.test(msgText);
+	const linkMatches = beatmapLink.test(msgText) || isNewMapLink;
+	const isMapset = msgText.replace(beatmapLink, '$1') === 's' || msgText.replace(newMapLink, '$2') === '';
+
+	const id = isNewMapLink ? msgText.replace(newMapLink, isMapset ? '$1' : '$2') : msgText.replace(beatmapLink, '$2');
+
 	const setFormat = '%s - %s (%s)';
-	const mapFormat = '%s - %s [%s] ★ %f (%s)';
-	if (beatmapLink.test(msgText)) {
+	const mapFormat = '%s - %s [%s] ★ %d (%s)';
+	if (linkMatches) {
 		if (isMapset) {
 			osuApi.getBeatmaps({ s: id }).then(beatmaps => {
 				console.log('[s] Diffs: ' + beatmaps.length);
@@ -50,7 +62,7 @@ function respond (msg) {
 		} else {
 			osuApi.getBeatmaps({ b: id }).then(beatmaps => {
 				const bmap = beatmaps[0];
-				const mapString = util.format(mapFormat, bmap.artist, bmap.title, bmap.version, bmap.creator);
+				const mapString = util.format(mapFormat, bmap.artist, bmap.title, bmap.version, parseFloat(bmap.difficulty.rating).toFixed(2), bmap.creator);
 				sendMessage(mapString);
 			});
 		}
@@ -131,3 +143,4 @@ function respond (msg) {
 }
 
 exports.respond = respond;
+// module.exports = respond;

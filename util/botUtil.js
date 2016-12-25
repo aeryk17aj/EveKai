@@ -7,7 +7,7 @@ const userIds = require(getRootDir() + 'userIds');
 
 /**
  * Adds commas to every 3 characters / digits
- * @param  {[any, string]} s - Number or string
+ * @param  {*} s - Number or string
  * @return {string} - Now padded with commas
  */
 function commaPad (s) {
@@ -23,7 +23,7 @@ function getRootDir () {
 }
 
 /**
- * Gets a file from the root dir
+ * Gets a file from the root directory
  * @param  {string} s File name
  * @return {string} File path
  */
@@ -60,8 +60,8 @@ function senderIsOwner (msg) {
 }
 /**
  * Gets a random element from the given array
- * @param  {any[]} ar Any array
- * @return {any} Random element from input array
+ * @param  {*[]} ar Any array
+ * @return {*} Random element from input array
  */
 function rInAr (ar) {
 	return ar[Math.floor(Math.random() * ar.length)];
@@ -81,7 +81,7 @@ function codeL (s) {
 
 /**
  * Pads a string with three backticks to be turned to a code block
- * @param  {[string, string[]]} s input
+ * @param  {(string|string[])} s input
  * @return {string} the input but padded with three backticks
  * @example 
  *   codeB('textGoesHere');
@@ -95,13 +95,11 @@ function codeL (s) {
  *       ```
  */
 function codeB (s) {
+	return Array.isArray(s)
 	// Array case
-	if (s.constructor === Array) {
-		// return ['```', ...s, '```'].join('\n'); // Soon
-		s.unshift('```');
-		s.push('```');
-		return s.join('\n');
-	} else return '```' + s + '```'; // String case
+	? ['```', ...s, '```'].join('\n')
+	// String case
+	: '```' + s + '```';
 }
 
 module.exports = {

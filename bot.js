@@ -29,7 +29,7 @@ client.Dispatcher.on(Events.GATEWAY_RESUMED, () => console.log('[System] Connect
 
 /**
  * Fired every time a message is received by the bot.
- * @param  {Object} e Event object
+ * @param {Object} e Event object
  */
 function onMessageCreate (e) {
 	const msg = e.message;
@@ -45,6 +45,5 @@ client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);
  * TODO
  *
  * Finish Message Handler (aka port over every command)
- * Cleverbot - anti-self-response
- * Image map: "imgPath": [alias1, alias2]
+ * Image map: "filename": [alias1, alias2]
  */

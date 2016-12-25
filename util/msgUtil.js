@@ -14,9 +14,9 @@ function addCommand (msg, c, f) {
 
 /**
  * @summary Adds a command that takes arguments separated by spaces
- * @param {IMessage} msg  Message object
- * @param {string}    c   Command string
- * @param {Function}  f   Callback function
+ * @param {IMessage} msg Message object
+ * @param {string} c Command string
+ * @param {Function} f Callback function
  */
 function addCommandArgs (msg, c, f) {
 	const command = config.prefix + c + ' ';

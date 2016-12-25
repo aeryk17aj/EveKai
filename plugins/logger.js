@@ -81,9 +81,9 @@ function loggerCommands (msg) {
 }
 
 /**
- * [logMsg description]
- * @param  {IMessage} msg [description]
- * @return {void}       [description]
+ * Logs every whitelisted channel's messages to a single file.
+ * Considering on having multiple files separated by folders named by the day
+ * @param  {IMessage} msg Message object
  */
 function logMsg (msg) {
 	const msgText = msg.content;
@@ -100,25 +100,23 @@ function logMsg (msg) {
 	const logDate = timeSent.toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
 
-	// Disabling logging only disables logging of everything, detected commands will always be logged
+	// Only disables logging of everything else, detected commands will always be logged
 	const possibleCommand = new RegExp('^' + config.prefix + '.+');
-	if (!config.logMessages && !possibleCommand.test(msgText)) return;
+	if (!(config.logMessages || possibleCommand.test(msgText))) return;
 
 	// The attachments array exists, picture or none, so length check it is
 	// TODO save attachments
-	const attachments = !msg.attachments.length ? '' : '\n' + msg.attachments.map(a => a.url).join('\n');
+	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
 
 	const logLine = [
 		timeSentString,
-		'[' + (!msgChannel.guild ? 'DM' : msgGuild.name) + ']' +
-		(!msg.isPrivate ? ' [#' + msgChannel.name + ']' : '[' + msgChannel.recipient.username + ']'),
-		sender.username + ':',
+		`[${(!msgChannel.guild ? 'DM' : msgChannel.guild.name)}]` +
+		(!msg.isPrivate ? `[#${msgChannel.name}]` : `[${msgChannel.recipient.username}]`),
+		`${sender.username}:`,
 		msgText,
 		attachments
 	].join(' ');
 
-	// Chat Logger, AKA NSA mode
-	// Whitelists to not be full-on NSA
 	if (msg.isPrivate || (whitelist.hasOwnProperty(msgGuild.id) && whitelist[msgGuild.id].includes(msgChannel.id))) {
 		logToBoth(logLine);
 	}

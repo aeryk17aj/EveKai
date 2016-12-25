@@ -1,3 +1,5 @@
+const readline = require('readline');
+
 const botUtil = require(process.cwd() + '/util/botUtil');
 const msgUtil = require(process.cwd() + '/util/msgUtil');
 const logger = require(botUtil.getPlugin('logger'));
@@ -7,9 +9,14 @@ const ballQuotes = require(botUtil.getQuotes('8ball'));
 const leaveQuotes = require(botUtil.getQuotes('disconnect'));
 const docLinks = require(botUtil.getQuotes('docs'));
 
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
+
 /**
  * Primary message listener
- * @param  {IMessage}  msg    Message object to be used
+ * @param  {IMessage} msg Message object to be used
  * @param  {Discordie} client Bot client object
  */
 function respond (msg, client) {
@@ -115,7 +122,5 @@ function respond (msg, client) {
 	});
 }
 
-// exports.respond = respond;
-module.exports = {
-	respond
-};
+exports.respond = respond;
+// module.exports = respond;

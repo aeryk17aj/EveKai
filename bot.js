@@ -1,7 +1,9 @@
 // Dependencies
 const Discordie = require('discordie');
+const readline = require('readline');
 
 // Plugins
+const consoleHandler = require('./plugins/consoleHandler');
 const messageHandler = require('./plugins/messageHandler');
 const logger = require('./plugins/logger');
 const osu = require('./plugins/osu');
@@ -14,6 +16,16 @@ const config = require('./config');
 const Events = Discordie.Events;
 const client = new Discordie({
 	autoReconnect: true
+});
+const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
+
+rl.on('line', c => {
+	// const possibleCommand = c.startsWith(config.prefix);
+	// if (!possibleCommand) return;
+	consoleHandler.respond(c, client);
 });
 
 client.connect({ token: auth.loginToken });
@@ -36,7 +48,7 @@ function onMessageCreate (e) {
 	logger.init(msg);
 	messageHandler.respond(msg, client);
 	osu.respond(msg);
-	cleverbot.respond(msg, client);
+	cleverbot.init(msg, client);
 }
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);

@@ -1,18 +1,11 @@
-const readline = require('readline');
-
 const botUtil = require(process.cwd() + '/util/botUtil');
-const msgUtil = require(process.cwd() + '/util/msgUtil');
+const msgUtil = require('../util/msgUtil');
 const logger = require(botUtil.getPlugin('logger'));
 
-const config = require(botUtil.getFromRoot('config'));
 const ballQuotes = require(botUtil.getQuotes('8ball'));
 const leaveQuotes = require(botUtil.getQuotes('disconnect'));
 const docLinks = require(botUtil.getQuotes('docs'));
-
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
+const commands = require(botUtil.getQuotes('commands'));
 
 /**
  * Primary message listener
@@ -24,7 +17,7 @@ function respond (msg, client) {
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 	const msgChannel = msg.channel;
 	const msgGuild = msg.guild;
-	// Used in Cleverbot, not here, but just in case
+	// Used for eval
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
@@ -59,6 +52,8 @@ function respond (msg, client) {
 		else sendMessage('I don\'t have a link for ' + codeL(a));
 	});
 
+	addCommandResponse('cmds', Object.keys(commands.general).map(s => codeL(s)).join(', '));
+
 	// This is where the fun starts
 	addCommandSentence('8ball', a => {
 		if (/\?$/.test(a)) {
@@ -75,29 +70,21 @@ function respond (msg, client) {
 	});
 
 	addCommandSentence('eval', a => {
-		if (!senderIsOwner) return;
-		/* eslint-disable no-eval */
-		// if (a === 'e.message.content' || a === 'msgText') return;
-		try {
-			eval(a);
-		} catch (e) {
-			sendMessage('Error');
+		if (!senderIsOwner || a === 'e.message.content' || a === 'msgText') return;
+		let result;
+		return new Promise(resolve => {
+			result = eval(a);
+			resolve('Success');
+		}).catch(() => {
+			// sendMessage('\u{1F52B}'); // Peestol
 			logger.logToBoth('[System] Evaluation error');
-			// console.log(e);
-		}
-	});
-
-	addCommandSentence('evalR', a => {
-		if (!senderIsOwner) return;
-		if (a === 'e.message.content' || a === 'msgText') return;
-		try {
-			sendMessage(eval(a));
-		} catch (e) {
-			sendMessage('Error');
-			logger.logToBoth('[System] Evaluation error');
-			// console.log(e);
-		}
-		/* eslint-enable */
+		}).then(v => {
+			if (v === 'Success') {
+				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') sendMessage(result);
+				else if (Array.isArray(result)) sendMessage(result.join(', '));
+				else sendMessage('\u{1F44C}'); // Ok hand sign
+			}
+		});
 	});
 
 	addCommandResponse('roll', codeL(Math.ceil(Math.random() * 100))); // Default 100
@@ -113,9 +100,6 @@ function respond (msg, client) {
 		sendMessage(`It's ${codeL(timeShort)} EST.`);
 	});
 
-	// Far future: scrape for skill info, see if the page exists, etc.
-	//    Basically, split off to a wiki plugin
-	// TODO https://github.com/bda-research/node-crawler ;)
 	addCommandArgs('elwiki', a => {
 		const pageName = a.map(w => w[0].toUpperCase() + w.slice(1)).join('_');
 		sendMessage('http://elwiki.net/w/' + pageName);

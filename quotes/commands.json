@@ -1,0 +1,17 @@
+{
+	"general": {
+		"info": "Bot version.",
+		"v2?": "Eve v2 description.",
+		"builtOn": "",
+		"connections": "",
+		"docs": "links to various documentation used by the bot.",
+		"8ball": "Ask a simple yes or no question.",
+		"roll": "Generates a random number (default 100).",
+		"time": "Current time in EST."
+	},
+
+	"dev": {
+		"dc": "Disconnects the bot",
+		"eval": "Evaluates argument as JavaScript code."
+	}
+}

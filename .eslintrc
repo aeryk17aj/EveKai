@@ -10,8 +10,11 @@
             "SwitchCase": 1
         }],
         "no-var": 1,
+        "no-extra-boolean-cast": 0,
+        "no-unused-vars": 1,
         "prefer-const": 1,
-		"no-const-assign": 2,
-        "no-console": 0
+        "no-const-assign": 2,
+        "no-console": 0,
+        "no-eval": 0
     }
 }

@@ -43,26 +43,26 @@ function respond (msg) {
 		if (isMapset) {
 			osuApi.getBeatmaps({ s: id }).then(beatmaps => {
 				console.log('[s] Diffs: ' + beatmaps.length);
-				const bmapset = beatmaps[0];
+				const mapSet = beatmaps[0]; 
 				const setString = util.format(setFormat,
-					bmapset.artist,
-					bmapset.title,
-					bmapset.creator
+					mapSet.artist,
+					mapSet.title,
+					mapSet.creator
 				);
 				const mapString = util.format(mapFormat,
-					bmapset.artist,
-					bmapset.title,
-					bmapset.version,
-					parseFloat(bmapset.difficulty.rating).toFixed(2),
-					bmapset.creator
+					mapSet.artist,
+					mapSet.title,
+					mapSet.version,
+					parseFloat(mapSet.difficulty.rating).toFixed(2),
+					mapSet.creator
 				);
-				if (bmapset.length > 1) sendMessage(setString);
+				if (mapSet.length > 1) sendMessage(setString);
 				else sendMessage(mapString);
 			});
 		} else {
 			osuApi.getBeatmaps({ b: id }).then(beatmaps => {
-				const bmap = beatmaps[0];
-				const mapString = util.format(mapFormat, bmap.artist, bmap.title, bmap.version, parseFloat(bmap.difficulty.rating).toFixed(2), bmap.creator);
+				const bMap = beatmaps[0];
+				const mapString = util.format(mapFormat, bMap.artist, bMap.title, bMap.version, parseFloat(bMap.difficulty.rating).toFixed(2), bMap.creator);
 				sendMessage(mapString);
 			});
 		}

@@ -34,13 +34,13 @@ function loggerCommands (msg) {
 
 	if (!(args.length > 2)) {
 		switch (args[0]) {
-			case 'start': case 'resume':
+			case 'start':
 				if (config.logMessages) sendMessage('Logging is already enabled');
 				else {
 					config.logMessages = true;
 					sendMessage('Logging enabled');
 				} break;
-			case 'stop': case 'pause':
+			case 'stop':
 				if (!config.logMessages) sendMessage('Logging is already disabled');
 				else {
 					sendMessage('Logging disabled');
@@ -72,6 +72,7 @@ function loggerCommands (msg) {
 						sendMessage('Logging of this channel has now stopped');
 					}
 				} else logToBoth('Invalid whitelist argument ' + botUtil.codeL(args[1]));
+				// Whitelist refresh
 				fs.writeFileSync(botUtil.getRootDir() + '/whitelist.json', JSON.stringify(whitelist, null, 4), 'utf-8');
 				break;
 			default:

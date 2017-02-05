@@ -1,4 +1,8 @@
 {
     "prefix": "~",
-    "logMessages": true
+    "logMessages": true,
+	"oldClever": false,
+	"modules": {
+		"clever": true
+	}
 }

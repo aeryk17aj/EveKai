@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "apiai": "^3.0.3",
+    "cleverbot-node": "^0.2.4",
     "discordie": "^0.10.0",
     "node-osu": "^1.2.0"
   },

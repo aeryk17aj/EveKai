@@ -1,4 +1,7 @@
-const userIds = require(getRootDir() + 'userIds');
+const fs = require('fs');
+
+const config = require(getFromRoot('config'));
+const userIds = require(getFromRoot('userIds'));
 
 /**
  * botUtil.js
@@ -102,11 +105,15 @@ function codeB (s) {
 	: '```' + s + '```';
 }
 
+function refreshConfig () {
+	fs.writeFileSync('./config.json', JSON.stringify(config, null, 4), 'utf-8');
+}
+
 module.exports = {
 	// Module utility
 	getFromRoot, getPlugin, getQuotes,
 	// Message utility
 	senderIsOwner,
 	// General utility
-	commaPad, rInAr, codeL, codeB
+	commaPad, rInAr, codeL, codeB, refreshConfig
 };

@@ -1,9 +1,13 @@
 // Not the actual cleverbot, under heaevy development (bot side)
 const apiai = require('apiai');
+const Cleverbot = require('cleverbot-node');
 const botUtil = require(process.cwd() + '/util/botUtil');
-// const msgUtil = require(process.cwd() + '/util/msgUtil');
+const msgUtil = require(process.cwd() + '/util/msgUtil');
 const auth = require(botUtil.getFromRoot('auth'));
+const config = require(botUtil.getFromRoot('config'));
+
 const eve = apiai(auth.apiai);
+const cleverbot = new Cleverbot();
 
 /**
  * @param {IMessage} msg message object
@@ -11,34 +15,81 @@ const eve = apiai(auth.apiai);
  */
 function respond (msg, client) {
 	const msgText = msg.content;
-	const msgGuild = msg.guild;
 	const sender = msg.member || msg.author;
+	const msgGuild = msg.guild;
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
-	if (sender === botUser) return; // We don't want that even if I talk as her
+	if (!config.modules.clever) return;
 
-	// const addCommandSentence = (c, f) => msgUtil.addCommandArgs(c, a => f(a.join(' ')));
+	// Mention, Self, and command check
+	if (sender === botUser || !msgText.startsWith(client.User.mention)) return; 
 
-	// Universal, mention w/o nick
-	if (!msgText.startsWith(client.User.mention)) return;
-
-	// Guild only
+	// Guild-only nickname check
 	if (msg.isPrivate !== msgText.startsWith(client.User.memberOf(msgGuild).nickMention)) return;
-	// DM Only, No response on command
-	else if (msgText.startsWith('~') && sender.id !== client.User.id) return;
 
 	const actualMessage = msgText.replace(new RegExp(`^<@!?${client.User.id}> `), '');
 
-	const request = eve.textRequest(actualMessage, {
-		// Easy way to get something unique
-		sessionId: sender.id
+	if (!config.oldClever) {
+		const request = eve.textRequest(actualMessage, {
+			sessionId: sender.id // User ids are unique, might as well use those
+		});
+
+		request.on('response', res => msg.channel.sendMessage(res.result.fulfillment.speech));
+		request.on('error', err => console.log(`[APIAI] [¯\\_(ツ)_/¯] ${err}`));
+		request.end();
+	} else {
+		// Fallback - dumb, but packed Cleverbot
+		cleverbot.write(actualMessage, res => msg.channel.sendMessage(res.message));
+	}
+}
+
+/**
+ * @param {IMessage} msg message object
+ */
+function cleverCommands (msg) {
+	const msgChannel = msg.channel;
+
+	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
+	const refreshConfig = () => msgUtil.refreshConfig();
+
+	const addCommand = (c, f) => msgUtil.addCommand(msg, c, f);
+	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
+
+	if (!msg.content.startsWith(config.prefix)) return;
+
+	addCommand('tC', () => {
+		config.modules.clever = !config.modules.clever;
+		refreshConfig();
 	});
 
-	request.on('response', res => msg.channel.sendMessage(res.result.fulfillment.speech));
-	request.on('error', err => console.log(`[APIAI] [¯\\_(ツ)_/¯] ${err}`));
-	request.end();
+	addCommandResponse('isClever',
+		config.modules.clever
+		? 'Yup'
+		: 'Nope'
+	);
+
+	addCommand('oldClever', () => {
+		if (config.oldClever) return;
+		else config.oldClever = true;
+		refreshConfig();
+	});
+
+	addCommand('newClever', () => {
+		if (!config.oldClever) return;
+		else config.oldClever = false;
+		refreshConfig();
+	});
+}
+
+/**
+ * @param {IMessage} msg message object
+ * @param {Discordie} name bot client
+ */
+function init (msg, client) {
+	respond(msg, client);
+	cleverCommands(msg);
 }
 
 module.exports = {
-	respond
+	init
 };

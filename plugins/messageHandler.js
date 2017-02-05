@@ -1,4 +1,4 @@
-const botUtil = require(process.cwd() + '/util/botUtil');
+const botUtil = require('../util/botUtil');
 const msgUtil = require('../util/msgUtil');
 const logger = require(botUtil.getPlugin('logger'));
 

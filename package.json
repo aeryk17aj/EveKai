@@ -12,7 +12,10 @@
     "apiai": "^3.0.3",
     "cleverbot-node": "^0.2.6",
     "discordie": "^0.11.0",
-    "node-osu": "^1.2.0"
+    "fluent-ffmpeg": "^2.1.0",
+    "node-osu": "^1.2.0",
+    "youtube-node": "^1.3.0",
+    "ytdl-core": "^0.9.0"
   },
   "devDependencies": {
     "happiness": "^7.1.2"

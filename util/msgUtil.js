@@ -1,31 +1,37 @@
-const botUtil = require('./botUtil');
-const config = require(botUtil.getFromRoot('config'));
+const config = require('../config');
 
-/**
- * @summary Adds a command
- * @param {string} msg - Message object
- *   @see {@link https://qeled.github.io/discordie/#/docs/IMessage|IMessage}
- * @param {string} c - Command string
- * @param {Function} f - Callback function
- */
-function addCommand (msg, c, f) {
-	if (msg === config.prefix + c) f();
+class CommandHandler {
+	constructor (command) {
+		this.command = command;
+	}
+
+	/**
+	 * @summary Adds a command
+	 * @param {string} msg - Message object
+	 *   @see {@link https://qeled.github.io/discordie/#/docs/IMessage |IMessage}
+	 * @param {string} c - Command string
+	 * @param {Function} f - Callback function
+	 */
+	addCommand (c, f) {
+		if (this.command === config.prefix + c) f();
+	}
+
+	addCommandSentence (c, f) {
+		if (this.command.startsWith(c)) {
+			// if (this.command.length > c.length)
+			if (this.command[c.length] === ' ' || this.command[c.length] === undefined) f(this.command.slice(c.length + 1));
+		}
+	}
+
+	/**
+	 * @summary Adds a command that takes arguments separated by spaces
+	 * @param {string} msg Message object
+	 * @param {string} c Command string
+	 * @param {Function} f Callback function
+	 */
+	addCommandArgs (c, f) {
+		this.addCommandSentence(c, a => f(a.plit(' ')));
+	}
 }
 
-/**
- * @summary Adds a command that takes arguments separated by spaces
- * @param {string} msg Message object
- * @param {string} c Command string
- * @param {Function} f Callback function
- */
-function addCommandArgs (msg, c, f) {
-	const command = config.prefix + c + ' ';
-	const args = msg.replace(new RegExp('^' + command + '(.+)'), '$1').split(' ');
-	if (msg.startsWith(command) && msg !== command) f(args);
-	else return; // Uncomment to run some debug stuff when sucessful
-	// console.log(`Query: [${args.join(', ')}]`);
-}
-
-module.exports = {
-	addCommand, addCommandArgs
-};
+module.exports = CommandHandler;

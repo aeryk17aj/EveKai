@@ -1,6 +1,8 @@
 const botUtil = require('../util/botUtil');
-const msgUtil = require('../util/msgUtil');
+const CommandHandler = require('../util/msgUtil');
 const logger = require(botUtil.getPlugin('logger'));
+
+const config = require('../config');
 
 const ballQuotes = require(botUtil.getQuotes('8ball'));
 const leaveQuotes = require(botUtil.getQuotes('disconnect'));
@@ -23,10 +25,13 @@ function respond (msg, client) {
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
-	const addCommand = (c, f) => msgUtil.addCommand(msgText, c, f);
+	const command = msgText.slice(config.prefix.length);
+	const handler = new CommandHandler(command);
+
+	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
-	const addCommandArgs = (c, f) => msgUtil.addCommandArgs(msgText, c, f);
-	const addCommandSentence = (c, f) => addCommandArgs(c, a => f(a.join(' ')));
+	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
+	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
 
 	const codeL = s => botUtil.codeL(s);
 	const rInAr = ar => botUtil.rInAr(ar);
@@ -34,11 +39,13 @@ function respond (msg, client) {
 
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;
-		sendMessage(rInAr(leaveQuotes));
-		logger.logToBoth('[System] System Disconnected (command)');
+		
 		setTimeout(() => {
-			client.disconnect();
-			process.exit();
+			sendMessage(rInAr(leaveQuotes)).then(() => {
+				logger.logToBoth('[System] System Disconnected (command)');
+				client.disconnect();
+				process.exit();
+			});
 		}, 2000);
 	});
 
@@ -46,7 +53,7 @@ function respond (msg, client) {
 	addCommandResponse('v2?', 'Yep, Eve is being split into (still connected) parts instead of being one big file.');
 	addCommandResponse('builtOn', codeL(client.User.username) + ' is currently running on under `Discordie 0.10.0` (Node.js)');
 	addCommandResponse('connections', codeL(client.User.username) + ' is connected to ' + codeL(client.Guilds.length) + ' servers.');
-	addCommandResponse('docs', 'http://qeled.github.io/discordie/#/docs/Discordie?_k=grrhaj');
+	// addCommandResponse('docs', 'http://qeled.github.io/discordie/#/docs/Discordie?_k=grrhaj');
 	addCommandSentence('docs', a => {
 		if (docLinks.hasOwnProperty(a)) sendMessage(docLinks[a]);
 		else sendMessage('I don\'t have a link for ' + codeL(a));
@@ -75,22 +82,27 @@ function respond (msg, client) {
 		return new Promise(resolve => {
 			result = eval(a);
 			resolve('Success');
-		}).catch(() => {
+		}).catch(e => {
 			// sendMessage('\u{1F52B}'); // Peestol
-			logger.logToBoth('[System] Evaluation error');
+			console.log(e);
+			sendMessage('It didn\'t work.');
 		}).then(v => {
 			if (v === 'Success') {
 				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') sendMessage(result);
 				else if (Array.isArray(result)) sendMessage(result.join(', '));
-				else sendMessage('\u{1F44C}'); // Ok hand sign
+				// else sendMessage('\u{1F44C}'); // Ok hand sign
 			}
 		});
 	});
 
-	addCommandResponse('roll', codeL(Math.ceil(Math.random() * 100))); // Default 100
-	addCommandArgs('roll', a => {
-		if (a.length > 1) sendMessage('Invalid argument count: ' + codeL(a.length));
-		else sendMessage(codeL(Math.ceil(Math.random() * a[0])));
+	// addCommandResponse('roll', codeL(Math.ceil(Math.random() * 100))); // Default 100
+	// addCommandArgs('roll', a => {
+	// 	if (a.length > 1) sendMessage('Invalid argument count: ' + codeL(a.length));
+	// 	else sendMessage(codeL(Math.ceil(Math.random() * a[0])));
+	// });
+
+	addCommandSentence('roll', a => {
+		sendMessage(Math.ceil(Math.random() * (a || 100)));
 	});
 
 	// TODO add timezone argument, otherwise EST

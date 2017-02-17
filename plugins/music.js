@@ -37,7 +37,7 @@ function respond (msg, client) {
 		if (boundTextChannel.id !== msg.channel.id || sender.getVoiceChannel().id !== boundVoiceChannel.id) return;
 	}
 
-	const isOwner = sender.id === userIds.owner;
+	const isOwner = sender.id === userIds.aeryk;
 	const handler = new CommandHandler(command);
 	const sendMessage = (m, e) => msg.channel.sendMessage(m, false, e);
 
@@ -50,11 +50,12 @@ function respond (msg, client) {
 		if (a === 'e.message.content' || a === 'msgText') return;
 
 		let result;
-		return new Promise((resolve, reject) => {
+		return new Promise(resolve => {
 			result = eval(a);
 			resolve('Success'); // If it got to this point, it might as well work
 		}).catch(e => {
 			// sendMessage('\u{1F52B}'); // Peestol
+			console.log(e);
 			sendMessage('Didn\'t work /w\\');
 		}).then(v => {
 			if (v === 'Success') {
@@ -67,10 +68,10 @@ function respond (msg, client) {
 
 	addCommand('join', () => {
 		boundTextChannel = msg.channel;
-		if (!sender.getVoiceChannel()) return sendMessage('You\'re not in a voice channel. /w\\');
+		if (!sender.getVoiceChannel()) return sendMessage('You\'re not in a voice channel.');
 		sender.getVoiceChannel().join().then(() => {
 			boundVoiceChannel = sender.getVoiceChannel();
-			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`. \\w/');
+			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
 
 			// Initialize queue
 			if (!queue[msg.guild.id]) queue[msg.guild.id] = [];
@@ -170,7 +171,7 @@ function respond (msg, client) {
 							process.stdout.clearLine(1);
 							process.stdout.write('\n');
 							fs.unlink(vidOut); // Delete mp4 file
-							return sendMessage('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played \\w/.');
+							return sendMessage('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
 						});
 				});
 		}
@@ -181,7 +182,7 @@ function respond (msg, client) {
 	function removeTrack (a) {
 		const trackNumber = a; // Number(a);
 		if (!trackNumber) return sendMessage('Not a valid track number.');
-		else if (trackNumber > queue[msg.guild.id].length) return sendMessage(`There are only ${queue[msg.guild.id].length} songs in queue.`);
+		else if (trackNumber > queue[msg.guild.id].length) return sendMessage(`There are only ${queue[msg.guild.id].length} songs in the ueue.`);
 		else queue[msg.guild.id].splice(trackNumber - 1, 1);
 	}
 
@@ -189,7 +190,7 @@ function respond (msg, client) {
 
 	function playMusic () {
 		const voiceChannel = client.User.getVoiceChannel(msg.guild);
-		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel');
+		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
 		else play(voiceChannel.getVoiceConnectionInfo());
 	}
 
@@ -214,7 +215,7 @@ function respond (msg, client) {
 
 	addCommand('list', () => {
 		const songList = queue[msg.guild.id] || [];
-		sendMessage('```ini\n[Song List]\n\n' + (songList.map((s, i) => '\t ' + (i + 1) + ' : ' + s).join('\n') || '\tNothing but just us /w\\ ...') + '```');
+		sendMessage('```ini\n[Song List]\n\n' + (songList.map((s, i) => '\t ' + (i + 1) + ' : ' + s).join('\n') || '\tNothing but just us...') + '```');
 	});
 
 	function play (voiceConnectionInfo) {

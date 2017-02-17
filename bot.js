@@ -8,6 +8,7 @@ const messageHandler = require('./plugins/messageHandler');
 const logger = require('./plugins/logger');
 const osu = require('./plugins/osu');
 const cleverbot = require('./plugins/cleverbot');
+const music = require('./plugins/music');
 
 // External JSON files
 const auth = require('./auth');
@@ -45,10 +46,11 @@ client.Dispatcher.on(Events.GATEWAY_RESUMED, () => console.log('[System] Connect
  */
 function onMessageCreate (e) {
 	const msg = e.message;
-	logger.init(msg);
+	// logger.init(msg);
 	messageHandler.respond(msg, client);
-	osu.respond(msg);
-	cleverbot.init(msg, client);
+	// osu.respond(msg);
+	// cleverbot.init(msg, client);
+	music.respond(msg, client);
 }
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);

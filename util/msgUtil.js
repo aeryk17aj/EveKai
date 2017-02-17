@@ -13,7 +13,7 @@ class CommandHandler {
 	 * @param {Function} f - Callback function
 	 */
 	addCommand (c, f) {
-		if (this.command === config.prefix + c) f();
+		if (this.command === c) f();
 	}
 
 	addCommandSentence (c, f) {
@@ -30,7 +30,7 @@ class CommandHandler {
 	 * @param {Function} f Callback function
 	 */
 	addCommandArgs (c, f) {
-		this.addCommandSentence(c, a => f(a.plit(' ')));
+		this.addCommandSentence(c, a => f(a.split(' ')));
 	}
 }
 

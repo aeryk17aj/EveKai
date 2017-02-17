@@ -45,6 +45,7 @@ client.Dispatcher.on(Events.GATEWAY_RESUMED, () => console.log('[System] Connect
  * @param {Object} e Event object
  */
 function onMessageCreate (e) {
+	if (!e) return;
 	const msg = e.message;
 	// logger.init(msg);
 	messageHandler.respond(msg, client);

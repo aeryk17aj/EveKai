@@ -92,7 +92,7 @@ function codeL (s) {
  * 
  *   codeB(['text', 'goes', here]);
  *     > ```
- *       text 
+ *       text
  *       goes
  *       here
  *       ```

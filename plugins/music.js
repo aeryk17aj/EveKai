@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const childProcess = require('child_process');
 
-const CommandHandler = require('./util/msgUtil');
+const CommandHandler = require('../util/msgUtil');
 
 const auth = require('../auth');
 const config = require('../config');

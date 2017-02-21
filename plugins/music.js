@@ -18,11 +18,17 @@ yt.setKey(auth.yt);
 
 // Internal queue, stores position and id
 const queue = {};
+let guildQueue;
 let stopPlaying = false;
 let ffmpeg = null;
 
 let boundTextChannel = null;
 let boundVoiceChannel = null;
+
+let repeatOne = false;
+let repeatAll = false;
+
+let busy = false;
 
 function respond (msg, client) {
 	if (msg.isPrivate) return;
@@ -44,6 +50,15 @@ function respond (msg, client) {
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
+	// Initialize queue
+	if (!queue[msg.guild.id]) queue[msg.guild.id] = [];
+	guildQueue = queue[msg.guild.id];
+
+	// Check for some leftovers if on an empty queue
+	if (!guildQueue.length) guildQueue = fs.readdirSync(path.resolve(__dirname, './dl/' + msg.guild.id + '/'))
+		.filter(f => f.slice(-4) === '.mp3')
+		.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
+
 	// Only because I want to check things in this place specifically
 	addCommandSentence('evalM', a => {
 		if (!isOwner) return;
@@ -56,7 +71,7 @@ function respond (msg, client) {
 		}).catch(e => {
 			// sendMessage('\u{1F52B}'); // Peestol
 			console.log(e);
-			sendMessage('Didn\'t work /w\\');
+			sendMessage('It didn\'t work.');
 		}).then(v => {
 			if (v === 'Success') {
 				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') sendMessage(result);

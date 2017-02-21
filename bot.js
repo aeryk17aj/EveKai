@@ -50,7 +50,7 @@ function onMessageCreate (e) {
 	logger.init(msg);
 	messageHandler.respond(msg, client);
 	osu.respond(msg);
-	// cleverbot.init(msg, client);
+	cleverbot.init(msg, client);
 	music.respond(msg, client);
 }
 

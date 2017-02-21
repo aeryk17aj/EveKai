@@ -1,8 +1,11 @@
 // Not the actual cleverbot, under heaevy development (bot side)
 const apiai = require('apiai');
 const Cleverbot = require('cleverbot-node');
+
 const botUtil = require(process.cwd() + '/util/botUtil');
 const msgUtil = require(process.cwd() + '/util/msgUtil');
+const CommandHandler = require('../util/msgUtil');
+
 const auth = require(botUtil.getFromRoot('auth'));
 const config = require(botUtil.getFromRoot('config'));
 
@@ -52,10 +55,11 @@ function cleverCommands (msg) {
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const refreshConfig = () => msgUtil.refreshConfig();
 
-	const addCommand = (c, f) => msgUtil.addCommand(msg, c, f);
-	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
+	const command = msg.content.slice(config.prefix.length);
+	const handler = new CommandHandler(command);
 
-	if (!msg.content.startsWith(config.prefix)) return;
+	const addCommand = (c, f) => handler.addCommand(c, f);
+	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
 
 	addCommand('tC', () => {
 		config.modules.clever = !config.modules.clever;

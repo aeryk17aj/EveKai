@@ -88,9 +88,6 @@ function respond (msg, client) {
 			boundVoiceChannel = sender.getVoiceChannel();
 			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
 
-			// Initialize queue
-			if (!queue[msg.guild.id]) queue[msg.guild.id] = [];
-
 			// Initialize folders
 			const guildFolder = './dl/' + msg.guild.id;
 			const fullPath = path.resolve(__dirname, guildFolder);
@@ -122,7 +119,6 @@ function respond (msg, client) {
 			sendMessage(songList).then(() => {
 				let pick = 0;
 				let canceled = false;
-				// TODO: Util: waitFor
 				function trackListener (e) {
 					// console.log('Emitted to secondary');
 					if (!e) return;
@@ -156,39 +152,38 @@ function respond (msg, client) {
 		if (!a.startsWith(VIDEO_BASE)) search(a); // return sendMessage('Not a valid link.');
 		else if (a.startsWith('http:')) return sendMessage('Make sure it\'s HTTPS');
 		else {
+			// Pre-download
+			busy = true;
+
 			// Download stream
 			const stream = ytdl(a, { filter: 'audioonly' });
-			stream
-				.on('info', i => {
-					sendMessage('Queuing: `' + i.title + '` Don\'t play yet until ready.');
-					if (!guildQueue) queue[msg.guild.id] = [];
-					guildQueue.push(i.title);
-				});
+			stream.on('info', i => {
+				sendMessage('Queuing: `' + i.title + '` Don\'t play yet until ready.');
+				if (!guildQueue) queue[msg.guild.id] = [];
+				guildQueue.push(i.title);
+			});
 
 			// Save to file
 			const guildFolder = './dl/' + msg.guild.id;
 			const vidOut = path.resolve(__dirname, `${guildFolder}/_vid/${guildQueue.length + 1} - ${vidId}.mp4`);
-			stream.pipe(fs.createWriteStream(vidOut))
-				.on('finish', () => {
-					const mp3Out = path.resolve(__dirname, `${guildFolder}/${guildQueue[guildQueue.length - 1]}.mp3`);
-					stream.destroy(); // Destroy download stream
-					fluentffmpeg()
-						.input(vidOut)
-						.audioCodec('libmp3lame')
-						.audioFilters('volume=0.5') // 1.0 is pretty loud
-						.save(mp3Out)
-						// .on('progress', progress => {
-						// 	process.stdout.cursorTo(0);
-						// 	process.stdout.clearLine(1);
-						// 	process.stdout.write(progress.timemark);
-						// })
-						.on('end', () => {
-							process.stdout.clearLine(1);
-							process.stdout.write('\n');
-							fs.unlink(vidOut); // Delete mp4 file
-							return sendMessage('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
-						});
-				});
+			stream.pipe(fs.createWriteStream(vidOut)).on('finish', () => {
+				const mp3Out = path.resolve(__dirname, `${guildFolder}/${guildQueue[guildQueue.length - 1]}.mp3`);
+				stream.destroy(); // Destroy download stream
+				fluentffmpeg()
+					.input(vidOut)
+					.audioCodec('libmp3lame')
+					.audioFilters('volume=0.5') // 1.0 is pretty loud
+					.save(mp3Out)
+					// .on('progress', progress => {
+					// 	process.stdout.cursorTo(0);
+					// 	process.stdout.clearLine(1);
+					// 	process.stdout.write(progress.timemark);
+					// })
+					.on('end', () => {
+						fs.unlink(vidOut); // Delete mp4 file
+						return sendMessage('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
+					});
+			});
 		}
 	}
 
@@ -211,30 +206,68 @@ function respond (msg, client) {
 
 	['m p', 'music play', 'play'].forEach(s => addCommand(s, playMusic));
 
-	addCommand('skip', () => {
-		const songName = queue[msg.guild.id].shift();
-		fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`));
-		sendMessage('Skipped `' + songName + '`.').then(() => {
-			play(client.User.getVoiceChannel(msg.guild).getVoiceConnectionInfo());
+	function skip () {
+		const encoder = client.VoiceConnections.find(vc => vc.voiceConnection.guild === msg.guild).voiceConnection.getEncoder();
+		if (encoder.disposed) return;
+		encoder.kill();
+		ffmpeg.kill();
+		ffmpeg = null;
+		nextSong();
+	}
+
+	['m s', 'skip'].forEach(s => addCommand(s, skip));
+
+	function toggleRepeatOne () {
+		if (repeatOne) return sendMessage('Already on.');
+		else {
+			return sendMessage('Okie').then(() => {
+				repeatAll = false;
+				repeatOne = true;
+			});
+		}
+	}
+
+	['m re one', 'repeat one'].forEach(s => addCommand(s, toggleRepeatOne));
+
+	function toggleRepeatAll () {
+		if (repeatAll) return sendMessage('Already on.');
+		else {
+			return sendMessage('Okie').then(() => {
+				repeatAll = true;
+				repeatOne = false;
+			});
+		}
+	}
+
+	['m re all', 'repeat all'].forEach(s => addCommand(s, toggleRepeatAll));
+
+	function repeatOff () {
+		if (!(repeatOne || repeatAll)) return sendMessage('Not on repeat.');
+		else return sendMessage('Okie').then(() => {
+			repeatAll = false;
+			repeatOne = false;
 		});
-	});
+	}
+
+	['m re off', 'repeat off'].forEach(s => addCommand(s, repeatOff));
 
 	addCommand('stop', stop);
+	addCommand('dc', stop); // Stops the ffmpeg process before terminating
 
 	addCommand('clear', () => {
-		queue[msg.guild.id].forEach(songName => {
+		guildQueue.forEach(songName => {
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`));
-			queue[msg.guild].shift();
+			guildQueue.shift();
 		});
 	});
 
 	addCommand('list', () => {
-		const songList = queue[msg.guild.id] || [];
-		sendMessage('```ini\n[Song List]\n\n' + (songList.map((s, i) => '\t ' + (i + 1) + ' : ' + s).join('\n') || '\tNothing but just us...') + '```');
+		sendMessage('```ini\n[Song List]\n\n' + (guildQueue.map((s, i) => '\t ' + (i + 1) + ' : ' + s).join('\n') || '\tNothing but just us...') + '```');
 	});
 
 	function play (voiceConnectionInfo) {
 		stopPlaying = false;
+		if (busy && !stopPlaying && guildQueue.length <= 1) return sendMessage('Still processing your request(s)...');
 
 		const sampleRate = 48000;
 		const channels = 2;
@@ -292,13 +325,17 @@ function respond (msg, client) {
 			needBuffer();
 		});
 
-		ff.once('end', () => {
-			if (stopPlaying) return;
-			queue[msg.guild.id].shift(); // Remove from internal queue
-			fs.unlink(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`)); // Remove file
-			if (!queue[msg.guild.id].length) stop(); // TODO: Start timer for inactivity
-			else setTimeout(play, 100, voiceConnectionInfo); // Play the next track
-		});
+		ff.once('end', nextSong);
+	}
+
+	function nextSong () {
+		if (stopPlaying) return;
+		if (!(repeatOne || repeatAll)) { // If neither are on...
+			const firstSongName = guildQueue.shift(); // ..remove from internal queue
+			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${firstSongName}.mp3`)); // ...then delete the file
+		} else if (repeatAll) guildQueue.push(guildQueue.shift()); // ...or else push the finished song to the back
+		if (!queue[msg.guild.id].length) stop(); // TODO: Start timer for inactivity
+		else setTimeout(play, 100, client.User.getVoiceChannel(msg.guild).getVoiceConnectionInfo()); // Play the next track
 	}
 
 	function stop () {

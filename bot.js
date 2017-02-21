@@ -47,7 +47,7 @@ client.Dispatcher.on(Events.GATEWAY_RESUMED, () => console.log('[System] Connect
 function onMessageCreate (e) {
 	if (!e) return;
 	const msg = e.message;
-	// logger.init(msg);
+	logger.init(msg);
 	messageHandler.respond(msg, client);
 	// osu.respond(msg);
 	// cleverbot.init(msg, client);

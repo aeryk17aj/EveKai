@@ -2,6 +2,8 @@ const osu = require('node-osu');
 const util = require('util');
 
 const botUtil = require(process.cwd() + '/util/botUtil');
+const CommandHandler = require('../util/msgUtil');
+
 const auth = require(botUtil.getFromRoot('auth'));
 const config = require(botUtil.getFromRoot('config'));
 
@@ -18,6 +20,11 @@ function respond (msg) {
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
+
+	const command = msgText.slice(config.prefix.length);
+	const handler = new CommandHandler(command);
+
+	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
 	/**
 	 * $1 (\d+) Set ID
@@ -68,15 +75,16 @@ function respond (msg) {
 		}
 	}
 
-	const profileLookupArgs = msgText.replace(new RegExp('^' + config.prefix + 'osu ', 'g'), '').split(', ');
-	let mode = 0;
-	const modeNames = ['osu!', 'Taiko', 'Catch', 'Mania'];
-	if (msgText.startsWith(config.prefix + 'osu')) {
-		// Mode argument does not exist, default to osu!
-		if (!profileLookupArgs[1]) mode = 0;
+	addCommandSentence('osu', a => {
+		const csArgs = a.split(', ');
+		const userArg = csArgs[0], modeArg = csArgs[1] || '';
+		let mode = 0;
+
+		// Mode argument does not exist, default to osu!standard
+		if (!modeArg) mode = 0;
 		// Mode exists, check for matching
-		else if (isNaN(parseInt(profileLookupArgs[1]))) {
-			switch (profileLookupArgs[1].toLowerCase()) {
+		else if (isNaN(parseInt(modeArg))) {
+			switch (modeArg.toLowerCase()) {
 				case 'osu': case 'standard':
 					mode = 0; break;
 				case 'taiko': case 'tko':
@@ -90,8 +98,8 @@ function respond (msg) {
 			}
 		// Mode argument does not have any match, default to osu!
 		} else mode = 0;
-
-		osuApi.getUser({ u: profileLookupArgs[0], m: mode }).then(user => {
+		
+		osuApi.getUser({ u: userArg, m: mode }).then(user => {
 			const perfects = parseInt(user.counts['300']);
 			const closeOnes = parseInt(user.counts['100']);
 			const almostMiss = parseInt(user.counts['50']);
@@ -105,11 +113,11 @@ function respond (msg) {
 				author: {name: user.name, icon_url: 'https://a.ppy.sh/' + user.id},
 				fields: [
 					{
-						name: 'Performance (' + modeNames[mode] + ')',
+						name: `Performance (${['osu!', 'Taiko', 'Catch', 'Mania'][mode]})`,
 						value: [
-							user.pp.raw + 'pp',
-							'#' + user.pp.rank + ' World',
-							'#' + user.pp.countryRank + ' ' + user.country
+							`${user.pp.raw} pp`,
+							`#${user.pp.rank} World`,
+							`#${user.pp.countryRank} ${user.country}`
 						].join('\n'),
 						inline: true
 					}, {
@@ -118,28 +126,30 @@ function respond (msg) {
 							'SS: ' + user.counts.SS,
 							'S: ' + user.counts.S,
 							'A: ' + user.counts.A
-						].join(' | '),
+						].join('\n'),
 						inline: true
 					}, {
 						name: 'Accuracy',
 						value: [
-							'Overall: ' + user.accuracy.slice(0, 5) + '%',
-							[
-								'300s: ' + commaPad(perfects),
-								'100: ' + commaPad(closeOnes),
-								'50s: ' + commaPad(almostMiss)
-							].join(', '),
-							'\t\t\t(' + [
-								(perfects / totalHits).toFixed(2) + '%',
-								(closeOnes / totalHits).toFixed(2) + '%',
-								(almostMiss / totalHits).toFixed(2) + '%'
-							].join('   /   ') + ')'
-						].join('\n')
+							`Overall: ${user.accuracy.slice(0, 5)}%`,
+							`300s: ${commaPad(perfects)}`,
+							`100s: ${commaPad(closeOnes)}`,
+							`50s: ${commaPad(almostMiss)}`
+						].join('\n'),
+						inline: true
+					}, {
+						name: 'Hit percentage',
+						value: [ ' - - - - - ',
+							`${(perfects / totalHits * 100).toFixed(2)}%`,
+							`${(closeOnes / totalHits * 100).toFixed(2)}%`,
+							`${(almostMiss / totalHits * 100).toFixed(2)}%`
+						].join('\n'),
+						inline: true
 					}
 				]
 			});
 		});
-	}
+	});
 }
 
 exports.respond = respond;

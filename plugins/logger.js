@@ -123,5 +123,6 @@ function init (msg) {
 }
 
 module.exports = {
+	whitelist, 
 	init, addToLog, logToBoth
 };

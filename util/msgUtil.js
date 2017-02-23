@@ -1,5 +1,3 @@
-const config = require('../config');
-
 class CommandHandler {
 	constructor (command) {
 		this.command = command;

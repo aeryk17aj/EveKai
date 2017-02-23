@@ -1,5 +1,5 @@
 const botUtil = require('../util/botUtil');
-const msgUtil = require('../util/msgUtil');
+const CommandHandler = require('../util/msgUtil');
 const logger = require(botUtil.getPlugin('logger'));
 
 const config = require('../config');
@@ -11,8 +11,11 @@ function respond (msg, client) {
 	const possibleCommand = msg.startsWith(config.prefix);
 	if (!possibleCommand) return;
 
-	const addCommand = (c, f) => msgUtil.addCommand(msg, c, f);
-	const addCommandArgs = (c, f) => msgUtil.addCommandArgs(msg, c, f);
+	const command = msg.slice(config.prefix.length);
+	const handler = new CommandHandler(command);
+
+	const addCommand = (c, f) => handler.addCommand(msg, c, f);
+	const addCommandArgs = (c, f) => handler.addCommandArgs(msg, c, f);
 	const addCommandSentence = (c, f) => addCommandArgs(c, a => f(a.join(' ')));
 
 	addCommand('dc', () => {

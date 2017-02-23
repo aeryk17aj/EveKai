@@ -1,5 +1,6 @@
 const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
+const Permissions = require('discordie').Permissions;
 const logger = require(botUtil.getPlugin('logger'));
 
 const config = require('../config');
@@ -100,6 +101,40 @@ function respond (msg, client) {
 	// 	if (a.length > 1) sendMessage('Invalid argument count: ' + codeL(a.length));
 	// 	else sendMessage(codeL(Math.ceil(Math.random() * a[0])));
 	// });
+
+	function fetchMoreMessages (channel, left) {
+		const before = channel.messages[0];
+		return channel.fetchMessages(Math.min(left, 100), before)
+			.then(e => onFetch(e, channel, left));
+	}
+
+	function onFetch (e, channel, left) {
+		if (!e.messages.length) return Promise.resolve();
+		left -= e.messages.length;
+		if (left <= 0) return Promise.resolve();
+		return fetchMoreMessages(channel, left);
+	}
+
+	addCommandSentence('prune', a => {
+		// Sender can't delete or pin messages
+		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msg.guild)) return sendMessage('No.');
+		// Bot can't delete or pin messages
+		if (!client.User.memberOf(msg.guild).can(Permissions.Text.MANAGE_MESSAGES, msg.guild)) return sendMessage('I don\'t have permission.');
+		const mention = a.split(' ')[0];
+		const amount = parseInt(a.split(' ')[1]);
+		let deletableMessages = msg.channel.messages.filter(m => !m.deleted);
+		if (mention === 'all') {
+			if (amount > deletableMessages.length) {
+				const difference = amount - deletableMessages.length;
+				console.log(client.Messages.length + ' < ' + difference);
+				fetchMoreMessages(msg.channel, difference).then(() => {
+					deletableMessages = msg.channel.messages.filter(m => !m.deleted);
+					deletableMessages.slice(-amount).reverse().forEach(m => m.delete());
+				});
+			}
+		// Usually comes when fetching more, so this is only for cached
+		} else deletableMessages.slice(-amount).reverse().forEach(m => m.delete());
+	});
 
 	addCommandSentence('roll', a => {
 		sendMessage(Math.ceil(Math.random() * (a || 100)));

@@ -38,6 +38,10 @@ function respond (msg, client) {
 	const rInAr = ar => botUtil.rInAr(ar);
 	const senderIsOwner = botUtil.senderIsOwner(msg);
 
+	if (!logger.whitelist.hasOwnProperty(msgGuild.id) || !logger.whitelist[msgGuild.id].includes(msgChannel)) {
+		if (msgText.startsWith(config.prefix)) logger.logToBoth(msgText);
+	}
+
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;
 		
@@ -117,18 +121,18 @@ function respond (msg, client) {
 
 	addCommandSentence('prune', a => {
 		// Sender can't delete or pin messages
-		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msg.guild)) return sendMessage('No.');
+		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('No.');
 		// Bot can't delete or pin messages
-		if (!client.User.memberOf(msg.guild).can(Permissions.Text.MANAGE_MESSAGES, msg.guild)) return sendMessage('I don\'t have permission.');
+		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);
-		let deletableMessages = msg.channel.messages.filter(m => !m.deleted);
+		let deletableMessages = msgChannel.messages.filter(m => !m.deleted);
 		if (mention === 'all') {
 			if (amount > deletableMessages.length) {
 				const difference = amount - deletableMessages.length;
 				console.log(client.Messages.length + ' < ' + difference);
-				fetchMoreMessages(msg.channel, difference).then(() => {
-					deletableMessages = msg.channel.messages.filter(m => !m.deleted);
+				fetchMoreMessages(msgChannel, difference).then(() => {
+					deletableMessages = msgChannel.messages.filter(m => !m.deleted);
 					deletableMessages.slice(-amount).reverse().forEach(m => m.delete());
 				});
 			}

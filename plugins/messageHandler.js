@@ -161,6 +161,7 @@ function respond (msg, client) {
 	// 	else sendMessage(codeL(Math.ceil(Math.random() * a[0])));
 	// });
 
+	// TODO: New fetchMore, resolves when specific user filter meets or exceeds
 	function fetchMoreMessages (channel, left) {
 		const before = channel.messages[0];
 		return channel.fetchMessages(Math.min(left, 100), before)
@@ -191,13 +192,13 @@ function respond (msg, client) {
 
 		if (amount > messages.length) {
 			const difference = amount - messages.length;
+			// (Mentions only): Works great 0-100; Might have issues 100-200; Definitely miscounted 200+
 			fetchMoreMessages(msgChannel, allMsgs ? difference : 100).then(() => {
 				// Reassign with new length, might need reviewing
 				messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
 				if (!allMsgs) messages = messages.filter(m => m.author.id === msg.mentions[0].id);
 				client.Messages.deleteMessages(messages.slice(-amount), msgChannel);
 				client.Messages.purgeChannelCache(msgChannel);
-				// TODO: Signal other listeners to not run when cache is purged
 			});
 		} else {
 			// Usually comes when fetching more, so this is only for cached

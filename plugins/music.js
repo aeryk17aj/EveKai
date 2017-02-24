@@ -100,7 +100,8 @@ function respond (msg, client) {
 
 	addCommand('leave', () => {
 		stop();
-		client.User.getVoiceChannel(msg.guild).leave();
+		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
+		else client.User.getVoiceChannel(msg.guild).leave();
 		boundTextChannel = null;
 		boundVoiceChannel = null;
 	});

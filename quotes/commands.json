@@ -1,8 +1,9 @@
 {
 	"general": {
-		"info": "Bot version.",
-		"v2?": "Eve v2 description.",
-		"builtOn": "",
+		"help": {
+			"aliases": ["?", "cmds"],
+			"description": "shows a list of all commands"
+		},
 		"connections": "",
 		"docs": "links to various documentation used by the bot.",
 		"8ball": "Ask a simple yes or no question.",

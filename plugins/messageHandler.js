@@ -4,6 +4,7 @@ const Permissions = require('discordie').Permissions;
 const logger = require(botUtil.getPlugin('logger'));
 
 const config = require('../config');
+const userIds = require('../userIds');
 
 const ballQuotes = require(botUtil.getQuotes('8ball'));
 const leaveQuotes = require(botUtil.getQuotes('disconnect'));
@@ -38,10 +39,6 @@ function respond (msg, client) {
 	const rInAr = ar => botUtil.rInAr(ar);
 	const senderIsOwner = botUtil.senderIsOwner(msg);
 
-	if (!logger.whitelist.hasOwnProperty(msgGuild.id) || !logger.whitelist[msgGuild.id].includes(msgChannel)) {
-		if (msgText.startsWith(config.prefix)) logger.logToBoth(msgText);
-	}
-
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;
 		
@@ -54,9 +51,9 @@ function respond (msg, client) {
 		}, 2000);
 	});
 
-	addCommandResponse('info', 'Running on 2.0.0-1.');
-	addCommandResponse('v2?', 'Yep, Eve is being split into (still connected) parts instead of being one big file.');
-	addCommandResponse('builtOn', codeL(client.User.username) + ' is currently running on under `Discordie 0.10.0` (Node.js)');
+	// addCommandResponse('info', 'Running on 2.0.0-1.');
+	// addCommandResponse('v2?', 'Yep, Eve is being split into (still connected) parts instead of being one big file.');
+	// addCommandResponse('builtOn', codeL(client.User.username) + ' is currently running on under `Discordie 0.10.0` (Node.js)');
 	addCommandResponse('connections', codeL(client.User.username) + ' is connected to ' + codeL(client.Guilds.length) + ' servers.');
 	// addCommandResponse('docs', 'http://qeled.github.io/discordie/#/docs/Discordie?_k=grrhaj');
 	addCommandSentence('docs', a => {
@@ -64,7 +61,65 @@ function respond (msg, client) {
 		else sendMessage('I don\'t have a link for ' + codeL(a));
 	});
 
-	addCommandResponse('cmds', Object.keys(commands.general).map(s => codeL(s)).join(', '));
+	function showHelp (a) {
+		let help;
+		if (a === 'music') {
+			help = [
+				'```ini',
+				'[Music Commands]', '',
+				...[
+					'join',
+					'leave',
+					'm q | add [Search term | YouTube URL]',
+					'm rm | remove [number in queue]',
+					'm sh | shuffle',
+					'm p | play',
+					'm s | skip',
+					'm re | repeat [\'one\' | \'all\' | \'off\']',
+					'stop',
+					'clear',
+					'list'
+				].map(a => config.prefix + a),
+				'```'
+			].join('\n');
+		} else {
+			help = [
+				'```ini',
+				'[General Commands]', '',
+				...['help/cmds/?',
+					'connections',
+					'docs',
+					// 'invite (bot invite)',
+					'roll <optional: max number>',
+					'8ball <yes/no question, always ends with a question mark>',
+					'prune <\'all\' or user mention> <amount>',
+					'time',
+					'elwiki'
+				].map(a => config.prefix + a),
+				'', 'do \'' + config.prefix + '? music\' for music commands',
+				'```'
+			].join('\n');
+		}
+		sendMessage(help);
+	}
+
+	['help', 'cmds', '?'].forEach(s => addCommandSentence(s, showHelp));
+
+	addCommand('invite', () => {
+		const inviteLink = `https://discordapp.com/oauth2/authorize?&client_id=${userIds.eve}&scope=bot&permissions=34611200`;
+		/**
+		 * Required perms
+		 *
+		 * Manage Messages: for prune
+		 * Connect: To join voice ¯\_(ツ)_/¯
+		 * Use Voice Activity: to stream sick beats
+		 */
+		// if (msg.channel.isDM || msg.channel.isGroupDM) return sendMessage(inviteLink);
+		sender.openDM().then((dmChannel, err) => {
+			if (err) return console.log(err);
+			dmChannel.sendMessage(inviteLink);
+		});
+	});
 
 	// This is where the fun starts
 	addCommandSentence('8ball', a => {

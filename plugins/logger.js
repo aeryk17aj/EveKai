@@ -28,7 +28,6 @@ function loggerCommands (msg) {
 	const msgChannel = msg.channel;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const msgGuild = msg.guild;
-	// const command = config.prefix + 'log';
 	const command = msg.content.slice((config.prefix + 'log ').length);
 
 	const handler = new CommandHandler(command);
@@ -97,24 +96,23 @@ function logMsg (msg) {
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
 
 	// Only disables logging of everything else, detected commands will always be logged
-	const possibleCommand = new RegExp('^' + config.prefix + '.+');
-	if (!(config.logMessages || possibleCommand.test(msg.content))) return;
+	const possibleCommand = msg.content.startsWith(config.prefix);
+	if (!(config.logMessages || possibleCommand)) return;
 
 	// The attachments array exists, picture or none, so length check it is
 	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
 
 	const logLine = [
 		timeSentString,
-		`[${(!msgChannel.guild ? 'DM' : msgChannel.guild.name)}]` +
-		(!msg.isPrivate ? `[#${msgChannel.name}]` : `[${msgChannel.recipient.username}]`),
+		`[${!msg.isPrivate ? msgChannel.guild.name + ': #' + msgChannel.name : 'DM: ' + msgChannel.recipient.username}]`,
 		`${(msg.member || msg.author).username}:`, // IUser as substitute for the case of DMs
 		msg.content,
 		attachments
 	].join(' ');
 
-	if (msg.isPrivate || (whitelist.hasOwnProperty(msg.guild.id) && whitelist[msg.guild.id].includes(msgChannel.id))) {
-		logToBoth(logLine);
-	}
+	const hasGuildList = whitelist.hasOwnProperty(msg.guild.id);
+	const inGuildList = whitelist[msg.guild.id].includes(msgChannel.id);
+	if (msg.isPrivate || possibleCommand || (hasGuildList && inGuildList)) logToBoth(logLine);
 }
 
 function init (msg) {

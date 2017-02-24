@@ -181,6 +181,7 @@ function respond (msg, client) {
 					// 	process.stdout.write(progress.timemark);
 					// })
 					.on('end', () => {
+						busy = false;
 						fs.unlink(vidOut); // Delete mp4 file
 						return sendMessage('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
 					});

@@ -181,18 +181,22 @@ function respond (msg, client) {
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);
+
 		let messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
-		if (mention === 'all') {
-			if (amount > messages.length) {
-				const difference = amount - messages.length;
-				fetchMoreMessages(msgChannel, difference).then(() => {
-					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
-					client.Messages.deleteMessages(messages.slice(0, amount), msgChannel);
-					client.Messages.purgeChannelCache(msgChannel);
-				});
-			}
-		// Usually comes when fetching more, so this is only for cached
+		if (msg.mentions.length) messages = messages.filter(m => m.author.id === msg.mentions[0].id);
+		else if (mention !== 'all') return sendMessage('Has to be `all` or a user mention.');
+
+		if (amount > messages.length) {
+			const difference = amount - messages.length;
+			fetchMoreMessages(msgChannel, difference).then(() => {
+				// Reassign with new length, might need reviewing
+				messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
+				client.Messages.deleteMessages(messages.slice(0, amount), msgChannel);
+				client.Messages.purgeChannelCache(msgChannel);
+				// TODO: Signal other listeners to not run when cache is purged
+			});
 		} else {
+			// Usually comes when fetching more, so this is only for cached
 			client.Messages.deleteMessages(messages.slice(0, amount), msgChannel);
 			client.Messages.purgeChannelCache(msgChannel);
 		}

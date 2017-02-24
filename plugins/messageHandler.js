@@ -182,22 +182,26 @@ function respond (msg, client) {
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);
 
+		let allMsgs = false;
+
 		let messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
 		if (msg.mentions.length) messages = messages.filter(m => m.author.id === msg.mentions[0].id);
-		else if (mention !== 'all') return sendMessage('Has to be `all` or a user mention.');
+		else if (mention === 'all') allMsgs = true;
+		else return sendMessage('Has to be `all` or a user mention.');
 
 		if (amount > messages.length) {
 			const difference = amount - messages.length;
-			fetchMoreMessages(msgChannel, difference).then(() => {
+			fetchMoreMessages(msgChannel, allMsgs ? difference : 100).then(() => {
 				// Reassign with new length, might need reviewing
 				messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
-				client.Messages.deleteMessages(messages.slice(0, amount), msgChannel);
+				if (!allMsgs) messages = messages.filter(m => m.author.id === msg.mentions[0].id);
+				client.Messages.deleteMessages(messages.slice(-amount), msgChannel);
 				client.Messages.purgeChannelCache(msgChannel);
 				// TODO: Signal other listeners to not run when cache is purged
 			});
 		} else {
 			// Usually comes when fetching more, so this is only for cached
-			client.Messages.deleteMessages(messages.slice(0, amount), msgChannel);
+			client.Messages.deleteMessages(messages.slice(-amount), msgChannel);
 			client.Messages.purgeChannelCache(msgChannel);
 		}
 		

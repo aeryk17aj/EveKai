@@ -49,6 +49,7 @@ function onMessageCreate (e) {
 	const msg = e.message;
 	logger.init(msg);
 	messageHandler.respond(msg, client);
+	if (!e.msg) return;
 	osu.respond(msg);
 	cleverbot.init(msg, client);
 	music.respond(msg, client);

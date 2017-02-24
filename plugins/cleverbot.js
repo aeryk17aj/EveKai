@@ -27,8 +27,8 @@ function respond (msg, client) {
 	// Mention, Self, and command check
 	if (sender === botUser || !msgText.startsWith(client.User.mention)) return; 
 
-	// Guild-only nickname check
-	if (msg.isPrivate !== msgText.startsWith(client.User.memberOf(msgGuild).nickMention)) return;
+	// Either no-prefix PM or mentioned in Guild
+	if (msg.isPrivate == msgText.startsWith(client.User.memberOf(msgGuild).nickMention)) return;
 
 	const actualMessage = msgText.replace(new RegExp(`^<@!?${client.User.id}> `), '');
 

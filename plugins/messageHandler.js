@@ -181,18 +181,22 @@ function respond (msg, client) {
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);
-		let deletableMessages = msgChannel.messages.filter(m => !m.deleted);
+		let messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
 		if (mention === 'all') {
-			if (amount > deletableMessages.length) {
-				const difference = amount - deletableMessages.length;
-				console.log(client.Messages.length + ' < ' + difference);
+			if (amount > messages.length) {
+				const difference = amount - messages.length;
 				fetchMoreMessages(msgChannel, difference).then(() => {
-					deletableMessages = msgChannel.messages.filter(m => !m.deleted);
-					deletableMessages.slice(-amount).reverse().forEach(m => m.delete());
+					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
+					client.Messages.deleteMessages(messages.slice(0, amount), msgChannel);
+					client.Messages.purgeChannelCache(msgChannel);
 				});
 			}
 		// Usually comes when fetching more, so this is only for cached
-		} else deletableMessages.slice(-amount).reverse().forEach(m => m.delete());
+		} else {
+			client.Messages.deleteMessages(messages.slice(0, amount), msgChannel);
+			client.Messages.purgeChannelCache(msgChannel);
+		}
+		
 	});
 
 	addCommandSentence('roll', a => {

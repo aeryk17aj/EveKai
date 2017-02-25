@@ -37,7 +37,7 @@ client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unus
 	console.log('[System] Connected.');
 });
 
-client.Dispatcher.on(Events.DISCONNECTED, err => console.log(`[System] Connection interrupted. (${err})`));
+client.Dispatcher.on(Events.DISCONNECTED, e => console.log(`[System] Connection interrupted. (${e.error})`));
 client.Dispatcher.on(Events.GATEWAY_RESUMED, () => console.log('[System] Connection resumed.'));
 
 /**

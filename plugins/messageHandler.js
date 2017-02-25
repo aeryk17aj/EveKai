@@ -30,6 +30,8 @@ function respond (msg, client) {
 	const command = msgText.slice(config.prefix.length);
 	const handler = new CommandHandler(command);
 
+	if (!msgText.startsWith(config.prefix)) return;
+
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);

@@ -189,7 +189,7 @@ function respond (msg, client) {
 	}
 
 	function deleteMessages (msgs, channel) {
-		client.Messages.deleteMessages(msgs, channel).then(() => {
+		return client.Messages.deleteMessages(msgs, channel).then(() => {
 			client.Messages.purgeChannelCache(channel);
 		});
 	}

@@ -24,7 +24,7 @@ function logToBoth (s) {
  * @param  {IMessage} msg Message object
  */
 function loggerCommands (msg) {
-	// TODO: Perms
+	if (!botUtil.senderIsOwner(msg)) return;
 	const msgChannel = msg.channel;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const msgGuild = msg.guild;
@@ -74,7 +74,6 @@ function loggerCommands (msg) {
 			}
 		}
 		fs.writeFileSync(botUtil.getRootDir() + '/whitelist.json', JSON.stringify(whitelist, null, 4), 'utf-8');
-		
 	});
 }
 
@@ -121,6 +120,6 @@ function init (msg) {
 }
 
 module.exports = {
-	whitelist, 
+	whitelist,
 	init, addToLog, logToBoth
 };

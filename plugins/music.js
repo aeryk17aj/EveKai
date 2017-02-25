@@ -55,9 +55,11 @@ function respond (msg, client) {
 	guildQueue = queue[msg.guild.id];
 
 	// Check for some leftovers if on an empty queue
-	if (!guildQueue.length) guildQueue = fs.readdirSync(path.resolve(__dirname, './dl/' + msg.guild.id + '/'))
-		.filter(f => f.slice(-4) === '.mp3')
-		.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
+	if (!guildQueue.length) {
+		guildQueue = fs.readdirSync(path.resolve(__dirname, './dl/' + msg.guild.id + '/'))
+			.filter(f => f.slice(-4) === '.mp3')
+			.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
+	}
 
 	// Only because I want to check things in this place specifically
 	addCommandSentence('evalM', a => {
@@ -157,8 +159,8 @@ function respond (msg, client) {
 			busy = true;
 
 			// Download stream
-			const stream = ytdl(a, { filter: 'audioonly' });
-			stream.on('info', i => {
+			const downloadStream = ytdl(a, { filter: 'audioonly' });
+			downloadStream.on('info', i => {
 				sendMessage('Queuing: `' + i.title + '` Don\'t play yet until ready.');
 				if (!guildQueue) queue[msg.guild.id] = [];
 				guildQueue.push(i.title);
@@ -167,19 +169,14 @@ function respond (msg, client) {
 			// Save to file
 			const guildFolder = './dl/' + msg.guild.id;
 			const vidOut = path.resolve(__dirname, `${guildFolder}/_vid/${guildQueue.length + 1} - ${vidId}.mp4`);
-			stream.pipe(fs.createWriteStream(vidOut)).on('finish', () => {
+			downloadStream.pipe(fs.createWriteStream(vidOut)).on('finish', () => {
 				const mp3Out = path.resolve(__dirname, `${guildFolder}/${guildQueue[guildQueue.length - 1]}.mp3`);
-				stream.destroy(); // Destroy download stream
+				downloadStream.destroy(); // Destroy download stream
 				fluentffmpeg()
 					.input(vidOut)
 					.audioCodec('libmp3lame')
 					.audioFilters('volume=0.5') // 1.0 is pretty loud
 					.save(mp3Out)
-					// .on('progress', progress => {
-					// 	process.stdout.cursorTo(0);
-					// 	process.stdout.clearLine(1);
-					// 	process.stdout.write(progress.timemark);
-					// })
 					.on('end', () => {
 						busy = false;
 						fs.unlink(vidOut); // Delete mp4 file
@@ -245,10 +242,12 @@ function respond (msg, client) {
 
 	function repeatOff () {
 		if (!(repeatOne || repeatAll)) return sendMessage('Not on repeat.');
-		else return sendMessage('Okie').then(() => {
-			repeatAll = false;
-			repeatOne = false;
-		});
+		else {
+			return sendMessage('Okie').then(() => {
+				repeatAll = false;
+				repeatOne = false;
+			});
+		}
 	}
 
 	['m re off', 'repeat off'].forEach(s => addCommand(s, repeatOff));

@@ -25,10 +25,10 @@ function respond (msg, client) {
 	if (!config.modules.clever) return;
 
 	// Mention, Self, and command check
-	if (sender === botUser || !msgText.startsWith(client.User.mention)) return; 
+	if (sender === botUser || !msgText.startsWith(client.User.mention)) return;
 
 	// Either no-prefix PM or mentioned in Guild
-	if (msg.isPrivate == msgText.startsWith(client.User.memberOf(msgGuild).nickMention)) return;
+	if (msg.isPrivate === msgText.startsWith(client.User.memberOf(msgGuild).nickMention)) return;
 
 	const actualMessage = msgText.replace(new RegExp(`^<@!?${client.User.id}> `), '');
 

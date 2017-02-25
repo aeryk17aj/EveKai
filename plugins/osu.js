@@ -50,7 +50,7 @@ function respond (msg) {
 		if (isMapset) {
 			osuApi.getBeatmaps({ s: id }).then(beatmaps => {
 				console.log('[s] Diffs: ' + beatmaps.length);
-				const mapSet = beatmaps[0]; 
+				const mapSet = beatmaps[0];
 				const setString = util.format(setFormat,
 					mapSet.artist,
 					mapSet.title,
@@ -77,7 +77,8 @@ function respond (msg) {
 
 	addCommandSentence('osu', a => {
 		const csArgs = a.split(', ');
-		const userArg = csArgs[0], modeArg = csArgs[1] || '';
+		const userArg = csArgs[0];
+		const modeArg = csArgs[1] || '';
 		let mode = 0;
 
 		// Mode argument does not exist, default to osu!standard
@@ -98,13 +99,12 @@ function respond (msg) {
 			}
 		// Mode argument does not have any match, default to osu!
 		} else mode = 0;
-		
+
 		osuApi.getUser({ u: userArg, m: mode }).then(user => {
 			const perfects = parseInt(user.counts['300']);
 			const closeOnes = parseInt(user.counts['100']);
 			const almostMiss = parseInt(user.counts['50']);
 			const totalHits = perfects + closeOnes + almostMiss;
-			console.log([perfects, closeOnes, almostMiss, totalHits].join(', '));
 
 			sendEmbed({
 				color: 0xFFB2C5,

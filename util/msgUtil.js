@@ -5,8 +5,6 @@ class CommandHandler {
 
 	/**
 	 * @summary Adds a command
-	 * @param {string} msg - Message object
-	 *   @see {@link https://qeled.github.io/discordie/#/docs/IMessage |IMessage}
 	 * @param {string} c - Command string
 	 * @param {Function} f - Callback function
 	 */
@@ -16,14 +14,12 @@ class CommandHandler {
 
 	addCommandSentence (c, f) {
 		if (this.command.startsWith(c)) {
-			// if (this.command.length > c.length)
 			if (this.command[c.length] === ' ' || this.command[c.length] === undefined) f(this.command.slice(c.length + 1));
 		}
 	}
 
 	/**
 	 * @summary Adds a command that takes arguments separated by spaces
-	 * @param {string} msg Message object
 	 * @param {string} c Command string
 	 * @param {Function} f Callback function
 	 */

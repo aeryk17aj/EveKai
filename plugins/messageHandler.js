@@ -41,7 +41,7 @@ function respond (msg, client) {
 
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;
-		
+
 		setTimeout(() => {
 			sendMessage(rInAr(leaveQuotes)).then(() => {
 				logger.logToBoth('[System] System Disconnected (command)');

@@ -175,6 +175,25 @@ function respond (msg, client) {
 		return fetchMoreMessages(channel, left);
 	}
 
+	function fetchMoreSpecificMessages (channel, user, left) {
+		const before = channel.messages.filter(m => m.author.id === user.id)[0];
+		return channel.fetchMessages(100, before)
+			.then(e => onFetchUser(e, channel, user, left));
+	}
+
+	function onFetchUser (e, channel, user, left) {
+		if (!e.messages.length) return Promise.resolve();
+		left -= e.messages.filter(m => m.author.id === user.id).length;
+		if (left <= 0) return Promise.resolve();
+		return fetchMoreSpecificMessages(channel, user, left);
+	}
+
+	function deleteMessages (msgs, channel) {
+		client.Messages.deleteMessages(msgs, channel).then(() => {
+			client.Messages.purgeChannelCache(channel);
+		});
+	}
+
 	addCommandSentence('prune', a => {
 		// Sender can't delete or pin messages
 		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('No.');
@@ -191,21 +210,19 @@ function respond (msg, client) {
 		else return sendMessage('Has to be `all` or a user mention.');
 
 		if (amount > messages.length) {
-			const difference = amount - messages.length;
-			// (Mentions only): Works great 0-100; Might have issues 100-200; Definitely miscounted 200+
-			fetchMoreMessages(msgChannel, allMsgs ? difference : 100).then(() => {
-				// Reassign with new length, might need reviewing
-				messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
-				if (!allMsgs) messages = messages.filter(m => m.author.id === msg.mentions[0].id);
-				client.Messages.deleteMessages(messages.slice(-amount), msgChannel);
-				client.Messages.purgeChannelCache(msgChannel);
-			});
-		} else {
-			// Usually comes when fetching more, so this is only for cached
-			client.Messages.deleteMessages(messages.slice(-amount), msgChannel);
-			client.Messages.purgeChannelCache(msgChannel);
-		}
-		
+			if (allMsgs) {
+				const difference = amount - messages.length;
+				fetchMoreMessages(msgChannel, difference).then(() => {
+					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
+					deleteMessages(messages.slice(-amount), msgChannel);
+				});
+			} else {
+				fetchMoreSpecificMessages(msgChannel, msg.mentions[0], amount).then(() => {
+					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted && m.author.id === msg.mentions[0].id);
+					deleteMessages(messages.slice(-amount), msgChannel);
+				});
+			}
+		} else deleteMessages(messages.slice(-amount), msgChannel);
 	});
 
 	addCommandSentence('roll', a => {

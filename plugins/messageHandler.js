@@ -21,7 +21,7 @@ function respond (msg, client) {
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 	const msgChannel = msg.channel;
 	const msgGuild = msg.guild;
-	// Used for eval
+
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
@@ -51,11 +51,7 @@ function respond (msg, client) {
 		}, 2000);
 	});
 
-	// addCommandResponse('info', 'Running on 2.0.0-1.');
-	// addCommandResponse('v2?', 'Yep, Eve is being split into (still connected) parts instead of being one big file.');
-	// addCommandResponse('builtOn', codeL(client.User.username) + ' is currently running on under `Discordie 0.10.0` (Node.js)');
 	addCommandResponse('connections', codeL(client.User.username) + ' is connected to ' + codeL(client.Guilds.length) + ' servers.');
-	// addCommandResponse('docs', 'http://qeled.github.io/discordie/#/docs/Discordie?_k=grrhaj');
 	addCommandSentence('docs', a => {
 		if (docLinks.hasOwnProperty(a)) sendMessage(docLinks[a]);
 		else sendMessage('I don\'t have a link for ' + codeL(a));
@@ -155,13 +151,6 @@ function respond (msg, client) {
 		});
 	});
 
-	// addCommandResponse('roll', codeL(Math.ceil(Math.random() * 100))); // Default 100
-	// addCommandArgs('roll', a => {
-	// 	if (a.length > 1) sendMessage('Invalid argument count: ' + codeL(a.length));
-	// 	else sendMessage(codeL(Math.ceil(Math.random() * a[0])));
-	// });
-
-	// TODO: New fetchMore, resolves when specific user filter meets or exceeds
 	function fetchMoreMessages (channel, left) {
 		const before = channel.messages[0];
 		return channel.fetchMessages(Math.min(left, 100), before)
@@ -229,7 +218,7 @@ function respond (msg, client) {
 		sendMessage(Math.ceil(Math.random() * (a || 100)));
 	});
 
-	// TODO add timezone argument, otherwise EST
+	// TODO: add timezone argument, otherwise EST
 	addCommand('time', () => {
 		const currentTime = new Date(Date.now()).toLocaleTimeString('en-US', {hour12: true});
 		const timeShort = currentTime.replace(/([\d]+:[\d]{2})(:[\d]{2})(.*)/, '$1$3');

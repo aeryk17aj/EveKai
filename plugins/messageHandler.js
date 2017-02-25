@@ -121,7 +121,7 @@ function respond (msg, client) {
 
 	// This is where the fun starts
 	addCommandSentence('8ball', a => {
-		if (/\?$/.test(a)) {
+		if (a.endsWith('?')) {
 			sendEmbed({
 				color: 0xFFB2C5,
 				author: {

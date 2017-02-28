@@ -33,7 +33,7 @@ rl.on('line', c => {
 client.connect({ token: auth.loginToken });
 
 client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unused-vars
-	client.User.setGame('with a new version');
+	client.User.setGame('with new discoveries');
 	client.User.setStatus(config.idleMode ? 'idle' : 'online');
 	console.log('[System] Connected.');
 });

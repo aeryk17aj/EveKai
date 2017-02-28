@@ -1,7 +1,4 @@
 const Canvas = require('canvas');
-const w = 300; const h = 100;
-const canvas = new Canvas(w, h);
-const ctx = canvas.getContext('2d');
 
 const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
@@ -30,6 +27,13 @@ function respond (msg, client) {
 	if (!msgText.startsWith(config.prefix)) return;
 
 	const addCommand = (c, f) => handler.addCommand(c, f);
+	const addDrawCommand = (c, f, w, h) => addCommand(c, () => {
+		const canvas = new Canvas(w || 640, h || 480);
+		const ctx = canvas.getContext('2d');
+		f(ctx, canvas, w, h);
+		const imgBuffer = canvas.toBuffer();
+		uploadFile(imgBuffer);
+	});
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
 
@@ -54,15 +58,13 @@ function respond (msg, client) {
 		});
 	});
 
-	addCommand('testDraw', () => {
+	addDrawCommand('testDraw', (ctx, canvas, w, h) => {
 		ctx.fillStyle = '#FFB2C5';
 		ctx.fillRect(0, 0, w, h);
 		ctx.fillStyle = 'white';
 		ctx.font = '48px serif';
 		ctx.fillText('Hello, ' + (sender.nick || sender.username), 10, 50);
-		const imgBuffer = canvas.toBuffer();
-		uploadFile(imgBuffer);
-	});
+	}, 300, 100);
 }
 
 exports.respond = respond;

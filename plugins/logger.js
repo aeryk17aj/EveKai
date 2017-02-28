@@ -110,6 +110,7 @@ function logMsg (msg) {
 	].join(' ');
 
 	const hasGuildList = whitelist.hasOwnProperty(msg.guild.id);
+	if (!hasGuildList) return;
 	const inGuildList = whitelist[msg.guild.id].includes(msgChannel.id);
 	if (msg.isPrivate || possibleCommand || (hasGuildList && inGuildList)) logToBoth(logLine);
 }

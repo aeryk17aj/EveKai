@@ -9,6 +9,7 @@ const logger = require('./plugins/logger');
 const osu = require('./plugins/osu');
 const cleverbot = require('./plugins/cleverbot');
 const music = require('./plugins/music');
+const drawing = require('./plugins/drawing');
 
 // External JSON files
 const auth = require('./auth');
@@ -53,6 +54,7 @@ function onMessageCreate (e) {
 	osu.respond(msg);
 	cleverbot.init(msg, client);
 	music.respond(msg, client);
+	drawing.respond(msg, client);
 }
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);

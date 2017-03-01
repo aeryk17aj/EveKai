@@ -48,7 +48,7 @@ function respond (msg, client) {
 			sendMessage(rInAr(leaveQuotes)).then(() => {
 				logger.logToBoth('[System] System Disconnected (command)');
 				client.disconnect();
-				// process.exit();
+				process.exit(); // TODO: Investigate lingering process
 			});
 		}, 2000);
 	});

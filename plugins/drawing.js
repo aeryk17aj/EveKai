@@ -19,7 +19,7 @@ function respond (msg, client) {
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
-	const uploadFile = (s, n) => msgChannel.uploadFile(s, n || "drawing.png");
+	const uploadFile = (s, n) => msgChannel.uploadFile(s, n || "drawing.jpg");
 
 	const command = msgText.slice(config.prefix.length);
 	const handler = new CommandHandler(command);
@@ -27,7 +27,7 @@ function respond (msg, client) {
 	if (!msgText.startsWith(config.prefix)) return;
 
 	const addCommand = (c, f) => handler.addCommand(c, f);
-	const addDrawCommand = (c, f, w, h) => addCommand(c, () => {
+	const addDrawCommandSync = (c, f, w, h) => addCommand(c, () => {
 		const canvas = new Canvas(w || 640, h || 480);
 		const ctx = canvas.getContext('2d');
 		f(ctx, canvas, w, h);
@@ -58,7 +58,7 @@ function respond (msg, client) {
 		});
 	});
 
-	addDrawCommand('testDraw', (ctx, canvas, w, h) => {
+	addDrawCommandSync('testDraw', (ctx, canvas, w, h) => {
 		ctx.fillStyle = '#FFB2C5';
 		ctx.fillRect(0, 0, w, h);
 		ctx.fillStyle = 'white';

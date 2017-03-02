@@ -7,6 +7,7 @@ module.exports = function (stream, cb) {
 	const chunks = [];
 	stream.on('data', function (chunk) {
 		chunks.push(chunk);
+		console.log('Pushed Chunk');
 	});
 	stream.once('end', function () {
 		if (cb) cb(null, Buffer.concat(chunks));

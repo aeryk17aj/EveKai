@@ -1,4 +1,5 @@
 .vscode/*
+build/*
 logs/*
 node_modules/*
 plugins/dl/*

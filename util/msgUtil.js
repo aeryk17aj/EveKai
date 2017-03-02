@@ -12,6 +12,11 @@ class CommandHandler {
 		if (this.command === c) f();
 	}
 
+	/**
+	 * @summary Adds a command that takes one, space-safe argument
+	 * @param {string} c - Command string
+	 * @param {Function} f - Callback function
+	 */
 	addCommandSentence (c, f) {
 		if (this.command.startsWith(c)) {
 			if (this.command[c.length] === ' ' || this.command[c.length] === undefined) f(this.command.slice(c.length + 1));

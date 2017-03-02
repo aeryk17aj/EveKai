@@ -1,4 +1,8 @@
 const Canvas = require('canvas');
+const get = require('simple-get');
+
+const fs = require('fs');
+const path = require('path');
 
 const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
@@ -13,6 +17,7 @@ const config = require('../config');
 function respond (msg, client) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
+	const senderPfp = sender.staticAvatarURL;
 	const msgChannel = msg.channel;
 	const msgGuild = msg.guild;
 
@@ -65,6 +70,24 @@ function respond (msg, client) {
 		ctx.font = '48px serif';
 		ctx.fillText('Hello, ' + (sender.nick || sender.username), 10, 50);
 	}, 300, 100);
+
+	const guildFolder = './dl/' + msg.guild.id;
+	const imgOut = path.resolve(__dirname, `${guildFolder}/_img/${sender.id} - ${sender.avatar}.jpg`);
+	const hasAvatar = fs.readdirSync(path.resolve(__dirname, guildFolder + '/_img')).includes(`${sender.id} - ${sender.avatar}.jpg`);
+
+	function getPfp () {
+		get({ url: senderPfp, headers: { 'Content-Type': 'image/jpeg'} }, (err, stream) => {
+			stream.pipe(fs.createWriteStream(imgOut));
+		});
+	}
+
+	addCommand('pfp', () => {
+		if (!hasAvatar) getPfp();
+		get(senderPfp, (err, img) => {
+			if (err) return console.log(err);
+			uploadFile(img, 'aaa.jpg');
+		});
+	});
 }
 
 exports.respond = respond;

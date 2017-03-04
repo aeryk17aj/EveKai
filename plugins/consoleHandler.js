@@ -14,6 +14,8 @@ function respond (msg, client) {
 	const command = msg.slice(config.prefix.length);
 	const handler = new CommandHandler(command);
 
+	if (!msg.startsWith(config.prefix)) return;
+
 	const addCommand = (c, f) => handler.addCommand(msg, c, f);
 	const addCommandArgs = (c, f) => handler.addCommandArgs(msg, c, f);
 	const addCommandSentence = (c, f) => addCommandArgs(c, a => f(a.join(' ')));

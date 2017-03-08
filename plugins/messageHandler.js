@@ -179,10 +179,20 @@ function respond (msg, client) {
 		return fetchMoreSpecificMessages(channel, user, left);
 	}
 
-	function deleteMessages (msgs, channel) {
-		return client.Messages.deleteMessages(msgs, channel).then(() => {
-			client.Messages.purgeChannelCache(channel);
-		});
+	function deleteMessages (msgs, channel, left) {
+		if (!left) left = msgs.length;
+		const removeCount = Math.min(100, left);
+		return client.Messages.deleteMessages(msgs.slice(0, removeCount), channel)
+			.then(() => onDeleteMore(msgs, channel, left - removeCount))
+			//.catch(() => console.log('What, why can\'t it delete?'));
+			.catch(() => sendMessage('Deleting past 100 is broken at the moment.\nPlease prune by 100s while Aeryk gets this fixed.'));
+	}
+
+	function onDeleteMore (msgs, channel, left) {
+		// Messages are fetched when insufficient before deletion so...
+		// If there's nothing to delete, it's done deleting
+		if (!msgs.length || left <= 0) return Promise.resolve();
+		return deleteMessages(msg, channel, left);
 	}
 
 	addCommandSentence('prune', a => {
@@ -201,10 +211,12 @@ function respond (msg, client) {
 		else return sendMessage('Has to be `all` or a user mention.');
 
 		if (amount > messages.length) {
+			// console.log(`about to delete ${amount} out of ${messages.length} in cache`);
 			if (allMsgs) {
 				const difference = amount - messages.length;
 				fetchMoreMessages(msgChannel, difference).then(() => {
 					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
+					// console.log(`Post fetch: ${amount} out of ${messages.length} in cache`);
 					deleteMessages(messages.slice(-amount), msgChannel);
 				});
 			} else {

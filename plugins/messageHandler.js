@@ -80,6 +80,16 @@ function respond (msg, client) {
 				].map(a => config.prefix + a),
 				'```'
 			].join('\n');
+		} else if (a === 'sekrit'){
+			help = [
+				'```ini',
+				'[Sekrit Commands]', '',
+				...[
+					'pfp (fetches your pfp for her future use)',
+					'testDraw'
+				].map(a => config.prefix + a),
+				'```'
+			].join('\n');
 		} else {
 			help = [
 				'```ini',

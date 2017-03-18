@@ -25,8 +25,6 @@ const rl = readline.createInterface({
 });
 
 rl.on('line', c => {
-	// const possibleCommand = c.startsWith(config.prefix);
-	// if (!possibleCommand) return;
 	consoleHandler.respond(c, client);
 });
 
@@ -40,6 +38,14 @@ client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unus
 
 client.Dispatcher.on(Events.DISCONNECTED, e => console.log(`[System] Connection interrupted. (${e.error})`));
 client.Dispatcher.on(Events.GATEWAY_RESUMED, () => console.log('[System] Connection resumed.'));
+
+client.Dispatcher.on(Events.GUILD_MEMBER_ADD, e => {
+	e.guild.generalChannel.sendMessage(`Welcome, **${e.member.name}** to **${e.guild.name}**.`);
+});
+
+client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e => {
+	e.guild.generalChannel.sendMessage(`**${e.member.name}** has left **${e.guild.name}**.`);
+});
 
 /**
  * Fired every time a message is received by the bot.
@@ -58,10 +64,3 @@ function onMessageCreate (e) {
 }
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);
-
-/**
- * TODO
- *
- * Finish Message Handler (aka port over every command)
- * Image map: "filename": [alias1, alias2]
- */

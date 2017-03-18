@@ -157,7 +157,7 @@ function respond (msg, client) {
 		const MOBILE_BASE = 'https://m.youtube.com/watch?v=';
 		const vidId = a.slice(VIDEO_BASE.length);
 
-		if (!(a.startsWith(VIDEO_BASE) || a.startsWith(MOBILE_BASE))) search(a); // return sendMessage('Not a valid link.');
+		if (!(a.startsWith(VIDEO_BASE) || a.startsWith(MOBILE_BASE))) search(a);
 		else if (a.startsWith('http:')) return sendMessage('Make sure it\'s HTTPS');
 		else {
 			// Pre-download
@@ -168,7 +168,7 @@ function respond (msg, client) {
 			downloadStream.on('info', i => {
 				sendMessage('Queuing: `' + i.title + '`. Don\'t play yet until ready.');
 				if (i['length_seconds'] >= 15 * 60) sendMessage('The video seems to be 15 minutes or more. This might take a while.');
-				guildQueue.push(i.title.replace(/[\\\/:*?"<>|]/g, ' ')); // File name safe
+				guildQueue.push(i.title.replace(/[\\\/:*?"<>|]/g, '')); // File name safe
 			});
 
 			// Save to file

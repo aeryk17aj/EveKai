@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const botUtil = require(process.cwd() + '/util/botUtil');
+const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require(botUtil.getFromRoot('config'));
@@ -54,21 +54,21 @@ function loggerCommands (msg) {
 	addCommandSentence('whitelist', a => {
 		if (a === 'add') {
 			if (!(whitelist[msgGuild.id].length)) {
-				// Create Guild + Channel case
+				// 'Create Guild + Channel' case
 				whitelist[msgGuild.id] = [msgChannel.id];
 			} else {
-				// Already whitelisted case
+				// 'Already whitelisted' case
 				if (whitelist[msgGuild.id].includes(msgChannel.id)) return sendMessage('This channel is already being logged');
+				// 'Additional Channel' case
 				else whitelist[msgGuild.id].push(msgChannel.id);
-				// Additional Channel case
 			}
 			sendMessage('This channel is now being logged');
 		} else if (a === 'remove') {
 			if (!whitelist[msgGuild.id] || !whitelist[msgGuild.id].includes(msgChannel.id)) {
-				// Already not whitelisted case
+				// 'Already not whitelisted' case
 				return sendMessage('This channel is already not being logged');
 			} else {
-				// Remove channel case
+				// 'Remove channel' case
 				whitelist[msgGuild.id].splice(whitelist[msgGuild.id].indexOf(msgChannel.id), 1);
 				sendMessage('Logging of this channel has now stopped');
 			}

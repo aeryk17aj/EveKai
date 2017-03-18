@@ -8,6 +8,7 @@ const config = require('../config');
  * Ahh the sweet land of no permission checks because the console is owner-only
  */
 function respond (msg, client) {
+	// TBH I don't need this
 	const possibleCommand = msg.startsWith(config.prefix);
 	if (!possibleCommand) return;
 

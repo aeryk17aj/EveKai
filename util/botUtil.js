@@ -111,7 +111,7 @@ function refreshConfig () {
 
 module.exports = {
 	// Module utility
-	getFromRoot, getPlugin, getQuotes,
+	getFromRoot, getPlugin, getQuotes, getRootDir,
 	// Message utility
 	senderIsOwner,
 	// General utility

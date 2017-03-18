@@ -299,7 +299,7 @@ function respond (msg, client) {
 		const channels = 2;
 		const bitDepth = 16;
 
-		const songName = queue[msg.guild.id][0];
+		const songName = guildQueue[0];
 		sendMessage('Now playing: `' + songName + '`');
 
 		if (ffmpeg) ffmpeg.kill();

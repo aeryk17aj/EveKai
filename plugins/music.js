@@ -83,20 +83,25 @@ function respond (msg, client) {
 		});
 	});
 
+	function initFolders () {
+		// Initialize folders
+		const guildFolder = './dl/' + msg.guild.id;
+		const fullPath = path.resolve(__dirname, guildFolder);
+		if (!fs.existsSync(fullPath)) {
+			fs.mkdirSync(fullPath); // Songs
+			fs.mkdirSync(fullPath + '/_vid'); // Audio-only video
+		}
+	}
+
+	addCommand('m init', initFolders);
+
 	addCommand('join', () => {
 		boundTextChannel = msg.channel;
 		if (!sender.getVoiceChannel()) return sendMessage('You\'re not in a voice channel.');
 		sender.getVoiceChannel().join().then(() => {
 			boundVoiceChannel = sender.getVoiceChannel();
 			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
-
-			// Initialize folders
-			const guildFolder = './dl/' + msg.guild.id;
-			const fullPath = path.resolve(__dirname, guildFolder);
-			if (!fs.existsSync(fullPath)) {
-				fs.mkdirSync(fullPath); // Songs
-				fs.mkdirSync(fullPath + '/_vid'); // Audio-only video
-			}
+			initFolders();
 		});
 	});
 
@@ -123,7 +128,6 @@ function respond (msg, client) {
 				let pick = 0;
 				let canceled = false;
 				function trackListener (e) {
-					// console.log('Emitted to secondary');
 					if (!e) return;
 					const pickQuery = e.message.content;
 					if (e.message.channel.id !== msg.channel.id) return;
@@ -136,23 +140,24 @@ function respond (msg, client) {
 						if (!canceled) addToQueue(links[pick - 1]);
 					}
 				}
+				// Needs to listen more than once until it gets the right msg
 				client.Dispatcher.on(Events.MESSAGE_CREATE, trackListener);
-				if (pick || canceled) client.Dispatcher.emit(Events.MESSAGE_CREATE); // I don't need a 2nd time
+				if (pick || canceled) client.Dispatcher.emit(Events.MESSAGE_CREATE); // No need for a 2nd time
 			});
 		});
 	}
 
-	['m f', 'search'].forEach(s => addCommandSentence(s, search));
+	// ['m f', 'search'].forEach(s => addCommandSentence(s, search));
 
 	function addToQueue (a) {
 		// Channel check
 		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
 
 		const VIDEO_BASE = 'https://www.youtube.com/watch?v=';
+		const MOBILE_BASE = 'https://m.youtube.com/watch?v=';
 		const vidId = a.slice(VIDEO_BASE.length);
-		const guildQueue = queue[msg.guild.id];
 
-		if (!a.startsWith(VIDEO_BASE)) search(a); // return sendMessage('Not a valid link.');
+		if (!(a.startsWith(VIDEO_BASE) || a.startsWith(MOBILE_BASE))) search(a); // return sendMessage('Not a valid link.');
 		else if (a.startsWith('http:')) return sendMessage('Make sure it\'s HTTPS');
 		else {
 			// Pre-download
@@ -161,9 +166,9 @@ function respond (msg, client) {
 			// Download stream
 			const downloadStream = ytdl(a, { filter: 'audioonly' });
 			downloadStream.on('info', i => {
-				sendMessage('Queuing: `' + i.title + '` Don\'t play yet until ready.');
-				if (!guildQueue) queue[msg.guild.id] = [];
-				guildQueue.push(i.title);
+				sendMessage('Queuing: `' + i.title + '`. Don\'t play yet until ready.');
+				if (i['length_seconds'] >= 15 * 60) sendMessage('The video seems to be 15 minutes or more. This might take a while.');
+				guildQueue.push(i.title.replace(/[\\\/:*?"<>|]/g, ' ')); // File name safe
 			});
 
 			// Save to file
@@ -175,11 +180,11 @@ function respond (msg, client) {
 				fluentffmpeg()
 					.input(vidOut)
 					.audioCodec('libmp3lame')
-					.audioFilters('volume=0.5') // 1.0 is pretty loud
+					.audioFilters('volume=0.3') // 1.0 is pretty loud
 					.save(mp3Out)
 					.on('end', () => {
 						busy = false;
-						fs.unlink(vidOut); // Delete mp4 file
+						fs.unlink(vidOut); // Delete mp4 file, no need to wait
 						return sendMessage('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
 					});
 			});
@@ -188,11 +193,23 @@ function respond (msg, client) {
 
 	['m q', 'music queue', 'add'].forEach(s => addCommandSentence(s, addToQueue));
 
+	function shuffle () {
+		const a = guildQueue;
+		for (let i = a.length; i; i--) {
+			const j = Math.floor(Math.random() * i);
+			[a[i - 1], a[j]] = [a[j], a[i - 1]];
+		}
+		return a;
+	}
+
+	['m sh', 'music shuffle', 'shuffle'].forEach(s => addCommandSentence(s, shuffle));
+
+	// TODO: test this
 	function removeTrack (a) {
 		const trackNumber = a; // Number(a);
 		if (!trackNumber) return sendMessage('Not a valid track number.');
 		else if (trackNumber > queue[msg.guild.id].length) return sendMessage(`There are only ${queue[msg.guild.id].length} songs in the ueue.`);
-		else queue[msg.guild.id].splice(trackNumber - 1, 1);
+		else queue[msg.guild.id].splice(trackNumber - 1, 1); // TODO: Also delete
 	}
 
 	['m r', 'music remove', 'remove'].forEach(s => addCommandSentence(s, removeTrack));
@@ -264,6 +281,14 @@ function respond (msg, client) {
 
 	addCommand('list', () => {
 		sendMessage('```ini\n[Song List]\n\n' + (guildQueue.map((s, i) => '\t ' + (i + 1) + ' : ' + s).join('\n') || '\tNothing but just us...') + '```');
+	});
+
+	addCommand('list2', () => {
+		sendMessage('', {
+			color: 0xEEDD33,
+			title: 'Song List',
+			description: guildQueue.map((s, i) => (i + 1) + ' : ' + s).join('\n') || 'Nothing but just us... /w\\'
+		});
 	});
 
 	function play (voiceConnectionInfo) {

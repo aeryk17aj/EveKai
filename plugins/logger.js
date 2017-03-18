@@ -35,6 +35,13 @@ function loggerCommands (msg) {
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
+	if (!whitelist[msgGuild.id]) whitelist[msgGuild.id] = [];
+
+	addCommand('status', () => {
+		if (whitelist[msgGuild.id].includes(msgChannel.id)) sendMessage('👍');
+		else sendMessage('👎');
+	});
+
 	addCommand('start', () => {
 		if (config.logMessages) sendMessage('Logging is already enabled');
 		else {
@@ -53,7 +60,7 @@ function loggerCommands (msg) {
 
 	addCommandSentence('whitelist', a => {
 		if (a === 'add') {
-			if (!(whitelist[msgGuild.id].length)) {
+			if (!whitelist[msgGuild.id].length) {
 				// 'Create Guild + Channel' case
 				whitelist[msgGuild.id] = [msgChannel.id];
 			} else {

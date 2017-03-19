@@ -44,7 +44,7 @@ client.Dispatcher.on(Events.GUILD_MEMBER_ADD, e => {
 });
 
 client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e => {
-	e.guild.generalChannel.sendMessage(`**${e.member.name}** has left **${e.guild.name}**.`);
+	e.guild.generalChannel.sendMessage(`**${e.user.username}** has left **${e.guild.name}**.`);
 });
 
 /**
@@ -54,6 +54,7 @@ client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e => {
 function onMessageCreate (e) {
 	if (!e) return;
 	const msg = e.message;
+	// TODO: Add idle mode, top priority listen
 	logger.init(msg);
 	messageHandler.respond(msg, client);
 	if (!msg || !msg.content) return;

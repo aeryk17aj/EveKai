@@ -50,7 +50,7 @@ function respond (msg, client) {
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
-	if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id)))initFolders();
+	if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id))) initFolders();
 
 	// Initialize queue
 	if (!queue[msg.guild.id]) queue[msg.guild.id] = [];
@@ -90,6 +90,7 @@ function respond (msg, client) {
 		const guildFolder = './dl/' + msg.guild.id;
 		const fullPath = path.resolve(__dirname, guildFolder);
 		if (!fs.existsSync(fullPath)) {
+			fs.mkdir(path.resolve(__dirname, './dl')); // dl folder
 			fs.mkdirSync(fullPath); // Songs
 			fs.mkdirSync(fullPath + '/_vid'); // Audio-only video
 		}

@@ -1,7 +1,7 @@
 const fs = require('fs');
 
-const config = require(getFromRoot('config'));
-const userIds = require(getFromRoot('userIds'));
+const config = require('../config');
+const userIds = require('../userIds');
 
 /**
  * botUtil.js

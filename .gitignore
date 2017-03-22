@@ -5,5 +5,5 @@ node_modules/*
 plugins/dl/*
 
 auth.json
-userIds.json
-whitelist.json
+#userIds.json
+#whitelist.json

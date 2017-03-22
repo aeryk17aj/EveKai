@@ -1,0 +1,62 @@
+body {
+	background-color: #999999;
+}
+
+.char-panel {
+	margin: auto;
+	margin-top: 50px;
+	padding: 10px;
+	display: flex;
+	flex-wrap: wrap;
+	width: 292px;
+	/*height: 202px;*/
+}
+
+.char-panel > .img-bg {
+	height: 146px;
+	background-color: #212121;
+}
+
+.char-panel .pfp {
+	padding: 10px;
+	border-radius: 100%;
+}
+
+.char-panel > .name-bg {
+	width: 146px;
+	background-color: #434343;
+}
+
+.char-panel .name {
+	/*Miraculously centered*/
+	margin: 30%;
+	margin-left: 20%;
+	font-size: 48px;
+	font-family: Whitney, Helvetica Neue, Helvetica, Arial, sans-serif;
+	color: #FFB2C5;
+}
+
+.char-panel > .invite-button {
+	width: 100%;
+	height: 56px;
+	background-color: #656565;
+}
+
+.invite-button > p {
+	margin-top: 13px;
+	text-align: center;
+}
+
+.invite-button > p > a {
+	width: 68px;
+	height: 16px; /* Reinforcing */
+	border: 2px solid white;
+	border-radius: 15px;
+	padding: 5px;
+	display: inline-block;
+	background-color: #434343;
+	color: white;
+	font-size: 14px;
+	font-family: Whitney, Helvetica Neue, Helvetica, Arial, sans-serif;
+	text-decoration: none;
+}

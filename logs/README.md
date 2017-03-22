@@ -1,0 +1,1 @@
+Yep, this is where chat logs are kept

@@ -90,7 +90,7 @@ function respond (msg, client) {
 		const guildFolder = './dl/' + msg.guild.id;
 		const fullPath = path.resolve(__dirname, guildFolder);
 		if (!fs.existsSync(fullPath)) {
-			fs.mkdir(path.resolve(__dirname, './dl')); // dl folder
+			fs.mkdirSync(path.resolve(__dirname, './dl')); // dl folder
 			fs.mkdirSync(fullPath); // Songs
 			fs.mkdirSync(fullPath + '/_vid'); // Audio-only video
 		}

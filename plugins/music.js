@@ -50,6 +50,8 @@ function respond (msg, client) {
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
+	if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id)))initFolders();
+
 	// Initialize queue
 	if (!queue[msg.guild.id]) queue[msg.guild.id] = [];
 	guildQueue = queue[msg.guild.id];

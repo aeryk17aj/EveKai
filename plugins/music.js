@@ -9,12 +9,11 @@ const childProcess = require('child_process');
 
 const CommandHandler = require('../util/msgUtil');
 
-const auth = require('../auth');
 const config = require('../config');
 const userIds = require('../userIds');
 
 const yt = new YouTube();
-yt.setKey(auth.yt);
+yt.setKey(process.env.YT_KEY || require('../auth').yt);
 
 // Internal queue, stores position and id
 const queue = {};

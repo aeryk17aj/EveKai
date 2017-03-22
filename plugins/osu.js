@@ -4,10 +4,9 @@ const util = require('util');
 const botUtil = require(process.cwd() + '/util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
-const auth = require(botUtil.getFromRoot('auth'));
 const config = require(botUtil.getFromRoot('config'));
 
-const osuApi = new osu.Api(auth.osuKey, {
+const osuApi = new osu.Api(process.env.OSU_KEY || require('../auth').osuKey, {
 	notFoundAsError: true,
 	completeScores: false
 });

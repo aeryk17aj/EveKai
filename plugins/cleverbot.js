@@ -6,10 +6,9 @@ const botUtil = require(process.cwd() + '/util/botUtil');
 const msgUtil = require(process.cwd() + '/util/msgUtil');
 const CommandHandler = require('../util/msgUtil');
 
-const auth = require(botUtil.getFromRoot('auth'));
 const config = require(botUtil.getFromRoot('config'));
 
-const eve = apiai(auth.apiai);
+const eve = apiai(process.env.APIAI_KEY || require('../auth').apiai);
 const cleverbot = new Cleverbot();
 
 /**

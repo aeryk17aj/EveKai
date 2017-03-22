@@ -15,8 +15,6 @@ const cleverbot = require('./plugins/cleverbot');
 const music = require('./plugins/music');
 // const drawing = require('./plugins/drawing');
 
-// External JSON files
-const auth = require('./auth');
 const config = require('./config');
 
 const Events = Discordie.Events;
@@ -32,7 +30,7 @@ rl.on('line', c => {
 	consoleHandler.respond(c, client);
 });
 
-client.connect({ token: auth.loginToken });
+client.connect({ token: process.env.BOT_TOKEN || require('./auth').loginToken });
 
 client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unused-vars
 	client.User.setGame('with new discoveries');

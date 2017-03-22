@@ -80,7 +80,8 @@ function respond (msg, client) {
 				].map(a => config.prefix + a),
 				'```'
 			].join('\n');
-		} else if (a === 'sekrit'){
+		} 
+		/*else if (a === 'sekrit'){
 			help = [
 				'```ini',
 				'[Sekrit Commands]', '',
@@ -90,7 +91,8 @@ function respond (msg, client) {
 				].map(a => config.prefix + a),
 				'```'
 			].join('\n');
-		} else {
+		} */
+		else {
 			help = [
 				'```ini',
 				'[General Commands]', '',

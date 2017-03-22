@@ -2,7 +2,7 @@
   "name": "eve",
   "version": "2.0.0-1",
   "engines": {
-	  "node": "7.x"
+    "node": "7.x"
   },
   "description": "Aeryk's personal Discord bot. Revision 1",
   "main": "bot.js",
@@ -13,7 +13,6 @@
   "license": "MIT",
   "dependencies": {
     "apiai": "^3.0.3",
-    "canvas": "^1.6.4",
     "cleverbot-node": "^0.2.6",
     "discordie": "^0.11.0",
     "fluent-ffmpeg": "^2.1.0",

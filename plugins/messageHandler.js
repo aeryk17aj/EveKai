@@ -210,6 +210,9 @@ function respond (msg, client) {
 		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('No.');
 		// Bot can't delete or pin messages
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
+		// Empty args
+		if(!a.length) return sendMessage(`\`${config.prefix}prune <\'all\' or user mention> <amount>\``);
+
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);
 
@@ -250,6 +253,7 @@ function respond (msg, client) {
 	});
 
 	addCommandArgs('elwiki', a => {
+		if (a.length) return;
 		const pageName = a.map(w => w[0].toUpperCase() + w.slice(1)).join('_');
 		sendMessage('http://elwiki.net/w/' + pageName);
 	});

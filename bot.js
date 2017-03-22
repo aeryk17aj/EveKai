@@ -71,7 +71,7 @@ function onMessageCreate (e) {
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);
 
 app.set('port', process.env.PORT || 5000);
-app.use(express.static(__dirname, '/public'));
+app.use(express.static('public'));
 
 app.get('/', (request, response) => {
 	response.send('Hello World!');

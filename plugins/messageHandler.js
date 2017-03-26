@@ -9,7 +9,6 @@ const userIds = require('../userIds');
 const ballQuotes = require(botUtil.getQuotes('8ball'));
 const leaveQuotes = require(botUtil.getQuotes('disconnect'));
 const docLinks = require(botUtil.getQuotes('docs'));
-const commands = require(botUtil.getQuotes('commands'));
 
 /**
  * Primary message listener

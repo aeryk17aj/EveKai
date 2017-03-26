@@ -6,20 +6,16 @@ const config = require('../config');
 
 /**
  * Ahh the sweet land of no permission checks because the console is owner-only
+ * 
+ * @param {string} msg 
+ * @param {Discordie} client 
  */
 function respond (msg, client) {
-	// TBH I don't need this
-	const possibleCommand = msg.startsWith(config.prefix);
-	if (!possibleCommand) return;
+	const handler = new CommandHandler(msg);
 
-	const command = msg.slice(config.prefix.length);
-	const handler = new CommandHandler(command);
-
-	if (!msg.startsWith(config.prefix)) return;
-
-	const addCommand = (c, f) => handler.addCommand(msg, c, f);
-	const addCommandArgs = (c, f) => handler.addCommandArgs(msg, c, f);
-	const addCommandSentence = (c, f) => addCommandArgs(c, a => f(a.join(' ')));
+	const addCommand = handler.addCommand;
+	//const addCommandArgs = handler.addCommandArgs;
+	const addCommandSentence = handler.addCommandSentence;
 
 	addCommand('dc', () => {
 		client.disconnect();

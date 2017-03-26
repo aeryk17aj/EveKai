@@ -8,3 +8,7 @@ plugins/dl/*
 auth.json
 userIds.json
 whitelist.json
+
+#for now
+db/*
+commands/*

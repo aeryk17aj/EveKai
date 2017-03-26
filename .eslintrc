@@ -4,6 +4,9 @@
         "es6": true,
         "node": true
     },
+	"parserOptions": {
+		"sourceType": "module"
+	},
     "rules": {
         "semi": [2, "always"],
         "indent": [2, "tab", {

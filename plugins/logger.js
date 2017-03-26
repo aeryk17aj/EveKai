@@ -3,8 +3,8 @@ const fs = require('fs');
 const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
-const config = require(botUtil.getFromRoot('config'));
-const whitelist = require(botUtil.getFromRoot('whitelist'));
+const config = require('../config');
+const whitelist = require('../whitelist');
 
 const today = new Date(Date.now()).toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
 let logFile = fs.createWriteStream(process.cwd() + '/logs/chatlog-' + today + '.txt', {flags: 'a'});
@@ -21,7 +21,7 @@ function logToBoth (s) {
 
 /**
  * Commands for the chat logger
- * @param  {IMessage} msg Message object
+ * @param {IMessage} msg Message object
  */
 function loggerCommands (msg) {
 	if (!botUtil.senderIsOwner(msg)) return;
@@ -87,7 +87,7 @@ function loggerCommands (msg) {
 /**
  * Logs every whitelisted channel's messages to a single file.
  * Considering on having multiple files separated by folders named by the day
- * @param  {IMessage} msg Message object
+ * @param {IMessage} msg Message object
  */
 function logMsg (msg) {
 	const msgChannel = msg.channel;
@@ -128,6 +128,6 @@ function init (msg) {
 }
 
 module.exports = {
-	whitelist,
+	//whitelist,
 	init, addToLog, logToBoth
 };

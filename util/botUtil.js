@@ -19,40 +19,6 @@ function commaPad (s) {
 }
 
 /**
- * @access private
- */
-function getRootDir () {
-	return process.cwd() + '/';
-}
-
-/**
- * Gets a file from the root directory
- * @param  {string} s File name
- * @return {string} File path
- */
-function getFromRoot (s) {
-	return getRootDir() + s;
-}
-
-/**
- * Gets a plugin
- * @param  {string} s File name
- * @return {string} File path
- */
-function getPlugin (s) {
-	return getFromRoot('plugins/' + s);
-}
-
-/**
- * Gets a quote collection
- * @param  {string} s File name
- * @return {string} File path
- */
-function getQuotes (s) {
-	return getFromRoot('quotes/' + s);
-}
-
-/**
  * @param  {IMessage} msg Message object
  * @return {boolean} whether the message sender has access
  */
@@ -110,8 +76,6 @@ function refreshConfig () {
 }
 
 module.exports = {
-	// Module utility
-	getFromRoot, getPlugin, getQuotes, getRootDir,
 	// Message utility
 	senderIsOwner,
 	// General utility

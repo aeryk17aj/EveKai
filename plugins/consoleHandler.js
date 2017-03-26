@@ -1,7 +1,6 @@
-const botUtil = require('../util/botUtil');
 const client = require('../bot').client;
 const CommandHandler = require('../util/msgUtil');
-const logger = require(botUtil.getPlugin('logger'));
+const logger = require('./logger');
 
 const config = require('../config');
 

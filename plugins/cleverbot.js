@@ -2,19 +2,17 @@
 const apiai = require('apiai');
 const Cleverbot = require('cleverbot-node');
 
-const botUtil = require(process.cwd() + '/util/botUtil');
-const msgUtil = require(process.cwd() + '/util/msgUtil');
+const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 const client = require('../bot').client;
 
-const config = require(botUtil.getFromRoot('config'));
+const config = require('../config');
 
 const eve = apiai(process.env.APIAI_KEY || require('../auth').apiai);
 const cleverbot = new Cleverbot();
 
 /**
  * @param {IMessage} msg message object
- * @param {Discordie} name bot client
  */
 function respond (msg) {
 	const msgText = msg.content;
@@ -53,7 +51,7 @@ function cleverCommands (msg) {
 	const msgChannel = msg.channel;
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
-	const refreshConfig = () => msgUtil.refreshConfig();
+	const refreshConfig = botUtil.refreshConfig;
 
 	const command = msg.content.slice(config.prefix.length);
 	const handler = new CommandHandler(command);

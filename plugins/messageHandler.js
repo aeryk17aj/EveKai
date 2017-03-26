@@ -2,14 +2,14 @@ const botUtil = require('../util/botUtil');
 const client = require('../bot').client;
 const CommandHandler = require('../util/msgUtil');
 const Permissions = require('discordie').Permissions;
-const logger = require(botUtil.getPlugin('logger'));
+const logger = require('./logger');
 
 const config = require('../config');
 const userIds = require('../userIds');
 
-const ballQuotes = require(botUtil.getQuotes('8ball'));
-const leaveQuotes = require(botUtil.getQuotes('disconnect'));
-const docLinks = require(botUtil.getQuotes('docs'));
+const ballQuotes = require('../quotes/8ball');
+const leaveQuotes = require('../quotes/disconnect');
+const docLinks = require('../quotes/docs');
 
 /**
  * Primary message listener

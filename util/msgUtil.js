@@ -1,21 +1,33 @@
 class CommandHandler {
+	/**
+	 * Creates an instance of CommandHandler
+	 * @param {string} command
+	 * 
+	 * @memberOf CommandHandler
+	 */
 	constructor (command) {
 		this.command = command;
 	}
 
 	/**
-	 * @summary Adds a command
+	 * Adds a command
+	 * 
 	 * @param {string} c - Command string
 	 * @param {Function} f - Callback function
+	 * 
+	 * @memberOf CommandHandler
 	 */
 	addCommand (c, f) {
 		if (this.command === c) f();
 	}
 
 	/**
-	 * @summary Adds a command that takes one, space-safe argument
+	 * Adds a command that takes one, space-safe argument
+	 * 
 	 * @param {string} c - Command string
 	 * @param {Function} f - Callback function
+	 * 
+	 * @memberOf CommandHandler
 	 */
 	addCommandSentence (c, f) {
 		if (this.command.startsWith(c)) {
@@ -24,9 +36,12 @@ class CommandHandler {
 	}
 
 	/**
-	 * @summary Adds a command that takes arguments separated by spaces
+	 * Adds a command that takes arguments separated by spaces
+	 * 
 	 * @param {string} c Command string
 	 * @param {Function} f Callback function
+	 * 
+	 * @memberOf CommandHandler
 	 */
 	addCommandArgs (c, f) {
 		this.addCommandSentence(c, a => f(a.split(' ')));

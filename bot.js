@@ -27,7 +27,7 @@ const rl = readline.createInterface({
 });
 
 rl.on('line', c => {
-	consoleHandler.respond(c, client);
+	consoleHandler.respond(c);
 });
 
 client.connect({ token: process.env.BOT_TOKEN || require('./auth').loginToken });
@@ -58,15 +58,17 @@ function onMessageCreate (e) {
 	const msg = e.message;
 	// TODO: Add idle mode, top priority listen
 	logger.init(msg);
-	messageHandler.respond(msg, client);
+	messageHandler.respond(msg);
 	if (!msg || !msg.content) return;
 	osu.respond(msg);
-	cleverbot.init(msg, client);
-	music.respond(msg, client);
+	cleverbot.init(msg);
+	music.respond(msg);
 	// drawing.respond(msg, client);
 }
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, onMessageCreate);
+
+exports.client = client;
 
 app.set('port', process.env.PORT || 5000);
 app.use(express.static('public'));

@@ -1,4 +1,5 @@
 const botUtil = require('../util/botUtil');
+const client = require('../bot').client;
 const CommandHandler = require('../util/msgUtil');
 const logger = require(botUtil.getPlugin('logger'));
 
@@ -8,9 +9,8 @@ const config = require('../config');
  * Ahh the sweet land of no permission checks because the console is owner-only
  * 
  * @param {string} msg 
- * @param {Discordie} client 
  */
-function respond (msg, client) {
+function respond (msg) {
 	const handler = new CommandHandler(msg);
 
 	const addCommand = handler.addCommand;

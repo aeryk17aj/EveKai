@@ -5,6 +5,7 @@ const Cleverbot = require('cleverbot-node');
 const botUtil = require(process.cwd() + '/util/botUtil');
 const msgUtil = require(process.cwd() + '/util/msgUtil');
 const CommandHandler = require('../util/msgUtil');
+const client = require('../bot').client;
 
 const config = require(botUtil.getFromRoot('config'));
 
@@ -15,7 +16,7 @@ const cleverbot = new Cleverbot();
  * @param {IMessage} msg message object
  * @param {Discordie} name bot client
  */
-function respond (msg, client) {
+function respond (msg) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author;
 	const msgGuild = msg.guild;
@@ -86,10 +87,9 @@ function cleverCommands (msg) {
 
 /**
  * @param {IMessage} msg message object
- * @param {Discordie} name bot client
  */
-function init (msg, client) {
-	respond(msg, client);
+function init (msg) {
+	respond(msg);
 	cleverCommands(msg);
 }
 

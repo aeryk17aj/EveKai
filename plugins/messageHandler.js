@@ -1,4 +1,5 @@
 const botUtil = require('../util/botUtil');
+const client = require('../bot').client;
 const CommandHandler = require('../util/msgUtil');
 const Permissions = require('discordie').Permissions;
 const logger = require(botUtil.getPlugin('logger'));
@@ -13,9 +14,8 @@ const docLinks = require(botUtil.getQuotes('docs'));
 /**
  * Primary message listener
  * @param  {IMessage} msg Message object to be used
- * @param  {Discordie} client Bot client object
  */
-function respond (msg, client) {
+function respond (msg) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 	const msgChannel = msg.channel;

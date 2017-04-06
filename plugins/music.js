@@ -8,7 +8,6 @@ const path = require('path');
 const childProcess = require('child_process');
 
 const CommandHandler = require('../util/msgUtil');
-const client = require('../bot').client;
 
 const config = require('../config');
 const userIds = require('../userIds');
@@ -30,7 +29,7 @@ let repeatAll = false;
 
 let busy = false;
 
-function respond (msg) {
+function respond (msg, client) {
 	if (msg.isPrivate) return;
 	const msgText = msg.content;
 	if (!msgText.startsWith(config.prefix)) return;

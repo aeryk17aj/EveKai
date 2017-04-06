@@ -19,11 +19,16 @@ function logToBoth (s) {
 	addToLog(s);
 }
 
+function updateWhitelist () {
+	fs.writeFileSync('../whitelist.json', JSON.stringify(whitelist, null, 4), 'utf-8');
+}
+
 /**
  * Commands for the chat logger
  * @param {IMessage} msg Message object
  */
 function loggerCommands (msg) {
+	if (msg.isPrivate) return;
 	if (!botUtil.senderIsOwner(msg)) return;
 	const msgChannel = msg.channel;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
@@ -40,6 +45,18 @@ function loggerCommands (msg) {
 	addCommand('status', () => {
 		if (whitelist[msgGuild.id].includes(msgChannel.id)) sendMessage('👍');
 		else sendMessage('👎');
+	});
+
+	addCommand('lswlc', () => {
+		sendMessage([
+			'```ini',
+			...whitelist[msgGuild.id]
+				.map(i => 
+					'#' + msgGuild.textChannels
+						.find(tc => 
+							tc.id === i).name),
+			'```'
+		].join('\n'));
 	});
 
 	addCommand('start', () => {
@@ -67,9 +84,13 @@ function loggerCommands (msg) {
 				// 'Already whitelisted' case
 				if (whitelist[msgGuild.id].includes(msgChannel.id)) return sendMessage('This channel is already being logged');
 				// 'Additional Channel' case
-				else whitelist[msgGuild.id].push(msgChannel.id);
+				else {
+					whitelist[msgGuild.id].push(msgChannel.id);
+					updateWhitelist();
+					sendMessage('This channel is now being logged');
+				}
 			}
-			sendMessage('This channel is now being logged');
+			
 		} else if (a === 'remove') {
 			if (!whitelist[msgGuild.id] || !whitelist[msgGuild.id].includes(msgChannel.id)) {
 				// 'Already not whitelisted' case
@@ -77,10 +98,9 @@ function loggerCommands (msg) {
 			} else {
 				// 'Remove channel' case
 				whitelist[msgGuild.id].splice(whitelist[msgGuild.id].indexOf(msgChannel.id), 1);
-				sendMessage('Logging of this channel has now stopped');
+				sendMessage('Logging of this channel has now stopped').then(() => updateWhitelist());
 			}
 		}
-		fs.writeFileSync(botUtil.getRootDir() + '/whitelist.json', JSON.stringify(whitelist, null, 4), 'utf-8');
 	});
 }
 
@@ -101,25 +121,28 @@ function logMsg (msg) {
 	const logDate = timeSent.toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
 
-	// Only disables logging of everything else, detected commands will always be logged
 	const possibleCommand = msg.content.startsWith(config.prefix);
-	if (!(config.logMessages || possibleCommand)) return;
 
 	// The attachments array exists, picture or none, so length check it is
 	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
 
 	const logLine = [
 		timeSentString,
-		`[${!msg.isPrivate ? msgChannel.guild.name + ': #' + msgChannel.name : 'DM: ' + msgChannel.recipient.username}]`,
+		`[${!msg.isPrivate ? msg.guild.name + ': #' + msgChannel.name : 'DM: ' + msgChannel.recipient.username}]`,
 		`${(msg.member || msg.author).username}:`, // IUser as substitute for the case of DMs
 		msg.content,
 		attachments
 	].join(' ');
 
-	const hasGuildList = whitelist.hasOwnProperty(msg.guild.id);
-	if (!hasGuildList) return;
-	const inGuildList = whitelist[msg.guild.id].includes(msgChannel.id);
-	if (msg.isPrivate || possibleCommand || (hasGuildList && inGuildList)) logToBoth(logLine);
+	if (!msg.isPrivate) { // Guild only
+		// Guild not a property
+		if (whitelist.hasOwnProperty(msg.guild.id) && config.logMessages) {
+			// Guild doesn't have channel
+			if (whitelist[msg.guild.id].includes(msgChannel.id)) logToBoth(logLine);
+			else return;
+		} else if (possibleCommand) logToBoth(msg);
+	}
+
 }
 
 function init (msg) {
@@ -128,6 +151,6 @@ function init (msg) {
 }
 
 module.exports = {
-	//whitelist,
+	whitelist,
 	init, addToLog, logToBoth
 };

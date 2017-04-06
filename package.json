@@ -7,8 +7,8 @@
   "description": "Aeryk's personal Discord bot. Revision 1",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js",
-    "test": "happiness bot.js \"plugins/**/*.js\""
+    "start": "node index.js",
+    "test": "happiness index.js \"plugins/**/*.js\" \"handler/**/*.js\""
   },
   "author": "Aeryk",
   "license": "MIT",

@@ -4,7 +4,6 @@ const Cleverbot = require('cleverbot-node');
 
 const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
-const client = require('../bot').client;
 
 const config = require('../config');
 
@@ -14,7 +13,7 @@ const cleverbot = new Cleverbot();
 /**
  * @param {IMessage} msg message object
  */
-function respond (msg) {
+function respond (msg, client) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author;
 	const msgGuild = msg.guild;
@@ -86,11 +85,9 @@ function cleverCommands (msg) {
 /**
  * @param {IMessage} msg message object
  */
-function init (msg) {
-	respond(msg);
+function init (msg, client) {
+	respond(msg, client);
 	cleverCommands(msg);
 }
 
-module.exports = {
-	init
-};
+exports.init = init;

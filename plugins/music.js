@@ -109,8 +109,9 @@ function respond (msg, client) {
 
 	addCommand('leave', () => {
 		stop();
-		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
-		else client.User.getVoiceChannel(msg.guild).leave();
+		const clientVc = client.User.getVoiceChannel(msg.guild);
+		if (!clientVc) return sendMessage('Not in a voice channel.');
+		else clientVc.leave();
 		boundTextChannel = null;
 		boundVoiceChannel = null;
 	});
@@ -149,7 +150,57 @@ function respond (msg, client) {
 		});
 	}
 
-	// ['m f', 'search'].forEach(s => addCommandSentence(s, search));
+	function searchOnly (a) {
+		const linkBase = 'https://www.youtube.com/watch?v=';
+		yt.search(a, 3, (err, res) => {
+			if (err) return console.log(err);
+			const links = res.items.map(i => linkBase + i.id.videoId);
+			const titles = res.items.map(i => `${i.snippet.title} (${i.snippet.channelTitle})`);
+			const songList = [
+				'```ini', '[Search Results]', '',
+				...titles.map((t, i) => `\t${(i + 1)} : ${t}`),
+				'\tc : Cancel', '```'
+			].join('\n');
+			sendMessage(songList).then(() => {
+				let pick = 0;
+				let canceled = false;
+				function trackListener (e) {
+					if (!e) return;
+					const pickQuery = e.message.content;
+					if (e.message.channel.id !== msg.channel.id) return;
+					else if (pickQuery === 'c') canceled = true;
+					else if (pickQuery > 0 && pickQuery < 4) pick = parseInt(pickQuery);
+
+					if (pick || canceled) {
+						client.Dispatcher.removeListener(Events.MESSAGE_CREATE, trackListener);
+						client.Dispatcher.emit(Events.MESSAGE_CREATE);
+						if (!canceled) {
+							const cRes = res.items[pick - 1];
+							sendMessage('', {
+								fields: [ {
+									name: 'Uploader',
+									value: `[${cRes.snippet.channelTitle}](${'https://www.youtube.com/user/' + cRes.snippet.channelTitle})`
+								}, {
+									name: 'Video',
+									value: `[${cRes.snippet.title}](${links[pick - 1]})`
+								}, {
+									name: 'Description',
+									value: cRes.snippet.description
+								} ],
+								image: {
+									url: cRes.snippet.thumbnails.high.url
+								}
+							});
+						}
+					}
+				}
+				client.Dispatcher.on(Events.MESSAGE_CREATE, trackListener);
+				if (pick || canceled) client.Dispatcher.emit(Events.MESSAGE_CREATE);
+			});
+		});
+	}
+
+	['m f', 'search'].forEach(s => addCommandSentence(s, searchOnly));
 
 	function addToQueue (a) {
 		// Channel check
@@ -206,7 +257,7 @@ function respond (msg, client) {
 
 	['m sh', 'music shuffle', 'shuffle'].forEach(s => addCommandSentence(s, shuffle));
 
-	// TODO: test this
+	// FIXME: Doesn't even work
 	function removeTrack (a) {
 		const trackNumber = a; // Number(a);
 		if (!trackNumber) return sendMessage('Not a valid track number.');
@@ -274,6 +325,7 @@ function respond (msg, client) {
 	addCommand('stop', stop);
 	addCommand('dc', stop); // Stops the ffmpeg process before terminating
 
+	// FIXME: Only deleted one
 	addCommand('clear', () => {
 		guildQueue.forEach(songName => {
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`));

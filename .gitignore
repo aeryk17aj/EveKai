@@ -12,3 +12,5 @@ whitelist.json
 #for now
 db/*
 commands/*
+*.png
+!*/*.png

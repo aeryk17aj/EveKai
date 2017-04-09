@@ -15,6 +15,7 @@ const commaPad = s => botUtil.commaPad(s);
 
 function respond (msg) {
 	const msgText = msg.content;
+	if (!msgText.startsWith(config.prefix)) return;
 	const msgChannel = msg.channel;
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);

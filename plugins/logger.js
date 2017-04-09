@@ -28,8 +28,8 @@ function updateWhitelist () {
  * @param {IMessage} msg Message object
  */
 function loggerCommands (msg) {
-	if (msg.isPrivate) return;
-	if (!botUtil.senderIsOwner(msg)) return;
+	if (!msg.content.startsWith(config.prefix)) return;
+	if (msg.isPrivate || !botUtil.senderIsOwner(msg)) return;
 	const msgChannel = msg.channel;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const msgGuild = msg.guild;

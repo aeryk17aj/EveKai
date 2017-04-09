@@ -16,6 +16,7 @@ const docLinks = require('../quotes/docs');
  */
 function respond (msg, client) {
 	const msgText = msg.content;
+	if (!msgText.startsWith(config.prefix)) return;
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 	const msgChannel = msg.channel;
 	const msgGuild = msg.guild;
@@ -27,8 +28,6 @@ function respond (msg, client) {
 
 	const command = msgText.slice(config.prefix.length);
 	const handler = new CommandHandler(command);
-
-	if (!msgText.startsWith(config.prefix)) return;
 
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));

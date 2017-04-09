@@ -1,4 +1,5 @@
 const Canvas = require('canvas');
+const Image = Canvas.Image;
 const get = require('simple-get');
 
 const fs = require('fs');
@@ -39,6 +40,14 @@ function respond (msg, client) {
 		const imgBuffer = canvas.toBuffer();
 		uploadFile(imgBuffer);
 	});
+	const addDrawCommand = (c, f, w, h) => addCommand(c, () => {
+		const canvas = new Canvas(w || 640, h || 480);
+		const ctx = canvas.getContext('2d');
+		f(ctx, canvas, w, h).then(() => {
+			const imgBuffer = canvas.toBuffer();
+			uploadFile(imgBuffer);
+		});
+	});
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
 
@@ -63,6 +72,7 @@ function respond (msg, client) {
 		});
 	});
 
+	// TODO: Dynamic width :thinking:
 	addDrawCommandSync('testDraw', (ctx, canvas, w, h) => {
 		ctx.fillStyle = '#FFB2C5';
 		ctx.fillRect(0, 0, w, h);
@@ -80,6 +90,19 @@ function respond (msg, client) {
 			stream.pipe(fs.createWriteStream(imgOut));
 		});
 	}
+
+	addDrawCommandSync('drawMe', (ctx, canvas, w, h) => {
+		if (!hasAvatar) getPfp();
+		ctx.fillStyle = '#FFB2C5';
+		ctx.fillRect(0, 0, w, h);
+		ctx.fillStyle = 'white';
+		ctx.font = '16px serif';
+		ctx.fillText(sender.nick || sender.username, 10, 17, 140);
+		const pfp = new Image();
+		pfp.src = fs.readFileSync(imgOut);
+		// ctx.drawImage(pfp, 21, 21, 128, 128); // FIXME:
+		console.log('ಠ_ಠ');
+	}, 170, 170);
 
 	addCommand('pfp', () => {
 		if (!hasAvatar) getPfp();

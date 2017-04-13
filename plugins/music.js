@@ -17,7 +17,7 @@ yt.setKey(process.env.YT_KEY || require('../auth').yt);
 
 // Internal queue, stores position and id
 const queue = {};
-let guildQueue;
+let guildQueue = [];
 let stopPlaying = false;
 let ffmpeg = null;
 
@@ -116,6 +116,11 @@ function respond (msg, client) {
 		boundVoiceChannel = null;
 	});
 
+	/**
+	 * Takes a search term and calls `addToQueue` to process the chosen result
+	 * 
+	 * @param {string} a Search term
+	 */
 	function search (a) {
 		const linkBase = 'https://www.youtube.com/watch?v=';
 		yt.search(a, 3, (err, res) => {
@@ -179,7 +184,7 @@ function respond (msg, client) {
 							sendMessage('', {
 								fields: [ {
 									name: 'Uploader',
-									value: `[${cRes.snippet.channelTitle}](${'https://www.youtube.com/user/' + cRes.snippet.channelTitle})`
+									value: `[${cRes.snippet.channelTitle}](${'https://www.youtube.com/channel/' + cRes.snippet.channelId})`
 								}, {
 									name: 'Video',
 									value: `[${cRes.snippet.title}](${links[pick - 1]})`
@@ -202,18 +207,27 @@ function respond (msg, client) {
 
 	['m f', 'search'].forEach(s => addCommandSentence(s, searchOnly));
 
+	/**
+	 * Link case:
+	 * 	Downloads and converts to a music file that's ready to be played
+	 * 
+	 * Search case:
+	 * 	Calls `search(a)`
+	 * 
+	 * @param {string} a YouTube link or search term
+	 * @returns
+	 */
 	function addToQueue (a) {
 		// Channel check
 		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
 
-		const VIDEO_BASE = 'https://www.youtube.com/watch?v=';
-		const MOBILE_BASE = 'https://m.youtube.com/watch?v=';
-		const vidId = a.slice(VIDEO_BASE.length);
+		const validLink = /https?\:\/\/(?:www\.|m\.)?youtube\.com\/watch\?v=/;
 
-		if (!(a.startsWith(VIDEO_BASE) || a.startsWith(MOBILE_BASE))) search(a);
+		if (!validLink.test(a)) return search(a);
 		else if (a.startsWith('http:')) return sendMessage('Make sure it\'s HTTPS');
 		else {
 			// Pre-download
+			const vidId = a.slice(a.match(validLink)[0].length);
 			busy = true;
 
 			// Download stream
@@ -257,12 +271,14 @@ function respond (msg, client) {
 
 	['m sh', 'music shuffle', 'shuffle'].forEach(s => addCommandSentence(s, shuffle));
 
-	// FIXME: Doesn't even work
 	function removeTrack (a) {
 		const trackNumber = a; // Number(a);
 		if (!trackNumber) return sendMessage('Not a valid track number.');
-		else if (trackNumber > queue[msg.guild.id].length) return sendMessage(`There are only ${queue[msg.guild.id].length} songs in the ueue.`);
-		else queue[msg.guild.id].splice(trackNumber - 1, 1); // TODO: Also delete
+		else if (trackNumber > guildQueue.length) return sendMessage(`There are only ${guildQueue.length} songs in the queue.`);
+		else {
+			const deletedTrack = guildQueue.splice(trackNumber - 1, 1);
+			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${deletedTrack}.mp3`));
+		} // TODO: Also delete
 	}
 
 	['m r', 'music remove', 'remove'].forEach(s => addCommandSentence(s, removeTrack));
@@ -325,12 +341,14 @@ function respond (msg, client) {
 	addCommand('stop', stop);
 	addCommand('dc', stop); // Stops the ffmpeg process before terminating
 
-	// FIXME: Only deleted one
+	// TODO: test
 	addCommand('clear', () => {
 		guildQueue.forEach(songName => {
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`));
-			guildQueue.shift();
+			//guildQueue.shift();
 		});
+
+		guildQueue = []; // Clear after all are deleted
 	});
 
 	addCommand('list', () => {

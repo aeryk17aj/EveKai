@@ -31,7 +31,8 @@ class CommandHandler {
 	 */
 	addCommandSentence (c, f) {
 		if (this.command.startsWith(c)) {
-			if (this.command[c.length] === ' ' || this.command[c.length] === undefined) f(this.command.slice(c.length + 1));
+			if (this.command[c.length] === ' ' || this.command[c.length] === undefined)
+				f(this.command.slice(c.length + 1));
 		}
 	}
 

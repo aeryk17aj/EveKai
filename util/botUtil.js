@@ -1,22 +1,7 @@
 const fs = require('fs');
+const resolve = require('path').resolve;
 
-const config = require('../config');
 const userIds = require('../userIds');
-
-/**
- * botUtil.js
- * These are my common functions for general use
- */
-
-/**
- * Adds commas to every 3 characters / digits
- * @param  {*} s - Number or string
- * @return {string} - Now padded with commas
- */
-function commaPad (s) {
-	if (typeof s !== 'string') s = s.toString();
-	return s.replace(/(\d)(?=(\d{3})+$)/g, '$1,');
-}
 
 /**
  * @param  {IMessage} msg Message object
@@ -27,57 +12,35 @@ function senderIsOwner (msg) {
 	const isAeryk = sender.id === userIds.aeryk || sender.id === userIds.eve;
 	return isAeryk;
 }
+
 /**
- * Gets a random element from the given array
- * @param  {*[]} ar Any array
- * @return {*} Random element from input array
+ * @access private
+ * @param {string} path
  */
-function rInAr (ar) {
-	return ar[Math.floor(Math.random() * ar.length)];
+function makeGuildFolder (path) {
+	fs.mkdirSync(path);
+	fs.mkdirSync(path + '/_vid');
+	fs.mkdirSync(path + '/_img');
 }
 
 /**
- * Pads a string with backticks to be highlighed in Markdown
- * @param  {string} s input
- * @return {string} the input but padded with backticks
- * @example
- *   codeL('textGoesHere');
- *     > `textGoesHere`
- */
-function codeL (s) {
-	return '`' + s + '`';
-}
-
-/**
- * Pads a string with three backticks to be turned to a code block
- * @param  {(string|string[])} s input
- * @return {string} the input but padded with three backticks
- * @example 
- *   codeB('textGoesHere');
- *     > ```textGoesHere```
+ * Makes a folder for storing music, pre-converted videos and cached avatars
  * 
- *   codeB(['text', 'goes', here]);
- *     > ```
- *       text
- *       goes
- *       here
- *       ```
+ * @param {Discordie} client
  */
-function codeB (s) {
-	return Array.isArray(s)
-	// Array case
-	? ['```', ...s, '```'].join('\n')
-	// String case
-	: '```' + s + '```';
-}
-
-function refreshConfig () {
-	fs.writeFileSync('./config.json', JSON.stringify(config, null, 4), 'utf-8');
+function ensureFoldersExist (client) {
+	client.Guilds.forEach(g => {
+		const guildFolder = resolve(__dirname, `./dl/${g.id}`);
+		if (!fs.existsSync(guildFolder)) {
+			makeGuildFolder(guildFolder);
+			console.log('Created folders for: ' + g.name);
+		}
+	});
 }
 
 module.exports = {
 	// Message utility
 	senderIsOwner,
 	// General utility
-	commaPad, rInAr, codeL, codeB, refreshConfig
+	ensureFoldersExist
 };

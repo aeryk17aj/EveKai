@@ -1,7 +1,10 @@
-const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 const Permissions = require('discordie').Permissions;
+
 const logger = require('./logger');
+const util = require('../util/botUtil');
+const stringUtil = require('../util/stringUtil');
+const arrayUtil = require('../util/arrayUtil');
 
 const config = require('../config');
 const userIds = require('../userIds');
@@ -34,9 +37,9 @@ function respond (msg, client) {
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
 
-	const codeL = s => botUtil.codeL(s);
-	const rInAr = ar => botUtil.rInAr(ar);
-	const senderIsOwner = botUtil.senderIsOwner(msg);
+	const codeL = s => stringUtil.codeL(s);
+	const rInAr = ar => arrayUtil.rInAr(ar);
+	const senderIsOwner = util.senderIsOwner(msg);
 
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;
@@ -65,11 +68,11 @@ function respond (msg, client) {
 				...[
 					'join',
 					'leave',
-					'm q | add [Search term | YouTube URL]',
+					'm q  | add [Search term | YouTube URL]',
 					'm rm | remove [number in queue]',
 					'm sh | shuffle',
-					'm p | play',
-					'm s | skip',
+					'm p  | play',
+					'm s  | skip',
 					'm re | repeat [\'one\' | \'all\' | \'off\']',
 					'stop',
 					'clear',
@@ -111,6 +114,47 @@ function respond (msg, client) {
 	}
 
 	['help', 'cmds', '?'].forEach(s => addCommandSentence(s, showHelp));
+
+	addCommand('helpAlt', () => {
+		sendMessage('', {
+			color: 0x2ECC71,
+			fields: [ {
+				name: 'General',
+				value: [
+					'help/cmds/?',
+					'connections',
+					'docs',
+					// 'invite (bot invite)',
+					'roll <optional: max number>',
+					'8ball <yes/no question, always ends with a question mark>',
+					'prune <\'all\' or user mention> <amount>',
+					'time',
+					'elwiki'
+				].map(a => {
+					const spI = a.indexOf(' ');
+					return `\`${config.prefix}${a.slice(0, spI)}\`${a.slice(spI)}`;
+				}).join('\n')
+			}, {
+				name: 'Music',
+				value: [
+					'join',
+					'leave',
+					'm q  | add [Search term | YouTube URL]',
+					'm rm | remove [number in queue]',
+					'm sh | shuffle',
+					'm p  | play',
+					'm s  | skip',
+					'm re | repeat [\'one\' | \'all\' | \'off\']',
+					'stop',
+					'clear',
+					'list'
+				].map(a => {
+					const spI = a.indexOf(' ');
+					return `\`${config.prefix}${a.slice(0, spI)}\`${a.slice(spI)}`;
+				}).join('\n')
+			} ]
+		});
+	});
 
 	addCommand('invite', () => {
 		const inviteLink = `https://discordapp.com/oauth2/authorize?&client_id=${userIds.eve}&scope=bot&permissions=34611200`;

@@ -1,11 +1,18 @@
 // Dependencies
 const Discordie = require('discordie');
 const readline = require('readline');
+const fs = require('fs');
+const resolve = require('path').resolve;
 
 // Handlers
 const consoleHandler = require('./handler/consoleHandler');
 const messageHandler = require('./handler/messageHandler');
+const logger = require('./plugins/logger');
 
+// Utility
+const util = require('./util/botUtil');
+
+// Config
 const config = require('./config');
 
 const Events = Discordie.Events;
@@ -22,10 +29,14 @@ rl.on('line', c =>
 
 client.connect({ token: process.env.BOT_TOKEN || require('./auth').loginToken });
 
+// Connection-related
+
 client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unused-vars
 	client.User.setGame('with new discoveries');
 	client.User.setStatus(config.idleMode ? 'idle' : 'online');
-	console.log('[System] Connected.');
+	console.log('[Startup] Checking music folders...');
+	util.ensureFoldersExist(client);
+	console.log('[Startup] Connected.');
 });
 
 client.Dispatcher.on(Events.DISCONNECTED, e =>

@@ -49,7 +49,7 @@ function respond (msg, client) {
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
-	if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id))) initFolders();
+	//if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id))) initFolders();
 
 	// Initialize queue
 	if (!queue[msg.guild.id]) queue[msg.guild.id] = [];
@@ -84,7 +84,7 @@ function respond (msg, client) {
 		});
 	});
 
-	function initFolders () {
+	/*function initFolders () {
 		// Initialize folders
 		const guildFolder = './dl/' + msg.guild.id;
 		const fullPath = path.resolve(__dirname, guildFolder);
@@ -93,9 +93,9 @@ function respond (msg, client) {
 			fs.mkdirSync(fullPath); // Songs
 			fs.mkdirSync(fullPath + '/_vid'); // Audio-only video
 		}
-	}
+	}*/
 
-	addCommand('m init', initFolders);
+	//addCommand('m init', initFolders);
 
 	addCommand('join', () => {
 		boundTextChannel = msg.channel;
@@ -103,7 +103,7 @@ function respond (msg, client) {
 		sender.getVoiceChannel().join().then(() => {
 			boundVoiceChannel = sender.getVoiceChannel();
 			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
-			initFolders();
+			//initFolders();
 		});
 	});
 

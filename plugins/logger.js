@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const botUtil = require('../util/botUtil');
+const util = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
@@ -29,7 +29,7 @@ function updateWhitelist () {
  */
 function loggerCommands (msg) {
 	if (!msg.content.startsWith(config.prefix)) return;
-	if (msg.isPrivate || !botUtil.senderIsOwner(msg)) return;
+	if (msg.isPrivate || !util.senderIsOwner(msg)) return;
 	const msgChannel = msg.channel;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const msgGuild = msg.guild;

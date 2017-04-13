@@ -1,7 +1,7 @@
 const osu = require('node-osu');
 const util = require('util');
 
-const botUtil = require('../util/botUtil');
+const stringUtil = require('../util/stringUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
@@ -11,7 +11,7 @@ const osuApi = new osu.Api(process.env.OSU_KEY || require('../auth').osuKey, {
 	completeScores: false
 });
 
-const commaPad = s => botUtil.commaPad(s);
+const commaPad = s => stringUtil.commaPad(s);
 
 function respond (msg) {
 	const msgText = msg.content;

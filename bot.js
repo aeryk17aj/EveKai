@@ -29,16 +29,24 @@ client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unus
 });
 
 client.Dispatcher.on(Events.DISCONNECTED, e =>
-	console.log(`[${getCurrentTime()}] [System] Connection interrupted. (${e.error})`));
+	console.log(`[${getCurrentTime()}] Connection interrupted. (${e.error})`));
 
 client.Dispatcher.on(Events.GATEWAY_RESUMED, () =>
-	console.log(`[${getCurrentTime()}] [System] Connection resumed.`));
+	console.log(`[${getCurrentTime()}] Connection resumed.`));
+
+// Guild-related
+
+client.Dispatcher.on(Events.GUILD_CREATE, e => {
+	logger.logToBoth('[GUILD_CREATE] ' + e.guild.name);
+});
 
 client.Dispatcher.on(Events.GUILD_MEMBER_ADD, e =>
 	e.guild.generalChannel.sendMessage(`Welcome, **${e.member.name}** to **${e.guild.name}**.`));
 
 client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e =>
 	e.guild.generalChannel.sendMessage(`**${e.user.username}** has left **${e.guild.name}**.`));
+
+// Message related
 
 client.Dispatcher.on(Events.MESSAGE_CREATE, e =>
 	messageHandler.handle(e, client));

@@ -1,5 +1,6 @@
 {
 	"prefix": "~",
+	"hide": false,
 	"logMessages": true,
 	"oldClever": false,
 	"modules": {

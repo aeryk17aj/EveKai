@@ -31,6 +31,7 @@ function handle (e) {
 
 function respond (msg) {
 	const handler = new CommandHandler(msg.content.slice((config.prefix + 'autovc ').length));
+	if (!msg.content.startsWith(config.prefix)) return; 
 
 	handler.addCommand('on', () => {
 		autoVcWl.push(msg.guild.id);

@@ -42,8 +42,10 @@ client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unus
 client.Dispatcher.on(Events.DISCONNECTED, e =>
 	console.log(`[${getCurrentTime()}] Connection interrupted. (${e.error})`));
 
-client.Dispatcher.on(Events.GATEWAY_RESUMED, () =>
-	console.log(`[${getCurrentTime()}] Connection resumed.`));
+client.Dispatcher.on(Events.GATEWAY_RESUMED, () => {
+	client.User.setStatus(config.hide ? 'invisible' : 'online');
+	console.log(`[${getCurrentTime()}] Connection resumed.`);
+});
 
 // Guild-related
 

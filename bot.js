@@ -7,6 +7,7 @@ const resolve = require('path').resolve;
 // Handlers
 const consoleHandler = require('./handler/consoleHandler');
 const messageHandler = require('./handler/messageHandler');
+const vcHandler = require('./handler/vcHandler');
 const logger = require('./plugins/logger');
 
 // Utility
@@ -67,3 +68,8 @@ client.Dispatcher.on(Events.MESSAGE_CREATE, e =>
 function getCurrentTime () {
 	return new Date(Date.now()).toLocaleString('en-US');
 }
+
+// Voice related
+
+client.Dispatcher.on(Events.VOICE_CHANNEL_JOIN, e => 
+	vcHandler.handle(e));

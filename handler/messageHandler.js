@@ -4,6 +4,8 @@ const logger = require('../plugins/logger');
 const osu = require('../plugins/osu');
 const music = require('../plugins/music');
 
+const autoVcCommands = require('./vcHandler');
+
 /**
  * Fired every time a message is received by the bot.
  * @param {Object} e Event object
@@ -19,6 +21,7 @@ function handle (e, client) {
 	osu.respond(msg);
 	music.respond(msg, client);
 	// drawing.respond(msg, client)
+	autoVcCommands.respond(msg);
 }
 
 exports.handle = handle;

@@ -150,6 +150,11 @@ function respond (msg) {
 			});
 		});
 	});
+
+	addCommandSentence('tvis', a => {
+		const converted = a.replace(/k/g, '\u{1F535}').replace(/d/g, '\u{1F534}').replace(/ /g, ' | ');
+		sendMessage(converted);
+	});
 }
 
 exports.respond = respond;

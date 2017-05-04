@@ -60,14 +60,12 @@ function respond (msg, client) {
 			result = eval(a);
 			resolve('Success');
 		}).catch(e => {
-			// sendMessage('\u{1F52B}'); // Peestol
 			console.log(e);
 			sendMessage('It didn\'t work.');
 		}).then(v => {
 			if (v === 'Success') {
 				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') sendMessage(result);
 				else if (Array.isArray(result)) sendMessage(result.join(', '));
-				// else sendMessage('\u{1F44C}'); // Ok hand sign
 			}
 		});
 	});
@@ -100,15 +98,14 @@ function respond (msg, client) {
 		ctx.fillText(sender.nick || sender.username, 10, 17, 140);
 		const pfp = new Image();
 		pfp.src = fs.readFileSync(imgOut);
-		// ctx.drawImage(pfp, 21, 21, 128, 128); // FIXME:
-		console.log('ಠ_ಠ');
-	}, 170, 170);
+		ctx.drawImage(pfp, 21, 51, 128, 128); // FIXME:
+	}, 170, 200);
 
 	addCommand('pfp', () => {
 		if (!hasAvatar) getPfp();
 		get(senderPfp, (err, img) => {
 			if (err) return console.log(err);
-			uploadFile(img, 'aaa.jpg');
+			// uploadFile(img, 'aaa.jpg');
 		});
 	});
 }

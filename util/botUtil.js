@@ -30,7 +30,7 @@ function makeGuildFolder (path) {
  */
 function ensureFoldersExist (client) {
 	client.Guilds.forEach(g => {
-		const guildFolder = resolve(__dirname, `./dl/${g.id}`);
+		const guildFolder = resolve(__dirname, `../plugins/dl/${g.id}`);
 		if (!fs.existsSync(guildFolder)) {
 			makeGuildFolder(guildFolder);
 			console.log('Created folders for: ' + g.name);

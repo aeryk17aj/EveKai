@@ -8,26 +8,24 @@ const special = require('../plugins/special');
 
 const autoVcCommands = require('./vcHandler');
 
+/** @typedef IMessage */
+/** @typedef Discordie */
+/** @typedef MessageCreateEvent
+ * 		@prop {IMessage} message Event Message*/
+
 /**
  * Fired every time a message is received by the bot.
- * @param {Object} e Event object
+ * @param {MessageCreateEvent} e Event object
  * @param {Discordie} client Bot client
  */
 function handle (e, client) {
 	if (!e) return;
 	const msg = e.message;
-	// TODO: Add idle mode, top priority listen
 	logger.init(msg);
 	general.respond(msg, client);
 	if (!msg || !msg.content) return;
 	osu.respond(msg);
 	music.respond(msg, client);
-	special.respond(msg, client);
-	drawing.respond(msg, client);
-	autoVcCommands.respond(msg);
-}
-
-exports.handle = handle;nt);
 	special.respond(msg, client);
 	drawing.respond(msg, client);
 	autoVcCommands.respond(msg);

@@ -2,7 +2,16 @@ const fs = require('fs');
 
 const CommandHandler = require('../util/msgUtil');
 
+/** 
+ * @typedef Configuration
+ * @type {object}
+ * @property {string} prefix - The bot's prefix
+*/
+
+/** @type {Configuration} */
 const config = require('../config');
+
+/** @type {string[]} */
 const autoVcWl = require('../autovc');
 
 function handle (e) {
@@ -14,19 +23,10 @@ function handle (e) {
 
 	const gameVc = guild.voiceChannels.find(vc => vc.name === user.gameName);
 
-	//console.log(`${user.username} has joined ${vc.name} (${guild.name})`);
-
 	if (!autoVcWl.includes(guild.id)) return;
 
-	if (!gameVc) {
-		console.log(`No vc exists for ${user.gameName} in ${guild.name}`);
-		return;
-	} else if (member.getVoiceChannel().name !== user.gameName) {
-		member.setChannel(gameVc).then(() => {
-			console.log(`${user.username} has been moved to ${vc.name} (${guild.name})`);
-		});
-		return;
-	}
+	if (!gameVc) return;
+	else if (member.getVoiceChannel().name !== user.gameName) member.setChannel(gameVc);
 }
 
 function respond (msg) {

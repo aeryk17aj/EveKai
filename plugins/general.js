@@ -6,12 +6,38 @@ const util = require('../util/botUtil');
 const stringUtil = require('../util/stringUtil');
 const arrayUtil = require('../util/arrayUtil');
 
+/**
+ * @typedef Configuration
+ * @type {object}
+ * @prop {string} prefix - The bot's prefix
+*/
+
+/** @type {Configuration} */
 const config = require('../config');
-const userIds = require('../userIds');
 
 const ballQuotes = require('../quotes/8ball');
 const leaveQuotes = require('../quotes/disconnect');
 const docLinks = require('../quotes/docs');
+
+/**
+ * @callback channel~sendMessage
+ * @param {string} message The message to be sent
+ * @param {booleam} tts Determines whether the message will be sent as a TTS message
+ * @param {object} embed Embed object
+ * @returns {Promise<{}>}
+ */
+
+/**
+ * @typedef ITextChannel
+ * @prop {function} sendMessage Sends a message
+ */
+
+/**
+ * @typedef IMessage
+ * @prop {string} content The string content of the message
+ * @prop {ITextChannel} channel The text channel the message belongs to
+ * @prop {boolean} isPrivate Determines whether the message is in a direct message channel or not
+ */
 
 /**
  * Primary message listener
@@ -26,6 +52,12 @@ function respond (msg, client) {
 
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
+	/**
+	 * Sends a message
+	 * @param {string} s Text
+	 * @param {object} e Embed object
+	 * @returns {Promise<IMessage>}
+	 */
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
@@ -80,19 +112,7 @@ function respond (msg, client) {
 				].map(a => config.prefix + a),
 				'```'
 			].join('\n');
-		} 
-		/*else if (a === 'sekrit'){
-			help = [
-				'```ini',
-				'[Sekrit Commands]', '',
-				...[
-					'pfp (fetches your pfp for her future use)',
-					'testDraw'
-				].map(a => config.prefix + a),
-				'```'
-			].join('\n');
-		} */
-		else {
+		} else {
 			help = [
 				'```ini',
 				'[General Commands]', '',
@@ -157,7 +177,7 @@ function respond (msg, client) {
 	});
 
 	addCommand('invite', () => {
-		const inviteLink = `https://discordapp.com/oauth2/authorize?&client_id=${userIds.eve}&scope=bot&permissions=34611200`;
+		const inviteLink = `https://discordapp.com/oauth2/authorize?&client_id=${client.User.id}&scope=bot&permissions=34611200`;
 		/**
 		 * Required perms
 		 *
@@ -237,7 +257,7 @@ function respond (msg, client) {
 		const removeCount = Math.min(100, left);
 		return client.Messages.deleteMessages(msgs.slice(0, removeCount), channel)
 			.then(() => onDeleteMore(msgs, channel, left - removeCount))
-			//.catch(() => console.log('What, why can\'t it delete?'));
+			// .catch(() => console.log('What, why can\'t it delete?'));
 			.catch(() => sendMessage('Deleting past 100 is broken at the moment.\nPlease prune by 100s while Aeryk gets this fixed.'));
 	}
 
@@ -254,7 +274,7 @@ function respond (msg, client) {
 		// Bot can't delete or pin messages
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		// Empty args
-		if(!a.length) return sendMessage(`\`${config.prefix}prune <\'all\' or user mention> <amount>\``);
+		if (!a.length) return sendMessage(`\`${config.prefix}prune <\'all\' or user mention> <amount>\``);
 
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);

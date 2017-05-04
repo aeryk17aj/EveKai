@@ -5,7 +5,7 @@
 
 /**
  * Adds commas to every 3 characters / digits
- * @param  {*} s - Number or string
+ * @param  {number|string} s - Number or string
  * @return {string} - Now padded with commas
  */
 function commaPad (s) {

@@ -1,8 +1,6 @@
 // Dependencies
 const Discordie = require('discordie');
 const readline = require('readline');
-const fs = require('fs');
-const resolve = require('path').resolve;
 
 // Handlers
 const consoleHandler = require('./handler/consoleHandler');
@@ -13,7 +11,14 @@ const logger = require('./plugins/logger');
 // Utility
 const util = require('./util/botUtil');
 
-// Config
+/**
+ * @typedef Configuration
+ * @type {object}
+ * @property {string} prefix - The bot's prefix
+ * @property {boolean} hide - Factor to whether the bot oges invisible on start / resume or not
+*/
+
+/** @type {Configuration} */
 const config = require('./config');
 
 const Events = Discordie.Events;
@@ -54,6 +59,7 @@ client.Dispatcher.on(Events.GUILD_CREATE, e => {
 	logger.logToBoth('[GUILD_CREATE] ' + e.guild.name);
 });
 
+// TODO: Make it cuztomizable, per guild
 client.Dispatcher.on(Events.GUILD_MEMBER_ADD, e =>
 	e.guild.generalChannel.sendMessage(`Welcome, **${e.member.name}** to **${e.guild.name}**.`));
 

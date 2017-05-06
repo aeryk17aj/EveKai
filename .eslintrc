@@ -1,13 +1,18 @@
 {
     "extends": "eslint:recommended",
+    "parser": "babel-eslint",
+	"plugins": ["async-await"],
     "env": {
         "es6": true,
         "node": true
     },
-	"parserOptions": {
-		"sourceType": "module"
-	},
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "script"
+    },
     "rules": {
+        "async-await/space-after-async": 1,
+        "async-await/space-after-await": 1,
         "semi": [2, "always"],
         "indent": [2, "tab", {
             "SwitchCase": 1
@@ -18,6 +23,7 @@
         "prefer-const": 1,
         "no-const-assign": 2,
         "no-console": 0,
-        "no-eval": 0
+        "no-eval": 0,
+        "spaced-comment": 1
     }
 }

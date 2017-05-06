@@ -7,6 +7,9 @@ plugins/dl/*
 
 auth.json
 userIds.json
+
+# Soon to be stored in a real db
+autovc.json
 whitelist.json
 
 #for now

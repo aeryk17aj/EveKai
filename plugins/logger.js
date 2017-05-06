@@ -110,37 +110,34 @@ function loggerCommands (msg) {
  * @param {IMessage} msg Message object
  */
 function logMsg (msg) {
-	const msgChannel = msg.channel;
-	const timeSent = msg.createdAt;
-	const timeSentString = `[${timeSent.toLocaleDateString('en-US')} ${timeSent.toLocaleTimeString('en-US', {hour12: true})}]`;
-
 	// So it changes on midnight
-	const logDate = timeSent.toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
+	const logDate = msg.createdAt.toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
-
 	const possibleCommand = msg.content.startsWith(config.prefix);
-
-	// The attachments array exists, picture or none, so length check it is
-	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
-
-	const logLine = [
-		timeSentString,
-		`[${!msg.isPrivate ? msg.guild.name + ': #' + msgChannel.name : 'DM: ' + msgChannel.recipient.username}]`,
-		`${(msg.member || msg.author).username}:`, // IUser as substitute for the case of DMs
-		msg.content,
-		attachments
-	].join(' ');
+	const logLine = getLogLine(msg.createdAt, msg);
 
 	if (!msg.isPrivate) { // Guild only
 		// Guild not a property
 		if (whitelist.hasOwnProperty(msg.guild.id) && config.logMessages) {
 			// Guild doesn't have channel
-			if (whitelist[msg.guild.id].includes(msgChannel.id)) logToBoth(logLine);
+			if (whitelist[msg.guild.id].includes(msg.channel.id)) logToBoth(logLine);
 			else if (possibleCommand) logToBoth(logLine);
 			else return;
 		} else if (possibleCommand) logToBoth(logLine);
 	}
+}
 
+function getLogLine (time, msg) {
+	const timeString = `[${time.toLocaleDateString('en-US')} ${time.toLocaleTimeString('en-US', {hour12: true})}]`
+	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
+
+	return [
+		timeString,
+		`[${!msg.isPrivate ? msg.guild.name + ': #' + msg.channel.name : 'DM: ' + msg.channel.recipient.username}]`,
+		`${(msg.member || msg.author).username}:`, // IUser as substitute for the case of DMs
+		msg.content,
+		attachments
+	].join(' ');
 }
 
 function init (msg) {

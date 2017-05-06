@@ -30,6 +30,9 @@ const rl = readline.createInterface({
 	output: process.stdout
 });
 
+process.on('unhandledRejection', err =>
+	console.log(`Unhandled Promise:\n${err.stack}`));
+
 rl.on('line', c =>
 	consoleHandler.respond(c, client));
 
@@ -44,6 +47,10 @@ client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unus
 	util.ensureFoldersExist(client);
 	console.log('[Startup] Connected.');
 });
+
+function getCurrentTime () {
+	return new Date(Date.now()).toLocaleString('en-US');
+}
 
 client.Dispatcher.on(Events.DISCONNECTED, e =>
 	console.log(`[${getCurrentTime()}] Connection interrupted. (${e.error})`));
@@ -71,9 +78,10 @@ client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e =>
 client.Dispatcher.on(Events.MESSAGE_CREATE, e =>
 	messageHandler.handle(e, client));
 
-function getCurrentTime () {
-	return new Date(Date.now()).toLocaleString('en-US');
-}
+/* client.Dispatcher.on(Events.MESSAGE_REACTION_ADD, e => {
+	// if (e.user.id !== botUser.id)
+	console.log('Reacted!');
+});*/
 
 // Voice related
 

@@ -15,7 +15,7 @@ function addToLog (s) {
 }
 
 function logToBoth (s) {
-	console.log(s);
+	process.stdout.write(s + '\n');
 	addToLog(s);
 }
 

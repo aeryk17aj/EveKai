@@ -5,7 +5,7 @@ const get = require('simple-get');
 const fs = require('fs');
 const path = require('path');
 
-const botUtil = require('../util/botUtil');
+// const botUtil = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
@@ -13,14 +13,13 @@ const config = require('../config');
 /**
  * Primary message listener
  * @param  {IMessage} msg Message object to be used
- * @param  {Discordie} client Bot client object
  */
-function respond (msg, client) {
+function respond (msg) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 	const senderPfp = sender.staticAvatarURL;
 	const msgChannel = msg.channel;
-	const msgGuild = msg.guild;
+	// const msgGuild = msg.guild;
 
 	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
@@ -40,7 +39,7 @@ function respond (msg, client) {
 		const imgBuffer = canvas.toBuffer();
 		uploadFile(imgBuffer);
 	});
-	const addDrawCommand = (c, f, w, h) => addCommand(c, () => {
+	/* const addDrawCommand = (c, f, w, h) => addCommand(c, () => {
 		const canvas = new Canvas(w || 640, h || 480);
 		const ctx = canvas.getContext('2d');
 		f(ctx, canvas, w, h).then(() => {
@@ -49,7 +48,7 @@ function respond (msg, client) {
 		});
 	});
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
-	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
+	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);*/
 
 	// const senderIsOwner = botUtil.senderIsOwner(msg);
 

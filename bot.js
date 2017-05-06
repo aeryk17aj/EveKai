@@ -30,8 +30,10 @@ const rl = readline.createInterface({
 	output: process.stdout
 });
 
+function log (s) { process.stdout.write(s + '\n'); }
+
 process.on('unhandledRejection', err =>
-	console.log(`Unhandled Promise:\n${err.stack}`));
+	log(`Unhandled Promise:\n${err.stack}`));
 
 rl.on('line', c =>
 	consoleHandler.respond(c, client));
@@ -43,9 +45,9 @@ client.connect({ token: process.env.BOT_TOKEN || require('./auth').loginToken })
 client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unused-vars
 	client.User.setStatus(config.hide ? 'invisible' : 'online');
 	if (client.User.status === 'online') client.User.setGame('with new discoveries');
-	console.log('[Startup] Checking music folders...');
+	log('[Startup] Checking music folders...');
 	util.ensureFoldersExist(client);
-	console.log('[Startup] Connected.');
+	log('[Startup] Connected.');
 });
 
 function getCurrentTime () {
@@ -53,11 +55,11 @@ function getCurrentTime () {
 }
 
 client.Dispatcher.on(Events.DISCONNECTED, e =>
-	console.log(`[${getCurrentTime()}] Connection interrupted. (${e.error})`));
+	log(`[${getCurrentTime()}] Connection interrupted. (${e.error})`));
 
 client.Dispatcher.on(Events.GATEWAY_RESUMED, () => {
 	client.User.setStatus(config.hide ? 'invisible' : 'online');
-	console.log(`[${getCurrentTime()}] Connection resumed.`);
+	log(`[${getCurrentTime()}] Connection resumed.`);
 });
 
 // Guild-related

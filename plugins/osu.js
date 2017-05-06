@@ -152,7 +152,12 @@ function respond (msg) {
 	});
 
 	addCommandSentence('tvis', a => {
-		const converted = a.replace(/k/g, '\u{1F535}').replace(/d/g, '\u{1F534}').replace(/ /g, ' | ');
+		const converted = a
+		.replace(/k/g, '\u{1F535}') // k -> blue circle
+		.replace(/d/g, '\u{1F534}') // d -> red circle
+		.replace(/K/g, '(\u{1F535})') // K -> blue circle in brackets
+		.replace(/D/g, '(\u{1F534})') // D -> red circle in brackets
+		.replace(/ /g, '   '); // space x3
 		sendMessage(converted);
 	});
 }

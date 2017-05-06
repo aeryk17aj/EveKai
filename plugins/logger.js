@@ -19,8 +19,8 @@ function logToBoth (s) {
 	addToLog(s);
 }
 
-function updateWhitelist () {
-	fs.writeFileSync('../whitelist.json', JSON.stringify(whitelist, null, 4), 'utf-8');
+async function updateWhitelist () {
+	fs.writeFileSync('./whitelist.json', JSON.stringify(whitelist, null, 4), 'utf-8');
 }
 
 /**
@@ -44,10 +44,11 @@ function loggerCommands (msg) {
 
 	addCommand('status', () => {
 		if (whitelist[msgGuild.id].includes(msgChannel.id)) sendMessage('👍');
-		else sendMessage('👎');
+		else if (Object.keys(whitelist).includes(msgGuild.id)) sendMessage('👎');
+		else sendMessage('👎 (Whole server)');
 	});
 
-	addCommand('lswlc', () => {
+	addCommand('lstc', () => {
 		sendMessage([
 			'```ini',
 			...whitelist[msgGuild.id]
@@ -86,8 +87,7 @@ function loggerCommands (msg) {
 				// 'Additional Channel' case
 				else {
 					whitelist[msgGuild.id].push(msgChannel.id);
-					updateWhitelist();
-					sendMessage('This channel is now being logged');
+					updateWhitelist().then(() => sendMessage('This channel is now being logged'));
 				}
 			}
 			
@@ -98,7 +98,7 @@ function loggerCommands (msg) {
 			} else {
 				// 'Remove channel' case
 				whitelist[msgGuild.id].splice(whitelist[msgGuild.id].indexOf(msgChannel.id), 1);
-				sendMessage('Logging of this channel has now stopped').then(() => updateWhitelist());
+				updateWhitelist().then(() => sendMessage('Logging of this channel has now stopped'));
 			}
 		}
 	});
@@ -112,10 +112,7 @@ function loggerCommands (msg) {
 function logMsg (msg) {
 	const msgChannel = msg.channel;
 	const timeSent = msg.createdAt;
-	const timeSentString = '[' +
-		timeSent.toLocaleDateString('en-US') + ' ' +
-		timeSent.toLocaleTimeString('en-US', {hour12: true}) +
-	']';
+	const timeSentString = `[${timeSent.toLocaleDateString('en-US')} ${timeSent.toLocaleTimeString('en-US', {hour12: true})}]`;
 
 	// So it changes on midnight
 	const logDate = timeSent.toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
@@ -139,8 +136,9 @@ function logMsg (msg) {
 		if (whitelist.hasOwnProperty(msg.guild.id) && config.logMessages) {
 			// Guild doesn't have channel
 			if (whitelist[msg.guild.id].includes(msgChannel.id)) logToBoth(logLine);
+			else if (possibleCommand) logToBoth(logLine);
 			else return;
-		} else if (possibleCommand) logToBoth(msg);
+		} else if (possibleCommand) logToBoth(logLine);
 	}
 
 }

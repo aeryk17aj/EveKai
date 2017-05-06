@@ -1,5 +1,7 @@
 const CommandHandler = require('../util/msgUtil');
-const Permissions = require('discordie').Permissions;
+const Discordie = require('discordie');
+const Permissions = Discordie.Permissions;
+const math = require('mathjs');
 
 const logger = require('./logger');
 const util = require('../util/botUtil');
@@ -41,7 +43,8 @@ const docLinks = require('../quotes/docs');
 
 /**
  * Primary message listener
- * @param  {IMessage} msg Message object to be used
+ * @param {IMessage} msg Message object to be used
+ * @param {Discordie} client description
  */
 function respond (msg, client) {
 	const msgText = msg.content;
@@ -225,6 +228,8 @@ function respond (msg, client) {
 			}
 		});
 	});
+
+	addCommandSentence('math', a => sendMessage(math.eval(a)));
 
 	function fetchMoreMessages (channel, left) {
 		const before = channel.messages[0];

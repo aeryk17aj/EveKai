@@ -95,7 +95,7 @@ function respond (msg, client) {
 		}
 	}*/
 
-	//addCommand('m init', initFolders);
+	// addCommand('m init', initFolders);
 
 	addCommand('join', () => {
 		boundTextChannel = msg.channel;
@@ -103,7 +103,7 @@ function respond (msg, client) {
 		sender.getVoiceChannel().join().then(() => {
 			boundVoiceChannel = sender.getVoiceChannel();
 			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
-			//initFolders();
+			// initFolders();
 		});
 	});
 

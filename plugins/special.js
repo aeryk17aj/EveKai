@@ -61,19 +61,26 @@ function respond (msg, client) {
 			if (err) return console.log(err);
 
 			addSelectors(msg).then(() => {
-				client.Dispatcher.on(Events.MESSAGE_RECTION_ADD, e => {
-					if (e.user.id !== botUser.id) console.log('Reacted!');
-				});
-			});
+				console.log('done');
+				function respondToReact (e) {
+					if (e.message.id !== msg.id) return client.Dispatcher.once(Events.MESSAGE_REACTION_ADD, respondToReact);
+					console.log(e.emoji.id);
+					
 
+				}
+				client.Dispatcher.once(Events.MESSAGE_REACTION_ADD, respondToReact);
+			}, () => {
+				console.log('\u{1F914}');
+			});
 		});
 	});
 
 	async function addSelectors (msg) {
-		let p = msg.addReaction(String.fromCodePoint(...Emojis.ONE));
+		let p = msg.addReaction(String.fromCodePoint(...Emojis.ONE)).catch(() => console.log('What?'));
 		for (let i = 1; i < Object.keys(Emojis).length; i++) {
 			const ind = Object.keys(Emojis)[i];
-			p = await msg.addReaction(Emojis[ind]);
+			console.log(ind);
+			p = await msg.addReaction(String.fromCodePoint(...Emojis[ind])).catch(() => console.log('What..?'));
 		}
 	}
 

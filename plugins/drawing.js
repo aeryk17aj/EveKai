@@ -22,9 +22,9 @@ function respond (msg, client) {
 	const msgChannel = msg.channel;
 	const msgGuild = msg.guild;
 
-	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
+	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
-	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
+	// const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const uploadFile = (s, n) => msgChannel.uploadFile(s, n || "drawing.jpg");
 
 	const command = msgText.slice(config.prefix.length);
@@ -51,9 +51,9 @@ function respond (msg, client) {
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
 
-	const senderIsOwner = botUtil.senderIsOwner(msg);
+	// const senderIsOwner = botUtil.senderIsOwner(msg);
 
-	addCommandSentence('evalC', a => {
+	/* addCommandSentence('evalC', a => {
 		if (!senderIsOwner || a === 'e.message.content' || a === 'msgText') return;
 		let result;
 		return new Promise(resolve => {
@@ -68,7 +68,7 @@ function respond (msg, client) {
 				else if (Array.isArray(result)) sendMessage(result.join(', '));
 			}
 		});
-	});
+	});*/
 
 	// TODO: Dynamic width :thinking:
 	addDrawCommandSync('testDraw', (ctx, canvas, w, h) => {
@@ -101,12 +101,8 @@ function respond (msg, client) {
 		ctx.drawImage(pfp, 21, 51, 128, 128); // FIXME:
 	}, 170, 200);
 
-	addCommand('pfp', () => {
+	addCommand('dlpfp', () => {
 		if (!hasAvatar) getPfp();
-		get(senderPfp, (err, img) => {
-			if (err) return console.log(err);
-			// uploadFile(img, 'aaa.jpg');
-		});
 	});
 }
 

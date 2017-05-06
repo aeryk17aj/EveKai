@@ -10,7 +10,7 @@ const childProcess = require('child_process');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
-const userIds = require('../userIds');
+// const userIds = require('../userIds');
 
 const yt = new YouTube();
 yt.setKey(process.env.YT_KEY || require('../auth').yt);
@@ -42,14 +42,14 @@ function respond (msg, client) {
 		if (boundTextChannel.id !== msg.channel.id || sender.getVoiceChannel().id !== boundVoiceChannel.id) return;
 	}
 
-	const isOwner = sender.id === userIds.aeryk;
+	// const isOwner = sender.id === userIds.aeryk;
 	const handler = new CommandHandler(command);
 	const sendMessage = (m, e) => msg.channel.sendMessage(m, false, e);
 
 	const addCommand = (c, f) => handler.addCommand(c, f);
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
-	//if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id))) initFolders();
+	// if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id))) initFolders();
 
 	// Initialize queue
 	if (!queue[msg.guild.id]) queue[msg.guild.id] = [];
@@ -63,7 +63,7 @@ function respond (msg, client) {
 	}
 
 	// Only because I want to check things in this place specifically
-	addCommandSentence('evalM', a => {
+	/* addCommandSentence('evalM', a => {
 		if (!isOwner) return;
 		if (a === 'e.message.content' || a === 'msgText') return;
 
@@ -82,9 +82,9 @@ function respond (msg, client) {
 				// else sendMessage('\u{1F44C}'); // Ok hand sign
 			}
 		});
-	});
+	});*/
 
-	/*function initFolders () {
+	/* function initFolders () {
 		// Initialize folders
 		const guildFolder = './dl/' + msg.guild.id;
 		const fullPath = path.resolve(__dirname, guildFolder);
@@ -116,15 +116,10 @@ function respond (msg, client) {
 		boundVoiceChannel = null;
 	});
 
-	/**
-	 * Takes a search term and calls `addToQueue` to process the chosen result
-	 * 
-	 * @param {string} a Search term
-	 */
-	function search (a) {
+	function search (a, callback) {
 		const linkBase = 'https://www.youtube.com/watch?v=';
 		yt.search(a, 3, (err, res) => {
-			if (err) return console.log(err);
+			if (err) return process.stdout.write(`${err}\n`);
 			const links = res.items.map(i => linkBase + i.id.videoId);
 			const titles = res.items.map(i => `${i.snippet.title} (${i.snippet.channelTitle})`);
 			const songList = [
@@ -145,7 +140,7 @@ function respond (msg, client) {
 					if (pick || canceled) {
 						client.Dispatcher.removeListener(Events.MESSAGE_CREATE, trackListener);
 						client.Dispatcher.emit(Events.MESSAGE_CREATE);
-						if (!canceled) addToQueue(links[pick - 1]);
+						if (!canceled) callback(res, links, pick);
 					}
 				}
 				// Needs to listen more than once until it gets the right msg
@@ -155,52 +150,34 @@ function respond (msg, client) {
 		});
 	}
 
-	function searchOnly (a) {
-		const linkBase = 'https://www.youtube.com/watch?v=';
-		yt.search(a, 3, (err, res) => {
-			if (err) return console.log(err);
-			const links = res.items.map(i => linkBase + i.id.videoId);
-			const titles = res.items.map(i => `${i.snippet.title} (${i.snippet.channelTitle})`);
-			const songList = [
-				'```ini', '[Search Results]', '',
-				...titles.map((t, i) => `\t${(i + 1)} : ${t}`),
-				'\tc : Cancel', '```'
-			].join('\n');
-			sendMessage(songList).then(() => {
-				let pick = 0;
-				let canceled = false;
-				function trackListener (e) {
-					if (!e) return;
-					const pickQuery = e.message.content;
-					if (e.message.channel.id !== msg.channel.id) return;
-					else if (pickQuery === 'c') canceled = true;
-					else if (pickQuery > 0 && pickQuery < 4) pick = parseInt(pickQuery);
+	/**
+	 * Takes a search term and calls `addToQueue` to process the chosen result
+	 * 
+	 * @param {string} a Search term
+	 */
+	function searchThenAdd (a) {
+		search(a, (res, links, pick) => {
+			addToQueue(links[pick - 1]);
+		});
+	}
 
-					if (pick || canceled) {
-						client.Dispatcher.removeListener(Events.MESSAGE_CREATE, trackListener);
-						client.Dispatcher.emit(Events.MESSAGE_CREATE);
-						if (!canceled) {
-							const cRes = res.items[pick - 1];
-							sendMessage('', {
-								fields: [ {
-									name: 'Uploader',
-									value: `[${cRes.snippet.channelTitle}](${'https://www.youtube.com/channel/' + cRes.snippet.channelId})`
-								}, {
-									name: 'Video',
-									value: `[${cRes.snippet.title}](${links[pick - 1]})`
-								}, {
-									name: 'Description',
-									value: cRes.snippet.description
-								} ],
-								image: {
-									url: cRes.snippet.thumbnails.high.url
-								}
-							});
-						}
-					}
+	function searchOnly (a) {
+		search(a, (res, links, pick) => {
+			const cRes = res.items[pick - 1];
+			sendMessage('', {
+				fields: [ {
+					name: 'Uploader',
+					value: `[${cRes.snippet.channelTitle}](${'https://www.youtube.com/channel/' + cRes.snippet.channelId})`
+				}, {
+					name: 'Video',
+					value: `[${cRes.snippet.title}](${links[pick - 1]})`
+				}, {
+					name: 'Description',
+					value: cRes.snippet.description
+				} ],
+				image: {
+					url: cRes.snippet.thumbnails.high.url
 				}
-				client.Dispatcher.on(Events.MESSAGE_CREATE, trackListener);
-				if (pick || canceled) client.Dispatcher.emit(Events.MESSAGE_CREATE);
 			});
 		});
 	}
@@ -223,7 +200,7 @@ function respond (msg, client) {
 
 		const validLink = /https?\:\/\/(?:www\.|m\.)?youtube\.com\/watch\?v=/;
 
-		if (!validLink.test(a)) return search(a);
+		if (!validLink.test(a)) return searchThenAdd(a);
 		else if (a.startsWith('http:')) return sendMessage('Make sure it\'s HTTPS');
 		else {
 			// Pre-download
@@ -345,7 +322,7 @@ function respond (msg, client) {
 	addCommand('clear', () => {
 		guildQueue.forEach(songName => {
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`));
-			//guildQueue.shift();
+			// guildQueue.shift();
 		});
 
 		guildQueue = []; // Clear after all are deleted
@@ -401,7 +378,7 @@ function respond (msg, client) {
 			channels;
 
 		ff.once('readable', () => {
-			if (!client.VoiceConnections.length) return console.log('Voice not connected');
+			// if (!client.VoiceConnections.length) return console.log('Voice not connected');
 			if (!voiceConnectionInfo) voiceConnectionInfo = client.VoiceConnections[0];
 			const voiceConnection = voiceConnectionInfo.voiceConnection;
 

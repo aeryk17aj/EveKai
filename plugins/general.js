@@ -94,41 +94,46 @@ function respond (msg, client) {
 		else sendMessage('I don\'t have a link for ' + codeL(a));
 	});
 
+	const generalCommands = [
+		'help/cmds/?',
+		'connections',
+		'docs',
+		// 'invite (bot invite)',
+		'roll <optional: max number>',
+		'8ball <yes/no question, always ends with a question mark>',
+		'prune <\'all\' or user mention> <amount>',
+		'time',
+		'elwiki'
+	];
+
+	const musicCommands = [
+		'join',
+		'leave',
+		'm q  | add [Search term | YouTube URL]',
+		'm rm | remove [number in queue]',
+		'm sh | shuffle',
+		'm p  | play',
+		'm s  | skip',
+		'm re | repeat [\'one\' | \'all\' | \'off\']',
+		'stop',
+		'clear',
+		'list'
+	];
+
 	function showHelp (a) {
 		let help;
 		if (a === 'music') {
 			help = [
 				'```ini',
 				'[Music Commands]', '',
-				...[
-					'join',
-					'leave',
-					'm q  | add [Search term | YouTube URL]',
-					'm rm | remove [number in queue]',
-					'm sh | shuffle',
-					'm p  | play',
-					'm s  | skip',
-					'm re | repeat [\'one\' | \'all\' | \'off\']',
-					'stop',
-					'clear',
-					'list'
-				].map(a => config.prefix + a),
+				...musicCommands.map(a => config.prefix + a),
 				'```'
 			].join('\n');
 		} else {
 			help = [
 				'```ini',
 				'[General Commands]', '',
-				...['help/cmds/?',
-					'connections',
-					'docs',
-					// 'invite (bot invite)',
-					'roll <optional: max number>',
-					'8ball <yes/no question, always ends with a question mark>',
-					'prune <\'all\' or user mention> <amount>',
-					'time',
-					'elwiki'
-				].map(a => config.prefix + a),
+				...generalCommands.map(a => config.prefix + a),
 				'', 'do \'' + config.prefix + '? music\' for music commands',
 				'```'
 			].join('\n');
@@ -138,43 +143,26 @@ function respond (msg, client) {
 
 	['help', 'cmds', '?'].forEach(s => addCommandSentence(s, showHelp));
 
+	/**
+	 * @param {string[]} sarr 
+	 * @returns {string} output
+	 */
+	function displayAsCommandList (sarr) {
+		return sarr.map(a => {
+			const spI = a.indexOf(' ');
+			return `\`${config.prefix}${a.slice(0, spI)}\`${a.slice(spI)}`;
+		}).join('\n');
+	}
+
 	addCommand('helpAlt', () => {
 		sendMessage('', {
 			color: 0x2ECC71,
 			fields: [ {
 				name: 'General',
-				value: [
-					'help/cmds/?',
-					'connections',
-					'docs',
-					// 'invite (bot invite)',
-					'roll <optional: max number>',
-					'8ball <yes/no question, always ends with a question mark>',
-					'prune <\'all\' or user mention> <amount>',
-					'time',
-					'elwiki'
-				].map(a => {
-					const spI = a.indexOf(' ');
-					return `\`${config.prefix}${a.slice(0, spI)}\`${a.slice(spI)}`;
-				}).join('\n')
+				value: displayAsCommandList(generalCommands)
 			}, {
 				name: 'Music',
-				value: [
-					'join',
-					'leave',
-					'm q  | add [Search term | YouTube URL]',
-					'm rm | remove [number in queue]',
-					'm sh | shuffle',
-					'm p  | play',
-					'm s  | skip',
-					'm re | repeat [\'one\' | \'all\' | \'off\']',
-					'stop',
-					'clear',
-					'list'
-				].map(a => {
-					const spI = a.indexOf(' ');
-					return `\`${config.prefix}${a.slice(0, spI)}\`${a.slice(spI)}`;
-				}).join('\n')
+				value: displayAsCommandList(musicCommands)
 			} ]
 		});
 	});
@@ -190,7 +178,7 @@ function respond (msg, client) {
 		 */
 		// if (msg.channel.isDM || msg.channel.isGroupDM) return sendMessage(inviteLink);
 		sender.openDM().then((dmChannel, err) => {
-			if (err) return console.log(err);
+			if (err) return process.stdout.write(`${err}\n`);
 			dmChannel.sendMessage(inviteLink);
 		});
 	});
@@ -218,7 +206,7 @@ function respond (msg, client) {
 			resolve('Success');
 		}).catch(e => {
 			// sendMessage('\u{1F52B}'); // Peestol
-			console.log(e);
+			process.stdout.write(`${e}\n`);
 			sendMessage('It didn\'t work.');
 		}).then(v => {
 			if (v === 'Success') {

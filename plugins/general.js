@@ -144,7 +144,7 @@ function respond (msg, client) {
 	['help', 'cmds', '?'].forEach(s => addCommandSentence(s, showHelp));
 
 	/**
-	 * @param {string[]} sarr 
+	 * @param {string[]} sarr
 	 * @returns {string} output
 	 */
 	function displayAsCommandList (sarr) {

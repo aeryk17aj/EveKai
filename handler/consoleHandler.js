@@ -1,18 +1,19 @@
 const CommandHandler = require('../util/msgUtil');
+const util = require('../util/botUtil');
 const logger = require('../plugins/logger');
 
-const config = require('../config');
+// const config = require('../config');
 
 /**
  * Ahh the sweet land of no permission checks because the console is owner-only
- * 
- * @param {string} msg 
+ *
+ * @param {string} msg
  */
 function respond (msg, client) {
 	const handler = new CommandHandler(msg);
 
 	const addCommand = (c, f) => handler.addCommand(c, f);
-	//const addCommandArgs = handler.addCommandArgs;
+	// const addCommandArgs = handler.addCommandArgs;
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 
 	addCommand('dc', () => {
@@ -29,9 +30,9 @@ function respond (msg, client) {
 			logger.logToBoth('[System] Evaluation error');
 		}).then(v => {
 			if (v === 'Success') {
-				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') console.log(result);
-				else if (Array.isArray(result)) console.log(result.join(', '));
-				else console.log('Eval Success');
+				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') util.log(result);
+				else if (Array.isArray(result)) util.log(result.join(', '));
+				else util.log('Eval Success');
 			}
 		});
 	});

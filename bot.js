@@ -83,9 +83,9 @@ client.Dispatcher.on(Events.MESSAGE_CREATE, e =>
 /* client.Dispatcher.on(Events.MESSAGE_REACTION_ADD, e => {
 	// if (e.user.id !== botUser.id)
 	console.log('Reacted!');
-});*/
+}); */
 
 // Voice related
 
-client.Dispatcher.on(Events.VOICE_CHANNEL_JOIN, e => 
+client.Dispatcher.on(Events.VOICE_CHANNEL_JOIN, e =>
 	vcHandler.handle(e));

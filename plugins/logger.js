@@ -6,7 +6,7 @@ const CommandHandler = require('../util/msgUtil');
 const config = require('../config');
 const whitelist = require('../whitelist');
 
-const today = new Date(Date.now()).toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
+const today = new Date(Date.now()).toLocaleDateString('en-US').replace(/[/\\]/g, '-');
 let logFile = fs.createWriteStream(process.cwd() + '/logs/chatlog-' + today + '.txt', {flags: 'a'});
 
 // Stuff that doesn't need to be inside
@@ -52,9 +52,9 @@ function loggerCommands (msg) {
 		sendMessage([
 			'```ini',
 			...whitelist[msgGuild.id]
-				.map(i => 
+				.map(i =>
 					'#' + msgGuild.textChannels
-						.find(tc => 
+						.find(tc =>
 							tc.id === i).name),
 			'```'
 		].join('\n'));
@@ -90,7 +90,6 @@ function loggerCommands (msg) {
 					updateWhitelist().then(() => sendMessage('This channel is now being logged'));
 				}
 			}
-			
 		} else if (a === 'remove') {
 			if (!whitelist[msgGuild.id] || !whitelist[msgGuild.id].includes(msgChannel.id)) {
 				// 'Already not whitelisted' case
@@ -111,7 +110,7 @@ function loggerCommands (msg) {
  */
 function logMsg (msg) {
 	// So it changes on midnight
-	const logDate = msg.createdAt.toLocaleDateString('en-US').replace(/[\/\\]/g, '-');
+	const logDate = msg.createdAt.toLocaleDateString('en-US').replace(/[/\\]/g, '-');
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
 	const possibleCommand = msg.content.startsWith(config.prefix);
 	const logLine = getLogLine(msg.createdAt, msg);
@@ -122,13 +121,12 @@ function logMsg (msg) {
 			// Guild doesn't have channel
 			if (whitelist[msg.guild.id].includes(msg.channel.id)) logToBoth(logLine);
 			else if (possibleCommand) logToBoth(logLine);
-			else return;
 		} else if (possibleCommand) logToBoth(logLine);
 	}
 }
 
 function getLogLine (time, msg) {
-	const timeString = `[${time.toLocaleDateString('en-US')} ${time.toLocaleTimeString('en-US', {hour12: true})}]`
+	const timeString = `[${time.toLocaleDateString('en-US')} ${time.toLocaleTimeString('en-US', {hour12: true})}]`;
 	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
 
 	return [
@@ -147,5 +145,7 @@ function init (msg) {
 
 module.exports = {
 	whitelist,
-	init, addToLog, logToBoth
+	init,
+	addToLog,
+	logToBoth
 };

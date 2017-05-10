@@ -29,16 +29,6 @@ function codeL (s) {
  * Pads a string with three backticks to be turned to a code block
  * @param  {(string|string[])} s input
  * @return {string} the input but padded with three backticks
- * @example 
- *   codeB('textGoesHere');
- *     > ```textGoesHere```
- * 
- *   codeB(['text', 'goes', here]);
- *     > ```
- *       text
- *       goes
- *       here
- *       ```
  */
 function codeB (s) {
 	return Array.isArray(s)

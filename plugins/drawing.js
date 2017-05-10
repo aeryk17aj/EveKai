@@ -5,7 +5,7 @@ const get = require('simple-get');
 const fs = require('fs');
 const path = require('path');
 
-// const botUtil = require('../util/botUtil');
+const util = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
@@ -24,7 +24,7 @@ function respond (msg) {
 	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
 	// const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
-	const uploadFile = (s, n) => msgChannel.uploadFile(s, n || "drawing.jpg");
+	const uploadFile = (s, n) => msgChannel.uploadFile(s, n || 'drawing.jpg');
 
 	const command = msgText.slice(config.prefix.length);
 	const handler = new CommandHandler(command);
@@ -48,7 +48,7 @@ function respond (msg) {
 		});
 	});
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
-	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);*/
+	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f); */
 
 	// const senderIsOwner = botUtil.senderIsOwner(msg);
 
@@ -67,7 +67,7 @@ function respond (msg) {
 				else if (Array.isArray(result)) sendMessage(result.join(', '));
 			}
 		});
-	});*/
+	}); */
 
 	// TODO: Dynamic width :thinking:
 	addDrawCommandSync('testDraw', (ctx, canvas, w, h) => {
@@ -83,7 +83,8 @@ function respond (msg) {
 	const hasAvatar = fs.readdirSync(path.resolve(__dirname, guildFolder + '/_img')).includes(`${sender.id} - ${sender.avatar}.jpg`);
 
 	function getPfp () {
-		get({ url: senderPfp, headers: { 'Content-Type': 'image/jpeg'} }, (err, stream) => {
+		get({ url: senderPfp, headers: { 'Content-Type': 'image/jpeg' } }, (err, stream) => {
+			if (err) util.log(err);
 			stream.pipe(fs.createWriteStream(imgOut));
 		});
 	}

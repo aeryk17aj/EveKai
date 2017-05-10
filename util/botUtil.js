@@ -25,7 +25,7 @@ function makeGuildFolder (path) {
 
 /**
  * Makes a folder for storing music, pre-converted videos and cached avatars
- * 
+ *
  * @param {Discordie} client
  */
 function ensureFoldersExist (client) {
@@ -33,14 +33,19 @@ function ensureFoldersExist (client) {
 		const guildFolder = resolve(__dirname, `../plugins/dl/${g.id}`);
 		if (!fs.existsSync(guildFolder)) {
 			makeGuildFolder(guildFolder);
-			console.log('Created folders for: ' + g.name);
+			log('Created folders for: ' + g.name);
 		}
 	});
+}
+
+function log (s) {
+	process.stdout.write(s + '\n');
 }
 
 module.exports = {
 	// Message utility
 	senderIsOwner,
 	// General utility
-	ensureFoldersExist
+	ensureFoldersExist,
+	log
 };

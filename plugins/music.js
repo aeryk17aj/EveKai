@@ -82,7 +82,7 @@ function respond (msg, client) {
 				// else sendMessage('\u{1F44C}'); // Ok hand sign
 			}
 		});
-	});*/
+	}); */
 
 	/* function initFolders () {
 		// Initialize folders
@@ -93,7 +93,7 @@ function respond (msg, client) {
 			fs.mkdirSync(fullPath); // Songs
 			fs.mkdirSync(fullPath + '/_vid'); // Audio-only video
 		}
-	}*/
+	} */
 
 	// addCommand('m init', initFolders);
 
@@ -152,7 +152,7 @@ function respond (msg, client) {
 
 	/**
 	 * Takes a search term and calls `addToQueue` to process the chosen result
-	 * 
+	 *
 	 * @param {string} a Search term
 	 */
 	function searchThenAdd (a) {
@@ -187,10 +187,10 @@ function respond (msg, client) {
 	/**
 	 * Link case:
 	 * 	Downloads and converts to a music file that's ready to be played
-	 * 
+	 *
 	 * Search case:
 	 * 	Calls `search(a)`
-	 * 
+	 *
 	 * @param {string} a YouTube link or search term
 	 * @returns
 	 */
@@ -198,7 +198,7 @@ function respond (msg, client) {
 		// Channel check
 		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
 
-		const validLink = /https?\:\/\/(?:www\.|m\.)?youtube\.com\/watch\?v=/;
+		const validLink = /https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?v=/;
 
 		if (!validLink.test(a)) return searchThenAdd(a);
 		else if (a.startsWith('http:')) return sendMessage('Make sure it\'s HTTPS');
@@ -206,13 +206,14 @@ function respond (msg, client) {
 			// Pre-download
 			const vidId = a.slice(a.match(validLink)[0].length);
 			busy = true;
+			let smsg;
 
 			// Download stream
 			const downloadStream = ytdl(a, { filter: 'audioonly' });
 			downloadStream.on('info', i => {
-				sendMessage('Queuing: `' + i.title + '`. Don\'t play yet until ready.');
+				sendMessage('Queuing: `' + i.title + '`. Don\'t play yet until ready.').then(ssmsg => smsg = ssmsg);
 				if (i['length_seconds'] >= 15 * 60) sendMessage('The video seems to be 15 minutes or more. This might take a while.');
-				guildQueue.push(i.title.replace(/[\\\/:*?"<>|]/g, '')); // File name safe
+				guildQueue.push(i.title.replace(/[\\/:*?"<>|]/g, '')); // File name safe
 			});
 
 			// Save to file
@@ -229,7 +230,7 @@ function respond (msg, client) {
 					.on('end', () => {
 						busy = false;
 						fs.unlink(vidOut); // Delete mp4 file, no need to wait
-						return sendMessage('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
+						return smsg.edit('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
 					});
 			});
 		}
@@ -272,8 +273,10 @@ function respond (msg, client) {
 		const encoder = client.VoiceConnections.find(vc => vc.voiceConnection.guild === msg.guild).voiceConnection.getEncoder();
 		if (encoder.disposed) return;
 		encoder.kill();
-		ffmpeg.kill();
-		ffmpeg = null;
+		if (ffmpeg) {
+			ffmpeg.kill();
+			ffmpeg = null;
+		}
 		nextSong();
 	}
 
@@ -409,7 +412,7 @@ function respond (msg, client) {
 			const firstSongName = guildQueue.shift(); // ..remove from internal queue
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${firstSongName}.mp3`)); // ...then delete the file
 		} else if (repeatAll) guildQueue.push(guildQueue.shift()); // ...or else push the finished song to the back
-		if (!queue[msg.guild.id].length) stop(); // TODO: Start timer for inactivity
+		if (!guildQueue.length) stop(); // TODO: Start timer for inactivity
 		else setTimeout(play, 100, client.User.getVoiceChannel(msg.guild).getVoiceConnectionInfo()); // Play the next track
 	}
 

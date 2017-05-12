@@ -1,5 +1,5 @@
 {
-    "extends": "standard",
+    "extends": "eslint:recommended",
     "parser": "babel-eslint",
     "plugins": ["async-await"],
     "env": {
@@ -24,10 +24,10 @@
         "no-trailing-spaces": [1, { "skipBlankLines": true }],
         "no-unused-vars": 1,
         "no-var": 1,
-		"one-var": 0,
+        "one-var": 0,
         "prefer-const": 1,
         "semi": [1, "always"],
         "spaced-comment": 1,
-		"yoda": 0
+        "yoda": 0
     }
 }

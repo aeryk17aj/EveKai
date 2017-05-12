@@ -27,7 +27,6 @@
   "devDependencies": {
     "babel-eslint": "^7.2.3",
     "eslint": "^3.19.0",
-    "eslint-plugin-async-await": "0.0.0",
-    "standard": "^10.0.2"
+    "eslint-plugin-async-await": "0.0.0"
   }
 }

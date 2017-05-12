@@ -1,24 +1,19 @@
 // Not the actual cleverbot, under heaevy development (bot side)
 const apiai = require('apiai');
-const Cleverbot = require('cleverbot-node');
-
-const botUtil = require('../util/botUtil');
+const util = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
 
 const eve = apiai(process.env.APIAI_KEY || require('../auth').apiai);
-const cleverbot = new Cleverbot();
 
-/**
- * @param {IMessage} msg message object
- */
 function respond (msg, client) {
 	const msgText = msg.content;
 	const sender = msg.member || msg.author;
 	const msgGuild = msg.guild;
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
+	// This doesn't exist anymore for now so everything below won't work at all.
 	if (!config.modules.clever) return;
 
 	// Mention, Self, and command check
@@ -29,28 +24,20 @@ function respond (msg, client) {
 
 	const actualMessage = msgText.replace(new RegExp(`^<@!?${client.User.id}> `), '');
 
-	if (!config.oldClever) {
-		const request = eve.textRequest(actualMessage, {
-			sessionId: sender.id // User ids are unique, might as well use those
-		});
+	const request = eve.textRequest(actualMessage, {
+		sessionId: sender.id // User ids are unique, might as well use those
+	});
 
-		request.on('response', res => msg.channel.sendMessage(res.result.fulfillment.speech));
-		request.on('error', err => console.log(`[APIAI] [¯\\_(ツ)_/¯] ${err}`));
-		request.end();
-	} else {
-		// Fallback - dumb, but packed Cleverbot
-		cleverbot.write(actualMessage, res => msg.channel.sendMessage(res.message));
-	}
+	request.on('response', res => msg.channel.sendMessage(res.result.fulfillment.speech));
+	request.on('error', err => util.log(`[APIAI] [¯\\_(ツ)_/¯] ${err}`));
+	request.end();
 }
 
-/**
- * @param {IMessage} msg message object
- */
 function cleverCommands (msg) {
 	const msgChannel = msg.channel;
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
-	const refreshConfig = botUtil.refreshConfig;
+	const refreshConfig = util.refreshConfig;
 
 	const command = msg.content.slice(config.prefix.length);
 	const handler = new CommandHandler(command);
@@ -82,9 +69,6 @@ function cleverCommands (msg) {
 	});
 }
 
-/**
- * @param {IMessage} msg message object
- */
 function init (msg, client) {
 	respond(msg, client);
 	cleverCommands(msg);

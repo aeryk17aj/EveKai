@@ -15,7 +15,6 @@ const commaPad = s => stringUtil.commaPad(s);
 
 function respond (msg) {
 	const msgText = msg.content;
-	if (!msgText.startsWith(config.prefix)) return;
 	const msgChannel = msg.channel;
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
@@ -44,36 +43,82 @@ function respond (msg) {
 
 	const id = isNewMapLink ? msgText.replace(newMapLink, isMapset ? '$1' : '$2') : msgText.replace(beatmapLink, '$2');
 
-	const setFormat = '%s - %s (%s)';
-	const mapFormat = '%s - %s [%s] ★ %d (%s)';
 	if (linkMatches) {
 		if (isMapset) {
 			osuApi.getBeatmaps({ s: id }).then(beatmaps => {
-				console.log('[s] Diffs: ' + beatmaps.length);
-				const mapSet = beatmaps[0];
-				const setString = util.format(setFormat,
-					mapSet.artist,
-					mapSet.title,
-					mapSet.creator
-				);
-				const mapString = util.format(mapFormat,
-					mapSet.artist,
-					mapSet.title,
-					mapSet.version,
-					parseFloat(mapSet.difficulty.rating).toFixed(2),
-					mapSet.creator
-				);
-				if (mapSet.length > 1) sendMessage(setString);
-				else sendMessage(mapString);
+				const msg = ['', {}];
+				switch (beatmaps.length) {
+					case 1:
+						msg[0] = 'Found 1 map.'; break;
+					case 2: case 3:
+						msg[0] = `Found ${beatmaps.length} maps.`; break;
+					default:
+						msg[0] = `Found ${beatmaps.length} maps, but only displaying 3.`;
+				}
+				msg[1] = Object.assign(getGeneralMapInfo(beatmaps), {
+					fields: beatmaps.sort(compareDifficulty).slice(-3).map(getDifficultyInfo)
+				});
+				sendMessage(...msg);
 			});
 		} else {
 			osuApi.getBeatmaps({ b: id }).then(beatmaps => {
-				const bMap = beatmaps[0];
-				const mapString = util.format(mapFormat, bMap.artist, bMap.title, bMap.version, parseFloat(bMap.difficulty.rating).toFixed(2), bMap.creator);
-				sendMessage(mapString);
+				sendEmbed(Object.assign(getGeneralMapInfo(beatmaps), {
+					fields: [getDifficultyInfo(beatmaps[0])]
+				}));
 			});
 		}
 	}
+
+	/**
+	 * Provides a part of an embed object with general information of the mapset.
+	 *
+	 * @param {Beatmap[]} set
+	 * @returns {{ color: number, thumbnail: { url: string }, title: string, description: string}}
+	 */
+	function getGeneralMapInfo (set) {
+		const diff = set[0];
+		return {
+			color: 0xFFB2C5,
+			thumbnail: { url: `http://b.ppy.sh/thumb/${diff.beatmapSetId}l.jpg` },
+			title: util.format('%s - %s by %s',
+				diff.artist,
+				diff.title,
+				diff.creator),
+			description: util.format('**Length**: %s **BPM**: %s\n**Tags**: %s\n-------------------',
+				diff.time.total, diff.bpm, diff.tags.join(' '))
+		};
+	}
+
+	/**
+	 * Provides a field object in an embed containing difficulty info.
+	 *
+	 * @param {Beatmap} diff
+	 * @returns {{ name: string, value: string }}
+	 */
+	function getDifficultyInfo (diff) {
+		return {
+			name: `__${diff.version}__`,
+			value: [
+				`**Difficulty**: ${parseFloat(diff.difficulty.rating).toFixed(2)}★ `,
+				`**Max Combo**: x${diff.maxCombo}\n`,
+				`**AR**: ${diff.difficulty.approach} `,
+				`**OD**: ${diff.difficulty.overall} `,
+				`**HP**: ${diff.difficulty.drain} `,
+				`**CS**: ${diff.difficulty.size}`
+			].map(a => '▸' + a).join('')
+		};
+	}
+
+	function compareDifficulty (a, b) {
+		const sr1 = parseFloat(a.difficulty.rating);
+		const sr2 = parseFloat(b.difficulty.rating);
+
+		if (sr1 > sr2) return 1;
+		else if (sr1 < sr2) return -1;
+		else return 0;
+	}
+
+	if (!msgText.startsWith(config.prefix)) return;
 
 	addCommandSentence('osu', a => {
 		const csArgs = a.split(', ');

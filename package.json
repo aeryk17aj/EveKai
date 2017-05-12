@@ -8,7 +8,7 @@
   "main": "bot.js",
   "scripts": {
     "start": "node index.js",
-    "lint": "happiness index.js \"plugins/**/*.js\" \"handler/**/*.js\""
+    "lint": "eslint -c ./.eslintrc index.js bot.js server.js \"plugins/**/*.js\" \"handler/**/*.js\""
   },
   "author": "Aeryk",
   "license": "MIT",
@@ -28,6 +28,6 @@
     "babel-eslint": "^7.2.3",
     "eslint": "^3.19.0",
     "eslint-plugin-async-await": "0.0.0",
-    "happiness": "^7.1.2"
+    "standard": "^10.0.2"
   }
 }

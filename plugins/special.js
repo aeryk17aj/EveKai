@@ -88,7 +88,7 @@ function respond (msg, client) {
 		}
 	}
 
-	/* addCommandSentence('emoji', a => {
+	addCommandSentence('unicode', a => {
 		if (msgText.includes('<')) return;
 		if (/^<:.+?:\d+>$/.test(msgText)) return;
 		a = a.replace(/\ufe0f|\u200d/gm, ''); // strips unicode variation selector and zero-width joiner
@@ -104,7 +104,7 @@ function respond (msg, client) {
 		}
 
 		sendMessage(r.join('-'));
-	}); */
+	});
 }
 
 exports.respond = respond;

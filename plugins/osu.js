@@ -208,4 +208,3 @@ function respond (msg) {
 }
 
 exports.respond = respond;
-// module.exports = respond;

@@ -11,7 +11,7 @@ const autoVcCommands = require('./vcHandler');
 /** @typedef IMessage */
 /** @typedef Discordie */
 /** @typedef MessageCreateEvent
- * 		@prop {IMessage} message Event Message*/
+ * 	  @prop {IMessage} message Event Message */
 
 /**
  * Fired every time a message is received by the bot.

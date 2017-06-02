@@ -219,6 +219,11 @@ function respond (msg, client) {
 
 	addCommandSentence('math', a => sendMessage(math.eval(a)));
 
+	addCommandArgs('emoji', a => {
+		// if (!/^<:.+?:\d+>$/.test(msgText)) return;
+		sendMessage(a.map(e => e.replace(/^<:.+?:(\d+)>$/, '$1')).map(i => `https://cdn.discordapp.com/emojis/${i}.png`).join('\n'));
+	});
+
 	function fetchMoreMessages (channel, left) {
 		const before = channel.messages[0];
 		return channel.fetchMessages(Math.min(left, 100), before)

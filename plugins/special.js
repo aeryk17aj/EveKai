@@ -88,7 +88,9 @@ function respond (msg, client) {
 		}
 	}
 
-	addCommandSentence('emoji', a => {
+	/* addCommandSentence('emoji', a => {
+		if (msgText.includes('<')) return;
+		if (/^<:.+?:\d+>$/.test(msgText)) return;
 		a = a.replace(/\ufe0f|\u200d/gm, ''); // strips unicode variation selector and zero-width joiner
 		let i = 0, c = 0, p = 0;
 		const r = [];
@@ -102,7 +104,7 @@ function respond (msg, client) {
 		}
 
 		sendMessage(r.join('-'));
-	});
+	}); */
 }
 
 exports.respond = respond;

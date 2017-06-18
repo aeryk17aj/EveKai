@@ -82,11 +82,20 @@ function respond (msg) {
 	const imgOut = path.resolve(__dirname, `${guildFolder}/_img/${sender.id} - ${sender.avatar}.jpg`);
 	const hasAvatar = fs.readdirSync(path.resolve(__dirname, guildFolder + '/_img')).includes(`${sender.id} - ${sender.avatar}.jpg`);
 
-	function getPfp () {
-		get({ url: senderPfp, headers: { 'Content-Type': 'image/jpeg' } }, (err, stream) => {
-			if (err) util.log(err);
-			stream.pipe(fs.createWriteStream(imgOut));
-		});
+	async function getPfp () {
+		get({ url: senderPfp, headers: { 'Content-Type': 'image/jpeg' } }, (err, stream) => downloadPicture(err, stream, () => Promise.resolve));
+	}
+
+	/**
+	 * @param {Error} err
+	 * @param {Readable} stream
+	 * @param {function} cb
+	 */
+	function downloadPicture (err, stream, cb) {
+		if (err) util.log(err);
+		const write = stream.pipe(fs.createWriteStream(imgOut));
+		
+		write.on('finish', cb);
 	}
 
 	addDrawCommandSync('drawMe', (ctx, canvas, w, h) => {

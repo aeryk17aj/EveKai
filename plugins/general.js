@@ -88,7 +88,7 @@ function respond (msg, client) {
 		}, 2000);
 	});
 
-	addCommandResponse('connections', codeL(client.User.username) + ' is connected to ' + codeL(client.Guilds.length) + ' servers.');
+	addCommandResponse('connections', `Connected to ${codeL(client.Guilds.length)} servers.`);
 	addCommandSentence('docs', a => {
 		if (docLinks.hasOwnProperty(a)) sendMessage(docLinks[a]);
 		else sendMessage('I don\'t have a link for ' + codeL(a));

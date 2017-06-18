@@ -15,11 +15,14 @@ const config = require('../config');
 const yt = new YouTube();
 yt.setKey(process.env.YT_KEY || require('../auth').yt);
 
+let ffmpeg = null;
+
 // Internal queue, stores position and id
 const queue = {};
 let guildQueue = [];
+
+// Might have to implement some per-server config and states
 let stopPlaying = false;
-let ffmpeg = null;
 
 let boundTextChannel = null;
 let boundVoiceChannel = null;

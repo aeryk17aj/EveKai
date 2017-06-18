@@ -1,12 +1,15 @@
-// Handlers
+// Bot: General
 const general = require('../plugins/general');
 const logger = require('../plugins/logger');
-const osu = require('../plugins/osu');
 const music = require('../plugins/music');
+
+// Bot: Extra
 const drawing = require('../plugins/drawing');
 const special = require('../plugins/special');
-
 const autoVcCommands = require('./vcHandler');
+
+// Game-related
+const osu = require('../plugins/osu');
 
 /** @typedef IMessage */
 /** @typedef Discordie */

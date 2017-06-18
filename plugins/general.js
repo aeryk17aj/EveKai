@@ -312,12 +312,6 @@ function respond (msg, client) {
 		const timeShort = currentTime.replace(/([\d]+:[\d]{2})(:[\d]{2})(.*)/, '$1$3');
 		sendMessage(`It's ${codeL(timeShort)} EST.`);
 	});
-
-	addCommandArgs('elwiki', a => {
-		if (a.length) return;
-		const pageName = a.map(w => w[0].toUpperCase() + w.slice(1)).join('_');
-		sendMessage('http://elwiki.net/w/' + pageName);
-	});
 }
 
 exports.respond = respond;

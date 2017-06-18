@@ -9,7 +9,7 @@ const vcHandler = require('./handler/vcHandler');
 const logger = require('./plugins/logger');
 
 // Utility
-const util = require('./util/botUtil');
+const { ensureFoldersExist } = require('./util/botUtil');
 
 /**
  * @typedef Configuration
@@ -46,7 +46,7 @@ client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unus
 	client.User.setStatus(config.hide ? 'invisible' : 'online');
 	if (client.User.status === 'online') client.User.setGame('with new discoveries');
 	log('[Startup] Checking music folders...');
-	util.ensureFoldersExist(client);
+	ensureFoldersExist(client);
 	log('[Startup] Connected.');
 });
 

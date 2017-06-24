@@ -6,7 +6,7 @@ const readline = require('readline');
 const consoleHandler = require('./handler/consoleHandler');
 const messageHandler = require('./handler/messageHandler');
 const vcHandler = require('./handler/vcHandler');
-const logger = require('./plugins/logger');
+const { logToBoth } = require('./plugins/logger');
 
 // Utility
 const { ensureFoldersExist } = require('./util/botUtil');
@@ -65,7 +65,7 @@ client.Dispatcher.on(Events.GATEWAY_RESUMED, () => {
 // Guild-related
 
 client.Dispatcher.on(Events.GUILD_CREATE, e => {
-	logger.logToBoth('[GUILD_CREATE] ' + e.guild.name);
+	logToBoth('[GUILD_CREATE] ' + e.guild.name);
 });
 
 // TODO: Make it cuztomizable, per guild

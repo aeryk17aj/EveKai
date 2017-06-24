@@ -1,7 +1,7 @@
 const fluentffmpeg = require('fluent-ffmpeg');
 const ytdl = require('ytdl-core');
 const YouTube = require('youtube-node');
-const Events = require('discordie').Events;
+const { Events } = require('discordie');
 
 const fs = require('fs');
 const path = require('path');
@@ -9,7 +9,7 @@ const childProcess = require('child_process');
 
 const CommandHandler = require('../util/msgUtil');
 
-const config = require('../config');
+const { prefix } = require('../config');
 // const userIds = require('../userIds');
 
 const yt = new YouTube();
@@ -34,23 +34,23 @@ let busy = false;
 
 function respond (msg, client) {
 	if (msg.isPrivate) return;
-	const msgText = msg.content;
-	if (!msgText.startsWith(config.prefix)) return;
-	const command = msgText.slice(config.prefix.length);
-	const sender = msg.member;
-	if (sender.bot) return;
+	const { content: msgText, member: sender } = msg;
+	if (!msgText.startsWith(prefix) || sender.bot) return;
+
+	const command = msgText.slice(prefix.length);
 
 	if (boundTextChannel && boundVoiceChannel) {
 		// Ignore music commands except for bound channel
 		if (boundTextChannel.id !== msg.channel.id || sender.getVoiceChannel().id !== boundVoiceChannel.id) return;
 	}
 
-	// const isOwner = sender.id === userIds.aeryk;
-	const handler = new CommandHandler(command);
 	const sendMessage = (m, e) => msg.channel.sendMessage(m, false, e);
 
-	const addCommand = (c, f) => handler.addCommand(c, f);
-	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
+	const handler = new CommandHandler(command);
+
+	const { addCommand, addCommandSentence } = handler;
+
+	// const isOwner = sender.id === userIds.aeryk;
 
 	// if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id))) initFolders();
 

@@ -7,6 +7,13 @@ class CommandHandler {
 	 */
 	constructor (command) {
 		this.command = command;
+		[
+			'addCommand',
+			'addCommandSentence',
+			'addCommandArgs'
+		].forEach(f => {
+			this[f] = this[f].bind(this);
+		});
 	}
 
 	/**
@@ -31,7 +38,9 @@ class CommandHandler {
 	 */
 	addCommandSentence (c, f) {
 		if (this.command.startsWith(c)) {
-			if (this.command[c.length] === ' ' || this.command[c.length] === undefined) f(this.command.slice(c.length + 1));
+			if (this.command[c.length] === ' ' || // There's a space, ergo another word
+				this.command[c.length] === undefined) // Nothing, supporting optional arguments
+				f(this.command.slice(c.length + 1));
 		}
 	}
 

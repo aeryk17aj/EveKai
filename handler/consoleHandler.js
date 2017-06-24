@@ -14,9 +14,7 @@ let ctc;
 function respond (msg, client) {
 	const handler = new CommandHandler(msg);
 
-	const addCommand = (c, f) => handler.addCommand(c, f);
-	// const addCommandArgs = handler.addCommandArgs;
-	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
+	const { addCommand, addCommandSentence } = handler;
 
 	addCommand('dc', () => {
 		client.disconnect();

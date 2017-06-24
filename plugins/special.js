@@ -2,7 +2,7 @@ const CommandHandler = require('../util/msgUtil');
 const Discordie = require('discordie');
 const Events = Discordie.Events;
 
-const util = require('../util/botUtil');
+const { log } = require('../util/botUtil');
 
 const config = require('../config');
 
@@ -14,15 +14,11 @@ const config = require('../config');
  * @returns
  */
 function respond (msg, client) {
-	const msgText = msg.content;
+	const { content: msgText, channel: msgChannel } = msg;
 	if (!msgText.startsWith(config.prefix)) return;
 	// const sender = msg.member || msg.author; // IUser as a substitute for DMs
-	const msgChannel = msg.channel;
-	// const msgGuild = msg.guild;
 
 	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
-
-	const log = (s) => util.log(s);
 
 	/**
 	 * Sends a message

@@ -3,10 +3,10 @@ const Discordie = require('discordie');
 const Permissions = Discordie.Permissions;
 const math = require('mathjs');
 
-const logger = require('./logger');
+const { logToBoth } = require('./logger');
 const util = require('../util/botUtil');
-const stringUtil = require('../util/stringUtil');
-const arrayUtil = require('../util/arrayUtil');
+const { codeL } = require('../util/stringUtil');
+const { rInAr } = require('../util/arrayUtil');
 
 /**
  * @typedef Configuration
@@ -15,7 +15,7 @@ const arrayUtil = require('../util/arrayUtil');
 */
 
 /** @type {Configuration} */
-const config = require('../config');
+const { prefix } = require('../config');
 
 const ballQuotes = require('../quotes/8ball');
 const leaveQuotes = require('../quotes/disconnect');
@@ -47,11 +47,9 @@ const docLinks = require('../quotes/docs');
  * @param {Discordie} client description
  */
 function respond (msg, client) {
-	const msgText = msg.content;
-	if (!msgText.startsWith(config.prefix)) return;
+	const { content: msgText, channel: msgChannel, guild: msgGuild} = msg;
+	if (!msgText.startsWith(prefix)) return;
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
-	const msgChannel = msg.channel;
-	const msgGuild = msg.guild;
 
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
@@ -64,16 +62,12 @@ function respond (msg, client) {
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
-	const command = msgText.slice(config.prefix.length);
+	const command = msgText.slice(prefix.length);
 	const handler = new CommandHandler(command);
 
-	const addCommand = (c, f) => handler.addCommand(c, f);
+	const { addCommand, addCommandSentence, addCommandArgs } = handler;
 	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
-	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
-	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
 
-	const codeL = s => stringUtil.codeL(s);
-	const rInAr = ar => arrayUtil.rInAr(ar);
 	const senderIsOwner = util.senderIsOwner(msg);
 
 	addCommand('dc', () => {
@@ -81,7 +75,7 @@ function respond (msg, client) {
 
 		setTimeout(() => {
 			sendMessage(rInAr(leaveQuotes)).then(() => {
-				logger.logToBoth('[System] System Disconnected (command)');
+				logToBoth('[System] System Disconnected (command)');
 				client.disconnect();
 				process.exit();
 			});
@@ -126,15 +120,15 @@ function respond (msg, client) {
 			help = [
 				'```ini',
 				'[Music Commands]', '',
-				...musicCommands.map(a => config.prefix + a),
+				...musicCommands.map(a => prefix + a),
 				'```'
 			].join('\n');
 		} else {
 			help = [
 				'```ini',
 				'[General Commands]', '',
-				...generalCommands.map(a => config.prefix + a),
-				'', 'do \'' + config.prefix + '? music\' for music commands',
+				...generalCommands.map(a => prefix + a),
+				'', 'do \'' + prefix + '? music\' for music commands',
 				'```'
 			].join('\n');
 		}
@@ -150,7 +144,7 @@ function respond (msg, client) {
 	function displayAsCommandList (sarr) {
 		return sarr.map(a => {
 			const spI = a.indexOf(' ');
-			return `\`${config.prefix}${a.slice(0, spI)}\`${a.slice(spI)}`;
+			return `\`${prefix}${a.slice(0, spI)}\`${a.slice(spI)}`;
 		}).join('\n');
 	}
 
@@ -272,7 +266,7 @@ function respond (msg, client) {
 		// Bot can't delete or pin messages
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		// Empty args
-		if (!a.length) return sendMessage(`\`${config.prefix}prune <\'all\' or user mention> <amount>\``);
+		if (!a.length) return sendMessage(`\`${prefix}prune <\'all\' or user mention> <amount>\``);
 
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);

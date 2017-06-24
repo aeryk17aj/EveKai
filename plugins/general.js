@@ -114,6 +114,7 @@ function respond (msg, client) {
 		'list'
 	];
 
+	// TODO: Help builder?
 	function showHelp (a) {
 		let help;
 		if (a === 'music') {
@@ -177,7 +178,6 @@ function respond (msg, client) {
 		});
 	});
 
-	// This is where the fun starts
 	addCommandSentence('8ball', a => {
 		if (a.endsWith('?')) {
 			sendEmbed({
@@ -193,20 +193,25 @@ function respond (msg, client) {
 	});
 
 	addCommandSentence('eval', a => {
-		if (!senderIsOwner || a === 'e.message.content' || a === 'msgText') return;
+		if (!senderIsOwner || a === 'msg.content' || a === 'msgText') return;
 		let result;
-		return new Promise(resolve => {
+		return new Promise((resolve, reject) => {
 			result = eval(a);
-			resolve('Success');
+			if (result === msgText) reject();
+			else resolve('Success');
 		}).catch(e => {
 			// sendMessage('\u{1F52B}'); // Peestol
-			process.stdout.write(`${e}\n`);
+			process.stdout.write(`Failed eval in ${msgGuild.name} : ${msgChannel.name}\n\n${e}\n`);
 			sendMessage('It didn\'t work.');
 		}).then(v => {
 			if (v === 'Success') {
-				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') sendMessage(result);
-				else if (Array.isArray(result)) sendMessage(result.join(', '));
-				// else sendMessage('\u{1F44C}'); // Ok hand sign
+				switch (typeof result) {
+					case 'string': case 'number': case 'boolean':
+						sendMessage(result); break;
+					default:
+						if (Array.isArray(result)) sendMessage(result.join(', '));
+						// else sendMessage('\u{1F44C}'); // Ok hand sign
+				}
 			}
 		});
 	});
@@ -215,6 +220,7 @@ function respond (msg, client) {
 
 	addCommandArgs('emoji', a => {
 		// if (!/^<:.+?:\d+>$/.test(msgText)) return;
+		const validCustomEmoji = /^<:.+?:(\d+)>$/;
 		sendMessage(a.map(e => e.replace(/^<:.+?:(\d+)>$/, '$1')).map(i => `https://cdn.discordapp.com/emojis/${i}.png`).join('\n'));
 	});
 

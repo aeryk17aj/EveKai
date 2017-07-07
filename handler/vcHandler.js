@@ -28,15 +28,17 @@ function handle (e) {
 }
 
 function respond (msg) {
-	const handler = new CommandHandler(msg.content.slice((config.prefix + 'autovc ').length));
-	if (!msg.content.startsWith(config.prefix)) return;
+	const keyword = 'autovc';
+	if (!msg.content.startsWith(config.prefix + keyword)) return;
+	const handler = new CommandHandler(msg.content.slice((config.prefix + keyword).length + 1));
+	const { addCommand } = handler;
 
-	handler.addCommand('on', () => {
+	addCommand('on', () => {
 		autoVcWl.push(msg.guild.id);
 		updateWl();
 	});
 
-	handler.addCommand('off', () => {
+	addCommand('off', () => {
 		autoVcWl.shift(msg.guild.id);
 		updateWl();
 	});

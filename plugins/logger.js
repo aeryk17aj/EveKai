@@ -28,14 +28,14 @@ async function updateWhitelist () {
  * @param {IMessage} msg Message object
  */
 function loggerCommands (msg) {
+	const keyword = 'log';
 	if (!msg.content.startsWith(config.prefix)) return;
 	if (msg.isPrivate || !util.senderIsOwner(msg)) return;
 	const msgChannel = msg.channel;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const msgGuild = msg.guild;
-	const command = msg.content.slice((config.prefix + 'log ').length);
 
-	const handler = new CommandHandler(command);
+	const handler = new CommandHandler(msg.content.slice((config.prefix + keyword).length + 1));
 
 	const { addCommand, addCommandSentence } = handler;
 

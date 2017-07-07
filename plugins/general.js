@@ -291,7 +291,7 @@ function respond (msg, client) {
 
 	addCommandSentence('prune', a => {
 		// Sender can't delete or pin messages
-		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('No.');
+		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return;
 		// Bot can't delete or pin messages
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		// Empty args

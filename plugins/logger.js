@@ -48,15 +48,16 @@ function loggerCommands (msg) {
 	});
 
 	addCommand('lstc', () => {
-		sendMessage([
-			'```ini',
-			...whitelist[msgGuild.id]
-				.map(i =>
-					'#' + msgGuild.textChannels
-						.find(tc =>
-							tc.id === i).name),
-			'```'
-		].join('\n'));
+		sendMessage(Object.keys(whitelist).includes(msgGuild.id)
+			? [
+				'```ini',
+				...whitelist[msgGuild.id].map(i =>
+					'#' + msgGuild.textChannels.find(tc =>
+						tc.id === i).name),
+				'```'
+			].join('\n')
+			: 'There are no logged channels'
+		);
 	});
 
 	addCommand('start', () => {

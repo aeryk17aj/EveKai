@@ -227,6 +227,26 @@ function respond (msg, client) {
 		else sendMessage(a.map(e => e.replace(/^<:.+?:(\d+)>$/, '$1')).map(i => `https://cdn.discordapp.com/emojis/${i}.png`).join('\n'));
 	});
 
+	function verifyMoveQuery (a) {
+		const senderVc = sender.getVoiceChannel();
+		if (!senderVc) return sendMessage('You\'re not in a voice channel.');
+		const pseudoVc = msgGuild.voiceChannels.find(vc => vc.name === a);
+		if (!pseudoVc) return sendMessage(`There is no voice channel named \`${a}\``);
+		return { senderVc, pseudoVc };
+	}
+
+	addCommandSentence('moveUs', a => {
+		const { senderVc, pseudoVc } = verifyMoveQuery(a);
+		const memList = senderVc.members;
+		const moves = memList.map(m => m.setChannel(pseudoVc));
+		return Promise.all(moves);
+	});
+
+	addCommandSentence('moveMe', a => {
+		const { pseudoVc } = verifyMoveQuery(a);
+		return sender.setChannel(pseudoVc);
+	});
+
 	function fetchMoreMessages (channel, left) {
 		const before = channel.messages[0];
 		return channel.fetchMessages(Math.min(left, 100), before)

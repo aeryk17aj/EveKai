@@ -50,8 +50,6 @@ function respond (msg, client) {
 
 	const { addCommand, addCommandSentence } = handler;
 
-	// const isOwner = sender.id === userIds.aeryk;
-
 	// if(!fs.existsSync(path.resolve(__dirname, './dl/' + msg.guild.id))) initFolders();
 
 	// Initialize queue
@@ -63,29 +61,7 @@ function respond (msg, client) {
 		guildQueue = fs.readdirSync(path.resolve(__dirname, './dl/' + msg.guild.id + '/'))
 			.filter(f => f.slice(-4) === '.mp3')
 			.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
-	}
-
-	// Only because I want to check things in this place specifically
-	/* addCommandSentence('evalM', a => {
-		if (!isOwner) return;
-		if (a === 'e.message.content' || a === 'msgText') return;
-
-		let result;
-		return new Promise(resolve => {
-			result = eval(a);
-			resolve('Success'); // If it got to this point, it might as well work
-		}).catch(e => {
-			// sendMessage('\u{1F52B}'); // Peestol
-			console.log(e);
-			sendMessage('It didn\'t work.');
-		}).then(v => {
-			if (v === 'Success') {
-				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') sendMessage(result);
-				else if (Array.isArray(result)) sendMessage(result.join(', '));
-				// else sendMessage('\u{1F44C}'); // Ok hand sign
 			}
-		});
-	}); */
 
 	/* function initFolders () {
 		// Initialize folders

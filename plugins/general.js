@@ -219,9 +219,12 @@ function respond (msg, client) {
 	addCommandSentence('math', a => sendMessage(math.eval(a)));
 
 	addCommandArgs('emoji', a => {
-		// if (!/^<:.+?:\d+>$/.test(msgText)) return;
 		const validCustomEmoji = /^<:.+?:(\d+)>$/;
-		sendMessage(a.map(e => e.replace(/^<:.+?:(\d+)>$/, '$1')).map(i => `https://cdn.discordapp.com/emojis/${i}.png`).join('\n'));
+
+		const invalidArgs = [];
+		a.forEach(e => { if (!validCustomEmoji.test(e)) invalidArgs.push(e); }); // TODO: Process like unicode command if found as native emoji
+		if (invalidArgs.length) return sendMessage('There are some invalid inputs: ' + invalidArgs.join(' '));
+		else sendMessage(a.map(e => e.replace(/^<:.+?:(\d+)>$/, '$1')).map(i => `https://cdn.discordapp.com/emojis/${i}.png`).join('\n'));
 	});
 
 	function fetchMoreMessages (channel, left) {

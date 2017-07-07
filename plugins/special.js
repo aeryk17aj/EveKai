@@ -74,14 +74,15 @@ function respond (msg, client) {
 	});
 
 	async function addSelectors (msg) {
-		// let p =
-		msg.addReaction(String.fromCodePoint(...Emojis.ONE)).catch(() => log('What?'));
+		const p = [];
+		p[0] = msg.addReaction(String.fromCodePoint(...Emojis.ONE)).catch(() => log('What?'));
 		for (let i = 1; i < Object.keys(Emojis).length; i++) {
 			const ind = Object.keys(Emojis)[i];
 			log(ind);
-			// p =
-			await msg.addReaction(String.fromCodePoint(...Emojis[ind])).catch(() => log('What..?'));
+			// Dfq so slow
+			p[i] = msg.addReaction(String.fromCodePoint(...Emojis[ind])).catch(() => log('What..?'));
 		}
+		return Promise.all(...p);
 	}
 
 	addCommandSentence('unicode', a => {

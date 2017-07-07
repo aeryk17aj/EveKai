@@ -279,7 +279,10 @@ function respond (msg, client) {
 		return client.Messages.deleteMessages(msgs.slice(0, removeCount), channel)
 			.then(() => onDeleteMore(msgs, channel, left - removeCount))
 			// .catch(() => console.log('What, why can\'t it delete?'));
-			.catch(() => sendMessage('Deleting past 100 is broken at the moment.\nPlease prune by 100s while Aeryk gets this fixed.'));
+			.catch(() => sendMessage(`
+				Deleting past 100 is broken at the moment.\n
+				Please prune by 100s while Aeryk gets this fixed.
+			`));
 	}
 
 	function onDeleteMore (msgs, channel, left) {
@@ -295,7 +298,7 @@ function respond (msg, client) {
 		// Bot can't delete or pin messages
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		// Empty args
-		if (!a.length) return sendMessage(`\`${prefix}prune <\'all\' or user mention> <amount>\``);
+		if (!a.length) return sendMessage(prefix + 'prune <\'all\' or user mention> <amount>`');
 
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);

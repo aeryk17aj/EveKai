@@ -3,6 +3,7 @@ const Discordie = require('discordie');
 const Events = Discordie.Events;
 
 const { log } = require('../util/botUtil');
+const { getCodePoint } = require('../util/stringUtil');
 
 const config = require('../config');
 
@@ -88,19 +89,7 @@ function respond (msg, client) {
 	addCommandSentence('unicode', a => {
 		if (msgText.includes('<')) return;
 		if (/^<:.+?:\d+>$/.test(msgText)) return;
-		a = a.replace(/\ufe0f|\u200d/gm, ''); // strips unicode variation selector and zero-width joiner
-		let i = 0, c = 0, p = 0;
-		const r = [];
-		while (i < a.length) {
-			c = a.charCodeAt(i++);
-			if (p) {
-				r.push((65536 + (p - 55296 << 10) + (c - 56320)).toString(16));
-				p = 0;
-			} else if (55296 <= c && c <= 56319) p = c;
-			else r.push(c.toString(16));
-		}
-
-		sendMessage(r.join('-'));
+		sendMessage(getCodePoint(a));
 	});
 }
 

@@ -5,7 +5,7 @@ const math = require('mathjs');
 
 const { logToBoth } = require('./logger');
 const util = require('../util/botUtil');
-const { codeL } = require('../util/stringUtil');
+const { codeL, getCodePoint } = require('../util/stringUtil');
 const { rInAr } = require('../util/arrayUtil');
 
 /**
@@ -222,8 +222,11 @@ function respond (msg, client) {
 		const validCustomEmoji = /^<:.+?:(\d+)>$/;
 
 		const invalidArgs = [];
-		a.forEach(e => { if (!validCustomEmoji.test(e)) invalidArgs.push(e); }); // TODO: Process like unicode command if found as native emoji
-		if (invalidArgs.length) return sendMessage('There are some invalid inputs: ' + invalidArgs.join(' '));
+		a.forEach(e => { if (!validCustomEmoji.test(e)) invalidArgs.push(e); });
+		if (invalidArgs.length) {
+			if (invalidArgs.length === a.length) return sendMessage(invalidArgs.map(getCodePoint));
+			return sendMessage('There are some invalid inputs: ' + invalidArgs.join(' '));
+		}
 		else sendMessage(a.map(e => e.replace(/^<:.+?:(\d+)>$/, '$1')).map(i => `https://cdn.discordapp.com/emojis/${i}.png`).join('\n'));
 	});
 

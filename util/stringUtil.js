@@ -38,6 +38,27 @@ function codeB (s) {
 	: '```' + s + '```';
 }
 
+/**
+ * Gets codepoint from a unicode character in the form of a string
+ * @param {string} a Input unicode character
+ * @returns string the found codepoint
+ */
+function getCodePoint (a) {
+	a = a.replace(/\ufe0f|\u200d/gm, ''); // strips unicode variation selector and zero-width joiner
+	let i = 0, c = 0, p = 0;
+	const r = [];
+	while (i < a.length) {
+		c = a.charCodeAt(i++);
+		if (p) {
+			r.push((65536 + (p - 55296 << 10) + (c - 56320)).toString(16));
+			p = 0;
+		} else if (55296 <= c && c <= 56319) p = c;
+		else r.push(c.toString(16));
+	}
+
+	return r.join('-');
+}
+
 module.exports = {
-	commaPad, codeL, codeB
+	commaPad, codeL, codeB, getCodePoint
 };

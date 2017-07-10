@@ -32,8 +32,8 @@ const rl = readline.createInterface({
 
 function log (s) { process.stdout.write(s + '\n'); }
 
-process.on('unhandledRejection', err =>
-	log(`Unhandled Promise:\n${err.stack}`));
+process.on('unhandledRejection', (reason, promise) =>
+	log(`Unhandled Promise:\n${promise}\n\n${reason.stack}`));
 
 rl.on('line', c =>
 	consoleHandler.respond(c, client));

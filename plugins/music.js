@@ -61,7 +61,7 @@ function respond (msg, client) {
 		guildQueue = fs.readdirSync(path.resolve(__dirname, './dl/' + msg.guild.id + '/'))
 			.filter(f => f.slice(-4) === '.mp3')
 			.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
-			}
+	}
 
 	/* function initFolders () {
 		// Initialize folders
@@ -240,10 +240,17 @@ function respond (msg, client) {
 
 	['m r', 'music remove', 'remove'].forEach(s => addCommandSentence(s, removeTrack));
 
-	function playMusic () {
-		const voiceChannel = client.User.getVoiceChannel(msg.guild);
-		if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
-		else play(voiceChannel.getVoiceConnectionInfo());
+	function playMusic (a) {
+		if (!guildQueue.length) return sendMessage('There is nothing to play.');
+
+		if (!a || !a.length) {
+			const voiceChannel = client.User.getVoiceChannel(msg.guild);
+			/* if (!client.User.getVoiceChannel(msg.guild)) return sendMessage('Not in a voice channel.');
+			else */
+			play(voiceChannel.getVoiceConnectionInfo());
+		} else {
+			// TODO: Make it play the specified number
+		}
 	}
 
 	['m p', 'music play', 'play'].forEach(s => addCommand(s, playMusic));
@@ -300,7 +307,7 @@ function respond (msg, client) {
 	addCommand('stop', stop);
 	addCommand('dc', stop); // Stops the ffmpeg process before terminating
 
-	// TODO: test
+	// TODO: Test this command more
 	addCommand('clear', () => {
 		guildQueue.forEach(songName => {
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`));

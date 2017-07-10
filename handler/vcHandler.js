@@ -2,14 +2,8 @@ const fs = require('fs');
 
 const CommandHandler = require('../util/msgUtil');
 
-/**
- * @typedef Configuration
- * @type {object}
- * @property {string} prefix - The bot's prefix
-*/
-
-/** @type {Configuration} */
-const config = require('../config');
+/** @type {{prefix: string}} */
+const { prefix } = require('../config');
 
 /** @type {string[]} */
 const autoVcWl = require('../autovc');
@@ -29,8 +23,8 @@ function handle (e) {
 
 function respond (msg) {
 	const keyword = 'autovc';
-	if (!msg.content.startsWith(config.prefix + keyword)) return;
-	const handler = new CommandHandler(msg.content.slice((config.prefix + keyword).length + 1));
+	if (!msg.content.startsWith(prefix + keyword)) return;
+	const handler = new CommandHandler(msg.content.slice((prefix + keyword).length + 1));
 	const { addCommand } = handler;
 
 	addCommand('on', () => {

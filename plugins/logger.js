@@ -4,6 +4,8 @@ const util = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
+const { prefix } = config;
+let { logMessages } = config;
 const whitelist = require('../whitelist');
 
 const today = new Date(Date.now()).toLocaleDateString('en-US').replace(/[/\\]/g, '-');
@@ -29,13 +31,12 @@ async function updateWhitelist () {
  */
 function loggerCommands (msg) {
 	const keyword = 'log';
-	if (!msg.content.startsWith(config.prefix)) return;
+	if (!msg.content.startsWith(prefix)) return;
 	if (msg.isPrivate || !util.senderIsOwner(msg)) return;
-	const msgChannel = msg.channel;
+	const { channel: msgChannel, guild: msgGuild} = msg;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
-	const msgGuild = msg.guild;
 
-	const handler = new CommandHandler(msg.content.slice((config.prefix + keyword).length + 1));
+	const handler = new CommandHandler(msg.content.slice((prefix + keyword).length + 1));
 
 	const { addCommand, addCommandSentence } = handler;
 
@@ -61,18 +62,18 @@ function loggerCommands (msg) {
 	});
 
 	addCommand('start', () => {
-		if (config.logMessages) sendMessage('Logging is already enabled');
+		if (logMessages) sendMessage('Logging is already enabled');
 		else {
-			config.logMessages = true;
+			logMessages = true;
 			sendMessage('Logging enabled');
 		}
 	});
 
 	addCommand('stop', () => {
-		if (!config.logMessages) sendMessage('Logging is already disabled');
+		if (!logMessages) sendMessage('Logging is already disabled');
 		else {
 			sendMessage('Logging disabled');
-			config.logMessages = false;
+			logMessages = false;
 		}
 	});
 
@@ -112,12 +113,12 @@ function logMsg (msg) {
 	// So it changes on midnight
 	const logDate = msg.createdAt.toLocaleDateString('en-US').replace(/[/\\]/g, '-');
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
-	const possibleCommand = msg.content.startsWith(config.prefix);
+	const possibleCommand = msg.content.startsWith(prefix);
 	const logLine = getLogLine(msg.createdAt, msg);
 
 	if (!msg.isPrivate) { // Guild only
 		// Guild not a property
-		if (whitelist.hasOwnProperty(msg.guild.id) && config.logMessages) {
+		if (whitelist.hasOwnProperty(msg.guild.id) && logMessages) {
 			// Guild doesn't have channel
 			if (whitelist[msg.guild.id].includes(msg.channel.id)) logToBoth(logLine);
 			else if (possibleCommand) logToBoth(logLine);

@@ -43,7 +43,7 @@ function respond (msg, client) {
 	});
 
 	addCommand('slr', () => {
-		const latestMessage = client.Messages.toArray().reverse()[0];
+		const latestMessage = client.Messages.toArray()[0];
 		cg = latestMessage.guild;
 		ctc = latestMessage.channel;
 		util.log(`Focus set to: ${cg.name} - #${ctc.name}`);

@@ -233,21 +233,25 @@ function respond (msg, client) {
 	function verifyMoveQuery (a) {
 		const senderVc = sender.getVoiceChannel();
 		if (!senderVc) return sendMessage('You\'re not in a voice channel.');
-		const pseudoVc = msgGuild.voiceChannels.find(vc => vc.name === a);
-		if (!pseudoVc) return sendMessage(`There is no voice channel named \`${a}\``);
-		return { senderVc, pseudoVc };
+		const destinationVc = msgGuild.voiceChannels.find(vc => vc.name === a);
+		if (!destinationVc) return sendMessage(`There is no voice channel named \`${a}\``);
+		return { senderVc, destinationVc };
 	}
 
 	addCommandSentence('moveUs', a => {
-		const { senderVc, pseudoVc } = verifyMoveQuery(a);
+		const result = verifyMoveQuery(a);
+		if (result instanceof Promise) return;
+		const { senderVc, destinationVc } = result;
 		const memList = senderVc.members;
-		const moves = memList.map(m => m.setChannel(pseudoVc));
+		const moves = memList.map(m => m.setChannel(destinationVc));
 		return Promise.all(moves);
 	});
 
 	addCommandSentence('moveMe', a => {
-		const { pseudoVc } = verifyMoveQuery(a);
-		return sender.setChannel(pseudoVc);
+		const result = verifyMoveQuery(a);
+		if (result instanceof Promise) return;
+		const { destinationVc } = result;
+		return sender.setChannel(destinationVc);
 	});
 
 	function fetchMoreMessages (channel, left) {

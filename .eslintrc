@@ -21,7 +21,7 @@
         "no-eval": 0,
         "no-extra-boolean-cast": 0,
         "no-tabs": 0,
-        "no-trailing-spaces": [1, { "ignoreComments": true }],
+        "no-trailing-spaces": [1, { "skipBlankLines": true, "ignoreComments": true }],
         "no-unused-vars": 1,
         "no-var": 1,
         "one-var": 0,

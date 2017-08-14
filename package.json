@@ -11,22 +11,23 @@
     "lint": "eslint -c ./.eslintrc index.js bot.js server.js \"plugins/**/*.js\" \"handler/**/*.js\""
   },
   "author": "Aeryk",
+  "repository": "github:aeryk17aj/EveKai",
   "license": "MIT",
   "dependencies": {
-    "apiai": "^4.0.2",
+    "apiai": "^4.0.3",
     "canvas": "^2.0.0-alpha.2",
     "discordie": "^0.11.0",
-    "express": "^4.15.3",
+    "express": "^4.15.4",
     "fluent-ffmpeg": "^2.1.2",
-    "mathjs": "^3.14.2",
+    "mathjs": "^3.16.1",
     "node-osu": "^1.2.0",
     "simple-get": "^2.6.0",
     "youtube-node": "^1.3.2",
-    "ytdl-core": "^0.14.4"
+    "ytdl-core": "^0.15.2"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
-    "eslint": "^4.2.0",
+    "eslint": "^4.4.1",
     "eslint-plugin-async-await": "0.0.0"
   }
 }

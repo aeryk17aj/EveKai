@@ -16,7 +16,7 @@
   "dependencies": {
     "apiai": "^4.0.3",
     "canvas": "^2.0.0-alpha.2",
-    "discordie": "^0.11.0",
+    "discordie": "github:qeled/discordie#dev",
     "express": "^4.15.4",
     "fluent-ffmpeg": "^2.1.2",
     "mathjs": "^3.16.1",

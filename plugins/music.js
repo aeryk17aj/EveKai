@@ -59,7 +59,7 @@ function respond (msg, client) {
 	// Check for some leftovers if on an empty queue
 	if (!guildQueue.length) {
 		guildQueue = fs.readdirSync(path.resolve(__dirname, './dl/' + msg.guild.id + '/'))
-			.filter(f => f.slice(-4) === '.mp3')
+			.filter(f => f.endsWith('.mp3'))
 			.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
 	}
 
@@ -78,9 +78,10 @@ function respond (msg, client) {
 
 	addCommand('join', () => {
 		boundTextChannel = msg.channel;
-		if (!sender.getVoiceChannel()) return sendMessage('You\'re not in a voice channel.');
-		sender.getVoiceChannel().join().then(() => {
-			boundVoiceChannel = sender.getVoiceChannel();
+		const senderVc = sender.getVoiceChannel();
+		if (!senderVc) return sendMessage('You\'re not in a voice channel.');
+		senderVc.join().then(() => {
+			boundVoiceChannel = senderVc;
 			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
 			// initFolders();
 		});
@@ -142,20 +143,20 @@ function respond (msg, client) {
 
 	function searchOnly (a) {
 		search(a, (res, links, pick) => {
-			const cRes = res.items[pick - 1];
+			const info = res.items[pick - 1].snippet;
 			sendMessage('', {
 				fields: [ {
 					name: 'Uploader',
-					value: `[${cRes.snippet.channelTitle}](${'https://www.youtube.com/channel/' + cRes.snippet.channelId})`
+					value: `[${info.channelTitle}](${'https://www.youtube.com/channel/' + info.channelId})`
 				}, {
 					name: 'Video',
-					value: `[${cRes.snippet.title}](${links[pick - 1]})`
+					value: `[${info.title}](${links[pick - 1]})`
 				}, {
 					name: 'Description',
-					value: cRes.snippet.description
+					value: info.description
 				} ],
 				image: {
-					url: cRes.snippet.thumbnails.high.url
+					url: info.thumbnails.high.url
 				}
 			});
 		});
@@ -191,7 +192,7 @@ function respond (msg, client) {
 			const downloadStream = ytdl(a, { filter: 'audioonly' });
 			downloadStream.on('info', i => {
 				sendMessage('Queuing: `' + i.title + '`. Don\'t play yet until ready.').then(ssmsg => smsg = ssmsg);
-				if (i['length_seconds'] >= 15 * 60) sendMessage('The video seems to be 15 minutes or more. This might take a while.');
+				if (i['length_seconds'] >= 15 * 60) sendMessage('The video is 15 minutes or longer. This might take a while.');
 				guildQueue.push(i.title.replace(/[\\/:*?"<>|]/g, '')); // File name safe
 			});
 
@@ -253,7 +254,7 @@ function respond (msg, client) {
 		}
 	}
 
-	['m p', 'music play', 'play'].forEach(s => addCommand(s, playMusic));
+	['m p', 'music play', 'play'].forEach(s => addCommandSentence(s, playMusic));
 
 	function skip () {
 		const encoder = client.VoiceConnections.find(vc => vc.voiceConnection.guild === msg.guild).voiceConnection.getEncoder();

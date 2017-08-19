@@ -1,62 +1,106 @@
-body {
+html, body {
+	margin: 0;
 	background-color: #999999;
+	font-family: 'Roboto', sans-serif;
 }
 
-.char-panel {
-	margin: auto;
-	margin-top: 50px;
+.header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	/* z-index: 1; */
+	background: #434343;
+	border-bottom: 3px solid #ffb2c5;
+}
+
+.header > div {
 	padding: 10px;
-	display: flex;
-	flex-wrap: wrap;
-	width: 292px;
-	/*height: 202px;*/
+	margin: 0 auto;
 }
 
-.char-panel > .img-bg {
-	height: 146px;
-	background-color: #212121;
+.page-logo {
+	/* height: 146px; */
+	display: inline-block;
+	vertical-align: middle;
+	border-radius: 35px;
+	background: #212121;
 }
 
-.char-panel .pfp {
-	padding: 10px;
+.page-logo * {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.page-logo img {
+	height: 70px;
+	margin: 10px;
 	border-radius: 100%;
+	border: 3px solid #ffb2c5;
 }
 
-.char-panel > .name-bg {
-	width: 146px;
-	background-color: #434343;
+.page-logo a {
+	vertical-align: middle;
+	overflow: hidden;
+	white-space: nowrap;
+	font-size: 36px;
+	height: 48px;
+	width: 0px;
+	text-decoration: none;
+	color: #ffb2c5;
 }
 
-.char-panel .name {
-	/*Miraculously centered*/
-	margin: 30%;
-	margin-left: 20%;
-	font-size: 48px;
-	font-family: Whitney, Helvetica Neue, Helvetica, Arial, sans-serif;
-	color: #FFB2C5;
+.page-logo:hover > a{
+	width: 163.39px;
+	margin-right: 25px;
+	opacity: 1;
+	transition: all 0.4s ease-in;
 }
 
-.char-panel > .invite-button {
-	width: 100%;
-	height: 56px;
-	background-color: #656565;
+.page-logo img + a {
+	width: 0;
+	margin-right: 0;
+	opacity: 0;
+	transition: all 0.4s ease-out;
 }
 
-.invite-button > p {
-	margin-top: 13px;
+@keyframes slide-in {
+	from {
+		opacity: 1;
+		width: 163.39px;
+		margin-right: 25px;
+	} to {
+		opacity: 0;
+		width: 0;
+		margin-right: 0;
+	}
+}
+
+.page-nav {
+	display: inline-block;
+	vertical-align: middle;
+	/* width: calc(100% - 280px); */
+	padding: 0;
+	margin: 0;
+	margin-left: 10px;
+	list-style: none;
+}
+
+.page-nav li {
+	margin: 0;
+	margin-right: 15px;
 	text-align: center;
+	display: inline-block;
 }
 
-.invite-button > p > a {
-	width: 68px;
-	height: 16px; /* Reinforcing */
+.page-nav li a {
 	border: 2px solid white;
 	border-radius: 15px;
-	padding: 5px;
+	padding: 7px 5px;
 	display: inline-block;
-	background-color: #434343;
-	color: white;
-	font-size: 14px;
+	background: white;
+	color: #999;
+	font-size: 20px;
 	font-family: Whitney, Helvetica Neue, Helvetica, Arial, sans-serif;
 	text-decoration: none;
 }

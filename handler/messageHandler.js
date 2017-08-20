@@ -11,20 +11,15 @@ const autoVcCommands = require('./vcHandler');
 // Game-related
 const osu = require('../plugins/osu');
 
-/** @typedef IMessage */
-/** @typedef Discordie */
-/** @typedef MessageCreateEvent
- * 	  @prop {IMessage} message Event Message */
-
 /**
  * Fired every time a message is received by the bot.
- * @param {MessageCreateEvent} e Event object
+ * @param {{msg: IMessage}} e Event object
  * @param {Discordie} client Bot client
  */
 function handle (e, client) {
 	if (!e) return;
 	const msg = e.message;
-	logger.init(msg);
+	logger.init(msg, client);
 	general.respond(msg, client);
 	if (!msg || !msg.content) return;
 	osu.respond(msg);

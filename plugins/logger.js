@@ -108,13 +108,14 @@ function loggerCommands (msg) {
  * Logs every whitelisted channel's messages to a single file.
  * Considering on having multiple files separated by folders named by the day
  * @param {IMessage} msg Message object
+ * @param {Discordie} client
  */
-function logMsg (msg) {
+function logMsg (msg, client) {
 	// So it changes on midnight
 	const logDate = msg.createdAt.toLocaleDateString('en-US').replace(/[/\\]/g, '-');
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
 	const possibleCommand = msg.content.startsWith(prefix);
-	const logLine = getLogLine(msg.createdAt, msg);
+	const logLine = getLogLine(msg.createdAt, msg, client);
 
 	if (!msg.isPrivate) { // Guild only
 		// Guild not a property
@@ -126,21 +127,59 @@ function logMsg (msg) {
 	}
 }
 
-function getLogLine (time, msg) {
+/**
+ * @param {Date} time 
+ * @param {IMessage} msg 
+ * @returns {String}
+ */
+function getLogLine (time, msg, client) {
 	const timeString = `[${time.toLocaleDateString('en-US')} ${time.toLocaleTimeString('en-US', {hour12: true})}]`;
+	const channel = `[${!msg.isPrivate ? msg.guild.name + ': #' + msg.channel.name : 'DM: ' + msg.channel.recipient.username}]`;
+	const sender = `${(msg.member || msg.author).username}:`; // IUser as substitute for the case of DMs
 	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
 
 	return [
 		timeString,
-		`[${!msg.isPrivate ? msg.guild.name + ': #' + msg.channel.name : 'DM: ' + msg.channel.recipient.username}]`,
-		`${(msg.member || msg.author).username}:`, // IUser as substitute for the case of DMs
-		msg.content,
+		channel,
+		sender,
+		resolveMessageContent(msg.content, msg.guild, client),
 		attachments
 	].join(' ');
 }
 
-function init (msg) {
-	logMsg(msg);
+/**
+ * Similar to `IMessage.resolveContent()` / `IMessageCollection.resolveContent(c, g?)` but:
+ * 
+ * - User / nickname mention: includes discriminator and id
+ * - Channel and Role: indicates if channel or role
+ * 
+ * @param {String} content
+ * @param {Discordie} client
+ * @returns {String}
+ */
+function resolveMessageContent (content, guild, client) {
+	return content.replace(/<(@!?|#|@&)([0-9]+)>/g, (match, type, id) => {
+		if (type === '@' || type === '@!') { // user
+			const user = client.Users.get(id);
+			if (!user) return match;
+			if (guild && type === '@!') {
+				const member = user.memberOf(guild);
+				return (member && ('@' + member.name + `#${member.discriminator}(${member.id})`)) || match;
+			}
+			return (user && ('@' + user.username + `(${user.id})`)) || match;
+		} else if (type === '#') { // channel
+			const channel = client.Channels.get(id);
+			return (channel && ('#' + channel.name + '(Channel)')) || match;
+		} else if (type === '@&') { // role
+			if (!guild || !guild.roles) return match;
+			const role = guild.roles.find(r => r.id === id);
+			return (role && ('@' + role.name + '(Role)')) || match;
+		}
+	});
+}
+
+function init (msg, client) {
+	logMsg(msg, client);
 	loggerCommands(msg);
 }
 

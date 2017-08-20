@@ -3,13 +3,16 @@ const util = require('../util/botUtil');
 const logger = require('../plugins/logger');
 
 // const config = require('../config');
+/** @type {IGuild | undefined} */
 let cg;
+/** @type {ITextChannel | undefined} */
 let ctc;
 
 /**
  * Ahh the sweet land of no permission checks because the console is owner-only
  *
  * @param {string} msg
+ * @param {Discordie} client
  */
 function respond (msg, client) {
 	const handler = new CommandHandler(msg);

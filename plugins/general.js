@@ -1,6 +1,5 @@
 const CommandHandler = require('../util/msgUtil');
-const Discordie = require('discordie');
-const Permissions = Discordie.Permissions;
+const Permissions = require('discordie').Permissions;
 const math = require('mathjs');
 
 const { logToBoth } = require('./logger');
@@ -22,32 +21,12 @@ const leaveQuotes = require('../quotes/disconnect');
 const docLinks = require('../quotes/docs');
 
 /**
- * @callback channel~sendMessage
- * @param {string} message The message to be sent
- * @param {booleam} tts Determines whether the message will be sent as a TTS message
- * @param {object} embed Embed object
- * @returns {Promise<{}>}
- */
-
-/**
- * @typedef ITextChannel
- * @prop {function} sendMessage Sends a message
- */
-
-/**
- * @typedef IMessage
- * @prop {string} content The string content of the message
- * @prop {ITextChannel} channel The text channel the message belongs to
- * @prop {boolean} isPrivate Determines whether the message is in a direct message channel or not
- */
-
-/**
  * Primary message listener
  * @param {IMessage} msg Message object to be used
  * @param {Discordie} client description
  */
 function respond (msg, client) {
-	const { content: msgText, channel: msgChannel, guild: msgGuild} = msg;
+	const { content: msgText, channel: msgChannel, guild: msgGuild } = msg;
 	if (!msgText.startsWith(prefix)) return;
 	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 

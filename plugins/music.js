@@ -24,7 +24,9 @@ let guildQueue = [];
 // Might have to implement some per-server config and states
 let stopPlaying = false;
 
+/** @type {ITextChannel | null} */
 let boundTextChannel = null;
+/** @type {IVoiceChannel | null} */
 let boundVoiceChannel = null;
 
 let repeatOne = false;
@@ -32,6 +34,11 @@ let repeatAll = false;
 
 let busy = false;
 
+/**
+ * @param {IMessage} msg 
+ * @param {Discordie} client 
+ * @returns void
+ */
 function respond (msg, client) {
 	if (msg.isPrivate) return;
 	const { content: msgText, member: sender } = msg;

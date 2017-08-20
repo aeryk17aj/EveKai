@@ -97,7 +97,11 @@ function respond (msg, client) {
 		'8ball <yes/no question, always ends with a question mark>',
 		'prune <\'all\' or user mention> <amount>',
 		'time',
-		'elwiki'
+		'elwiki <page name / search query>',
+		'math <math expression>',
+		'emoji <server or native emoji>',
+		'moveUs',
+		'moveMe'
 	];
 
 	const musicCommands = [

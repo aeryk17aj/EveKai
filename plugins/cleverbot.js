@@ -1,4 +1,5 @@
 // Not the actual cleverbot, under heaevy development (bot side)
+// TODO: At the very least, make it usable
 const apiai = require('apiai');
 const util = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
@@ -52,8 +53,8 @@ function cleverCommands (msg) {
 
 	addCommandResponse('isClever',
 		config.modules.clever
-		? 'Yup'
-		: 'Nope'
+			? 'Yup'
+			: 'Nope'
 	);
 
 	addCommand('oldClever', () => {

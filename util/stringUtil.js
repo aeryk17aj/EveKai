@@ -32,10 +32,10 @@ function codeL (s) {
  */
 function codeB (s) {
 	return Array.isArray(s)
-	// Array case
-	? ['```', ...s, '```'].join('\n')
-	// String case
-	: '```' + s + '```';
+		// Array case
+		? ['```', ...s, '```'].join('\n')
+		// String case
+		: '```' + s + '```';
 }
 
 /**

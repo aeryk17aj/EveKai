@@ -16,7 +16,7 @@ const osuApi = new osu.Api(process.env.OSU_KEY || require('../auth').osuKey, {
  * @returns void
  */
 function respond (msg) {
-	const { content: msgText, channel: msgChannel } = msg
+	const { content: msgText, channel: msgChannel } = msg;
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
@@ -207,7 +207,7 @@ function respond (msg) {
 				'K': '(\u{1F535})',	// K -> blue circle in brackets
 				'D': '(\u{1F534})',	// D -> red circle in brackets
 				' ': '   '			// space x3
-			}[b]
+			}[b];
 		}));
 	});
 }

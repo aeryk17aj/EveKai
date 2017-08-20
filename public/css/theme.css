@@ -27,7 +27,7 @@ html, body {
 	background: #212121;
 }
 
-.page-logo * {
+.page-logo img, .page-logo a {
 	display: inline-block;
 	vertical-align: middle;
 }
@@ -45,7 +45,7 @@ html, body {
 	white-space: nowrap;
 	font-size: 36px;
 	height: 48px;
-	width: 0px;
+	width: 0;
 	text-decoration: none;
 	color: #ffb2c5;
 }

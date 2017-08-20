@@ -1,39 +1,42 @@
 const osu = require('node-osu');
 const util = require('util');
 
-const stringUtil = require('../util/stringUtil');
+const { commaPad } = require('../util/stringUtil');
 const CommandHandler = require('../util/msgUtil');
 
-const config = require('../config');
+const { prefix } = require('../config');
 
 const osuApi = new osu.Api(process.env.OSU_KEY || require('../auth').osuKey, {
 	notFoundAsError: true,
 	completeScores: false
 });
 
-const commaPad = s => stringUtil.commaPad(s);
-
+/**
+ * @param {IMessage} msg
+ * @returns void
+ */
 function respond (msg) {
-	const msgText = msg.content;
-	const msgChannel = msg.channel;
+	const { content: msgText, channel: msgChannel } = msg
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
-	const command = msgText.slice(config.prefix.length);
+	const command = msgText.slice(prefix.length);
 	const handler = new CommandHandler(command);
 
-	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
+	const { addCommandSentence } = handler;
 
 	/**
-	 * $1 (\d+) Set ID
-	 * $2 (\d+) Map ID
+	 * Group 1 `(\d+)` Set ID
+	 *
+	 * Group 2 `(\d+)` Map ID
 	 */
 	const newMapLink = /https?:\/\/new\.ppy\.sh\/beatmapsets\/(\d+)(?:#(?:osu|taiko|fruits|mania)\/(\d+))?/g;
 
 	/**
-	 * $1 ([b|s]) Set/Map Indicator
-	 * $2 (\d+) Set/Map ID
+	 * Group 1 `([b|s])` Set/Map Indicator
+	 *
+	 * Group 2 `(\d+)` Set/Map ID
 	 */
 	const beatmapLink = /https?:\/\/osu\.ppy\.sh\/([b|s])\/(\d+)/g;
 
@@ -118,7 +121,7 @@ function respond (msg) {
 		else return 0;
 	}
 
-	if (!msgText.startsWith(config.prefix)) return;
+	if (!msgText.startsWith(prefix)) return;
 
 	addCommandSentence('osu', a => {
 		const csArgs = a.split(', ');
@@ -197,13 +200,15 @@ function respond (msg) {
 	});
 
 	addCommandSentence('tvis', a => {
-		const converted = a
-		.replace(/k/g, '\u{1F535}') // k -> blue circle
-		.replace(/d/g, '\u{1F534}') // d -> red circle
-		.replace(/K/g, '(\u{1F535})') // K -> blue circle in brackets
-		.replace(/D/g, '(\u{1F534})') // D -> red circle in brackets
-		.replace(/ /g, '   '); // space x3
-		sendMessage(converted);
+		sendMessage(a.replace(/k|d|K|D| /, b => {
+			return {
+				'k': '\u{1F535}',	// k -> blue circle
+				'd': '\u{1F534}',	// d -> red circle
+				'K': '(\u{1F535})',	// K -> blue circle in brackets
+				'D': '(\u{1F534})',	// D -> red circle in brackets
+				' ': '   '			// space x3
+			}[b]
+		}));
 	});
 }
 

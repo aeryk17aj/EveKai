@@ -4,6 +4,8 @@ logs/*
 !logs/README.md
 node_modules/*
 plugins/dl/*
+guild-config/*
+!guild-config/README.md
 
 auth.json
 userIds.json
@@ -15,5 +17,4 @@ whitelist.json
 #for now
 db/*
 commands/*
-*.png
 !*/*.png

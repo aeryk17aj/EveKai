@@ -367,7 +367,7 @@ function respond (msg, client) {
 
 			const encoder = voiceConnection.getEncoder(options);
 
-			const { onNeedBuffer: needBuffer } = encoder;
+			let { onNeedBuffer: needBuffer } = encoder;
 			needBuffer = () => {
 				const chunk = ff_out.read(readSize);
 

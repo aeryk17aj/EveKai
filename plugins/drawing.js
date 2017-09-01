@@ -5,7 +5,7 @@ const get = require('simple-get');
 const fs = require('fs');
 const path = require('path');
 
-const util = require('../util/botUtil');
+const { log } = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const { prefix } = require('../config');
@@ -26,10 +26,10 @@ function respond (msg) {
 
 	const command = msgText.slice(prefix.length);
 	const handler = new CommandHandler(command);
-
+	
 	if (!msgText.startsWith(prefix)) return;
-
-	const addCommand = (c, f) => handler.addCommand(c, f);
+	
+	const { addCommand } = handler;
 	const addDrawCommandSync = (c, f, w, h) => addCommand(c, () => {
 		const canvas = new Canvas(w || 640, h || 480);
 		const ctx = canvas.getContext('2d');
@@ -37,6 +37,7 @@ function respond (msg) {
 		const imgBuffer = canvas.toBuffer();
 		uploadFile(imgBuffer);
 	});
+
 	/* const addDrawCommand = (c, f, w, h) => addCommand(c, () => {
 		const canvas = new Canvas(w || 640, h || 480);
 		const ctx = canvas.getContext('2d');
@@ -62,6 +63,7 @@ function respond (msg) {
 	const hasAvatar = fs.readdirSync(path.resolve(__dirname, guildFolder + '/_img')).includes(`${sender.id} - ${sender.avatar}.jpg`);
 
 	async function getPfp () {
+		if (fs.existsSync(imgOut)) return;
 		get({ url: senderPfp, headers: { 'Content-Type': 'image/jpeg' } }, (err, stream) => downloadPicture(err, stream, () => Promise.resolve));
 	}
 
@@ -71,7 +73,7 @@ function respond (msg) {
 	 * @param {function} cb
 	 */
 	function downloadPicture (err, stream, cb) {
-		if (err) util.log(err);
+		if (err) log(err);
 		const write = stream.pipe(fs.createWriteStream(imgOut));
 		
 		write.on('finish', cb);

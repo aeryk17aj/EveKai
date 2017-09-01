@@ -38,6 +38,13 @@ function getDifficultyInfo (diff) {
 	};
 }
 
+/**
+ * Used for sorting a beatmap array basead on star difficulty, easiest to hardest
+ * 
+ * @param {any} a 
+ * @param {any} b 
+ * @returns 
+ */
 function compareDifficulty (a, b) {
 	const sr1 = parseFloat(a.difficulty.rating);
 	const sr2 = parseFloat(b.difficulty.rating);

@@ -1,5 +1,5 @@
 const CommandHandler = require('../util/msgUtil');
-const util = require('../util/botUtil');
+const { log } = require('../util/botUtil');
 const logger = require('../plugins/logger');
 
 // const config = require('../config');
@@ -28,28 +28,28 @@ function respond (msg, client) {
 		const guilds = client.Guilds;
 		const foundGuild = guilds.find(g => g.name === a);
 		if (foundGuild) cg = foundGuild;
-		else util.log(`Guild '${a}' not found.`);
+		else log(`Guild '${a}' not found.`);
 		if (ctc) ctc = undefined;
 	});
 
 	addCommand('lsgtc', () => {
-		if (!cg) util.log('No guild was set.');
-		else util.log(cg.textChannels.map(tc => tc.name));
+		if (!cg) log('No guild was set.');
+		else log(cg.textChannels.map(tc => tc.name));
 	});
 
 	addCommandSentence('stc', a => {
-		if (!cg) return util.log('Set a Guild first.');
+		if (!cg) return log('Set a Guild first.');
 		const tcs = cg.textChannels;
 		const foundChannel = tcs.find(c => c.name === a);
 		if (foundChannel) ctc = foundChannel;
-		else util.log(`Text channel '${a}' not found in ${cg.name}.`);
+		else log(`Text channel '${a}' not found in ${cg.name}.`);
 	});
 
 	addCommand('slr', () => {
 		const latestMessage = client.Messages.toArray()[0];
 		cg = latestMessage.guild;
 		ctc = latestMessage.channel;
-		util.log(`Focus set to: ${cg.name} - #${ctc.name}`);
+		log(`Focus set to: ${cg.name} - #${ctc.name}`);
 	});
 
 	addCommand('resetFocus', () => {
@@ -57,7 +57,7 @@ function respond (msg, client) {
 	});
 
 	addCommandSentence('say', a => {
-		if (!cg || !ctc) return util.log('No set Guild and/or text channel.');
+		if (!cg || !ctc) return log('[readline] No set Guild and/or text channel.');
 		else ctc.sendMessage(a);
 	});
 
@@ -65,14 +65,15 @@ function respond (msg, client) {
 		let result;
 		return new Promise(resolve => {
 			result = eval(a);
-			resolve('Success');
+			resolve();
 		}).catch(() => {
-			logger.logToBoth('[System] Evaluation error');
-		}).then(v => {
-			if (v === 'Success') {
-				if (typeof result === 'string' || typeof result === 'number' || typeof result === 'boolean') util.log(result);
-				else if (Array.isArray(result)) util.log(result.join(', '));
-				// else util.log('Eval Success');
+			logger.logToBoth('[readline] Evaluation error');
+		}).then(() => {
+			switch (typeof result) {
+				case 'string': case 'number': case 'boolean':
+					log(result); break;
+				default:
+					if (Array.isArray(result)) log(result.join(', '));
 			}
 		});
 	});

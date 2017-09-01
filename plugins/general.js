@@ -7,13 +7,7 @@ const util = require('../util/botUtil');
 const { codeL, getCodePoint } = require('../util/stringUtil');
 const { rInAr } = require('../util/arrayUtil');
 
-/**
- * @typedef Configuration
- * @type {object}
- * @prop {string} prefix - The bot's prefix
-*/
-
-/** @type {Configuration} */
+/** @type {{prefix: string}} */
 const { prefix } = require('../config');
 
 const ballQuotes = require('../quotes/8ball');
@@ -181,21 +175,19 @@ function respond (msg, client) {
 		return new Promise((resolve, reject) => {
 			result = eval(a);
 			if (result === msgText) reject();
-			else resolve('Success');
+			else resolve();
 		}).catch(e => {
 			// sendMessage('\u{1F52B}'); // Peestol
 			process.stdout.write(`Failed eval in ${msgGuild.name} : ${msgChannel.name}\n\n${e}\n`);
 			sendMessage('It didn\'t work.');
-		}).then(v => {
-			if (v === 'Success') {
-				switch (typeof result) {
-					case 'string': case 'number': case 'boolean':
-						sendMessage(result); break;
-					default:
-						if (Array.isArray(result)) sendMessage(result.join(', '));
-						// else sendMessage('\u{1F44C}'); // Ok hand sign
-				}
-			}
+		}).then(() => {
+			switch (typeof result) {
+				case 'string': case 'number': case 'boolean':
+					sendMessage(result); break;
+				default:
+					if (Array.isArray(result)) sendMessage(result.join(', '));
+					// else sendMessage('\u{1F44C}'); // Ok hand sign
+			}			
 		});
 	});
 

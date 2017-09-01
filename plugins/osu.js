@@ -32,7 +32,7 @@ function respond (msg) {
 	 *
 	 * Group 2 `(\d+)` Map ID
 	 */
-	const newMapLink = /https?:\/\/new\.ppy\.sh\/beatmapsets\/(\d+)(?:#(?:osu|taiko|fruits|mania)\/(\d+))?/g;
+	const newMapLink = /https?:\/\/osu\.ppy\.sh\/beatmapsets\/(\d+)(?:#(?:osu|taiko|fruits|mania)\/(\d+))?/g;
 
 	/**
 	 * Group 1 `([b|s])` Set/Map Indicator

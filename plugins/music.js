@@ -51,7 +51,7 @@ function respond (msg, client) {
 	}
 
 	const sendMessage = (m, e) => textChannel.sendMessage(m, false, e);
-	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(m.delete, 3000);
+	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(m.delete, 3000));
 
 	const { addCommand, addCommandSentence } = new CommandHandler(command);
 

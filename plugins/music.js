@@ -239,7 +239,7 @@ function respond (msg, client) {
 			else */
 			play(voiceChannel.getVoiceConnectionInfo());
 		} else {
-			// TODO: Make it play the specified number
+			play(voiceChannel.getVoiceConnectionInfo(), a);
 		}
 	}
 
@@ -323,7 +323,7 @@ function respond (msg, client) {
 	 * @param {VoiceConnectionInfo} vcInfo 
 	 * @returns 
 	 */
-	function play (vcInfo) {
+	function play (vcInfo, index) {
 		stopPlaying = false;
 		if (busy && !stopPlaying && guildQueue.length <= 1) return sendMessage('Still processing your request(s)...');
 
@@ -331,7 +331,7 @@ function respond (msg, client) {
 		const channels = 2;
 		const bitDepth = 16;
 
-		const songName = guildQueue[0];
+		const songName = guildQueue[index - 1 || 0];
 		sendMessage('Now playing: `' + songName + '`');
 
 		if (ffmpeg) ffmpeg.kill();

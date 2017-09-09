@@ -51,6 +51,7 @@ function respond (msg, client) {
 	}
 
 	const sendMessage = (m, e) => textChannel.sendMessage(m, false, e);
+	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(m.delete, 3000);
 
 	const { addCommand, addCommandSentence } = new CommandHandler(command);
 
@@ -70,7 +71,7 @@ function respond (msg, client) {
 	addCommand('join', () => {
 		boundTextChannel = textChannel;
 		const senderVc = sender.getVoiceChannel();
-		if (!senderVc) return sendMessage('You\'re not in a voice channel.');
+		if (!senderVc) return sendErrorMessage('You\'re not in a voice channel.');
 		senderVc.join().then(() => {
 			boundVoiceChannel = senderVc;
 			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
@@ -81,7 +82,7 @@ function respond (msg, client) {
 	addCommand('leave', () => {
 		const clientVc = client.User.getVoiceChannel(guild);
 		stop(clientVc.getVoiceConnectionInfo().voiceConnection.getEncoder());
-		if (!clientVc) return sendMessage('Not in a voice channel.');
+		if (!clientVc) return sendErrorMessage('Not in a voice channel.');
 		else clientVc.leave();
 		boundTextChannel = null;
 		boundVoiceChannel = null;
@@ -165,7 +166,8 @@ function respond (msg, client) {
 	 */
 	function addToQueue (a) {
 		// Channel check
-		if (!client.User.getVoiceChannel(guild)) return sendMessage('Not in a voice channel.');
+		if (!client.User.getVoiceChannel(guild)) 
+			return sendErrorMessage('Not in a voice channel.');
 
 		const validLink = /https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?v=/;
 
@@ -220,8 +222,10 @@ function respond (msg, client) {
 
 	function removeTrack (a) {
 		const trackNumber = a; // Number(a);
-		if (!trackNumber) return sendMessage('Not a valid track number.');
-		else if (trackNumber > guildQueue.length) return sendMessage(`There are only ${guildQueue.length} songs in the queue.`);
+		if (!trackNumber) 
+			return sendErrorMessage('Not a valid track number.');
+		else if (trackNumber > guildQueue.length) 
+			return sendErrorMessage(`There are only ${guildQueue.length} songs in the queue.`);
 		else {
 			const deletedTrack = guildQueue.splice(trackNumber - 1, 1);
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${deletedTrack}.mp3`));
@@ -231,7 +235,7 @@ function respond (msg, client) {
 	['m r', 'music remove', 'remove'].forEach(s => addCommandSentence(s, removeTrack));
 
 	function playMusic (a) {
-		if (!guildQueue.length) return sendMessage('There is nothing to play.');
+		if (!guildQueue.length) return sendErrorMessage('There is nothing to play.');
 
 		if (!a || !a.length) {
 			const voiceChannel = client.User.getVoiceChannel(guild);
@@ -259,7 +263,7 @@ function respond (msg, client) {
 	['m s', 'skip'].forEach(s => addCommand(s, skip));
 
 	function toggleRepeatOne () {
-		if (repeatOne) return sendMessage('Already on.');
+		if (repeatOne) return sendErrorMessage('Already on.');
 		else {
 			return sendMessage('Okie').then(() => {
 				repeatAll = false;
@@ -271,7 +275,7 @@ function respond (msg, client) {
 	['m re one', 'repeat one'].forEach(s => addCommand(s, toggleRepeatOne));
 
 	function toggleRepeatAll () {
-		if (repeatAll) return sendMessage('Already on.');
+		if (repeatAll) return sendErrorMessage('Already on.');
 		else {
 			return sendMessage('Okie').then(() => {
 				repeatAll = true;
@@ -283,7 +287,9 @@ function respond (msg, client) {
 	['m re all', 'repeat all'].forEach(s => addCommand(s, toggleRepeatAll));
 
 	function repeatOff () {
-		if (!(repeatOne || repeatAll)) return sendMessage('Not on repeat.');
+		if (!(repeatOne || repeatAll)) {
+			return sendErrorMessage('Not on repeat.');
+		}
 		else {
 			return sendMessage('Okie').then(() => {
 				repeatAll = false;
@@ -325,7 +331,8 @@ function respond (msg, client) {
 	 */
 	function play (vcInfo, index) {
 		stopPlaying = false;
-		if (busy && !stopPlaying && guildQueue.length <= 1) return sendMessage('Still processing your request(s)...');
+		if (busy && !stopPlaying && guildQueue.length <= 1) 
+			return sendErrorMessage('Still processing your request(s)...');
 
 		const sampleRate = 48000;
 		const channels = 2;

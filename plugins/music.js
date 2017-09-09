@@ -190,7 +190,7 @@ function respond (msg, client) {
 			const vidOut = path.resolve(__dirname, `${guildFolder}/_vid/${guildQueue.length + 1} - ${vidId}.mp4`);
 			downloadStream.pipe(fs.createWriteStream(vidOut)).on('finish', () => {
 				const mp3Out = path.resolve(__dirname, `${guildFolder}/${guildQueue[guildQueue.length - 1]}.mp3`);
-				downloadStream.destroy(); // Destroy download stream
+				downloadStream.destroy();
 				fluentffmpeg()
 					.input(vidOut)
 					.audioCodec('libmp3lame')
@@ -198,8 +198,8 @@ function respond (msg, client) {
 					.save(mp3Out)
 					.on('end', () => {
 						busy = false;
-						fs.unlink(vidOut); // Delete mp4 file, no need to wait
-						return smsg.edit('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
+						fs.unlink(vidOut);
+						smsg.edit('`' + guildQueue[guildQueue.length - 1] + '` is ready to be played.');
 					});
 			});
 		}

@@ -11,14 +11,7 @@ const { logToBoth } = require('./plugins/logger');
 // Utility
 const { ensureFoldersExist } = require('./util/botUtil');
 
-/**
- * @typedef Configuration
- * @type {object}
- * @property {string} prefix - The bot's prefix
- * @property {boolean} hide - Factor to whether the bot oges invisible on start / resume or not
-*/
-
-/** @type {Configuration} */
+/** @type {{ prefix: string, hide: boolean }} */
 const config = require('./config');
 
 const Events = Discordie.Events;

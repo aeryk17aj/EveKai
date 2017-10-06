@@ -4,6 +4,8 @@ const get = require('simple-get');
 
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
+const readFile = util.promisify(fs.readFile);
 
 const { log } = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
@@ -31,11 +33,13 @@ function respond (msg) {
 	
 	const { addCommand } = handler;
 	const addDrawCommandSync = (c, f, w, h) => addCommand(c, () => {
-		const canvas = new Canvas(w || 640, h || 480);
+		const canvas = Canvas.createCanvas(w || 640, h || 480);
 		const ctx = canvas.getContext('2d');
 		f(ctx, canvas, w, h);
-		const imgBuffer = canvas.toBuffer();
-		uploadFile(imgBuffer);
+		canvas.toBuffer((err, buf) => {
+			if (err) return console.log('Error converting image to buffer');
+			uploadFile(buf);
+		});
 	});
 
 	/* const addDrawCommand = (c, f, w, h) => addCommand(c, () => {
@@ -69,7 +73,7 @@ function respond (msg) {
 
 	/**
 	 * @param {Error} err
-	 * @param {Readable} stream
+	 * @param {NodeJS.ReadableStream} stream
 	 * @param {function} cb
 	 */
 	function downloadPicture (err, stream, cb) {
@@ -79,21 +83,21 @@ function respond (msg) {
 		write.on('finish', cb);
 	}
 
-	addDrawCommandSync('drawMe', (ctx, canvas, w, h) => {
-		if (!hasAvatar) getPfp();
+	addDrawCommandSync('drawMe', async (ctx, canvas, w, h) => {
+		if (!hasAvatar) await getPfp();
 		ctx.fillStyle = '#FFB2C5';
 		ctx.fillRect(0, 0, w, h);
 		ctx.fillStyle = 'white';
 		ctx.font = '16px serif';
 		ctx.fillText(sender.nick || sender.username, 10, 17, 140);
-		const pfp = new Image();
-		pfp.src = fs.readFileSync(imgOut);
-		ctx.drawImage(pfp, 21, 51, 128, 128); // FIXME:
+		const pfp = Canvas.loadImage(await readFile(imgOut));
+		ctx.drawImage(await pfp, 21, 51, 128, 128); // FIXME:
 	}, 170, 200);
 
 	addCommand('dlpfp', () => {
 		if (!hasAvatar) getPfp();
 	});
+
 }
 
 exports.respond = respond;

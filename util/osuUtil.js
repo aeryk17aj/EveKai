@@ -1,3 +1,5 @@
+const util = require('util');
+
 /**
  * Provides a part of an embed object with general information of the mapset.
  *
@@ -5,16 +7,22 @@
  * @returns {{ color: number, thumbnail: { url: string }, title: string, description: string}}
  */
 function getGeneralMapInfo (set) {
-	const diff = set[0];
+	const {
+		artist,
+		bpm,
+		beatmapSetId,
+		creator,
+		tags,
+		time,
+		title
+	} = set[0];
 	return {
 		color: 0xFFB2C5,
-		thumbnail: { url: `http://b.ppy.sh/thumb/${diff.beatmapSetId}l.jpg` },
-		title: util.format('%s - %s by %s',
-			diff.artist,
-			diff.title,
-			diff.creator),
-		description: util.format('**Length**: %s **BPM**: %s\n**Tags**: %s\n-------------------',
-			diff.time.total, diff.bpm, diff.tags.join(' '))
+		thumbnail: { url: `http://b.ppy.sh/thumb/${beatmapSetId}l.jpg` },
+		title: util.format('%s - %s by %s', artist, title, creator),
+		description: util.format(
+			'**Length**: %s **BPM**: %s\n**Tags**: %s\n-------------------',
+			time.total, bpm, tags.join(' '))
 	};
 }
 
@@ -25,15 +33,27 @@ function getGeneralMapInfo (set) {
  * @returns {{ name: string, value: string }}
  */
 function getDifficultyInfo (diff) {
+	const {
+		difficulty: {
+			approach,
+			overall,
+			drain,
+			rating,
+			size
+		},
+		maxCombo,
+		version
+	} = diff;
+
 	return {
-		name: `__${diff.version}__`,
+		name: `__${version}__`,
 		value: [
-			`**Difficulty**: ${parseFloat(diff.difficulty.rating).toFixed(2)}★ `,
-			`**Max Combo**: x${diff.maxCombo}\n`,
-			`**AR**: ${diff.difficulty.approach} `,
-			`**OD**: ${diff.difficulty.overall} `,
-			`**HP**: ${diff.difficulty.drain} `,
-			`**CS**: ${diff.difficulty.size}`
+			`**Difficulty**: ${parseFloat(rating).toFixed(2)}★ `,
+			`**Max Combo**: x${maxCombo}\n`,
+			`**AR**: ${approach} `,
+			`**OD**: ${overall} `,
+			`**HP**: ${drain} `,
+			`**CS**: ${size}`
 		].map(a => '▸' + a).join('')
 	};
 }
@@ -58,4 +78,4 @@ module.exports = {
 	getGeneralMapInfo,
 	getDifficultyInfo,
 	compareDifficulty
-}
+};

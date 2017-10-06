@@ -1,5 +1,4 @@
 const osu = require('node-osu');
-const util = require('util');
 
 const { commaPad } = require('../util/stringUtil');
 const CommandHandler = require('../util/msgUtil');

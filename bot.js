@@ -37,7 +37,7 @@ client.connect({ token: process.env.BOT_TOKEN || require('./auth').loginToken })
 
 client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unused-vars
 	client.User.setStatus(config.hide ? 'invisible' : 'online');
-	if (client.User.status === 'online') client.User.setGame('with new discoveries');
+	if (client.User.status === 'online') client.User.setGame('the usual stuff');
 	log('[Startup] Checking music folders...');
 	ensureFoldersExist(client);
 	log('[Startup] Connected.');

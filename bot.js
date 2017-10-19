@@ -33,19 +33,19 @@ rl.on('line', c =>
 
 client.connect({ token: process.env.BOT_TOKEN || require('./auth').loginToken });
 
+function getCurrentTime () {
+	return new Date(Date.now()).toLocaleString('en-US');
+}
+
 // Connection-related
 
 client.Dispatcher.on(Events.GATEWAY_READY, e => { // eslint-disable-line no-unused-vars
 	client.User.setStatus(config.hide ? 'invisible' : 'online');
 	if (client.User.status === 'online') client.User.setGame('the usual stuff');
-	log('[Startup] Checking music folders...');
+	log(`[${getCurrentTime()}] Checking music folders...`);
 	ensureFoldersExist(client);
-	log('[Startup] Connected.');
+	log(`[${getCurrentTime()}] Connected.`);
 });
-
-function getCurrentTime () {
-	return new Date(Date.now()).toLocaleString('en-US');
-}
 
 client.Dispatcher.on(Events.DISCONNECTED, e =>
 	log(`[${getCurrentTime()}] Connection interrupted. (${e.error})`));

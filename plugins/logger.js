@@ -11,7 +11,7 @@ const whitelist = require('../whitelist');
 const today = new Date(Date.now()).toLocaleDateString('en-US').replace(/[/\\]/g, '-');
 let logFile = fs.createWriteStream(process.cwd() + '/logs/chatlog-' + today + '.txt', {flags: 'a'});
 
-// Stuff that doesn't need to be inside
+// Information that is NOT outputted but stored
 function addToLog (s) {
 	logFile.write(s + '\n');
 }
@@ -43,9 +43,12 @@ function loggerCommands (msg) {
 	if (!whitelist[msgGuild.id]) whitelist[msgGuild.id] = [];
 
 	addCommand('status', () => {
-		if (whitelist[msgGuild.id].includes(msgChannel.id)) sendMessage('👍');
-		else if (Object.keys(whitelist).includes(msgGuild.id)) sendMessage('👎');
-		else sendMessage('👎 (Whole server)');
+		if (whitelist[msgGuild.id].includes(msgChannel.id))
+			sendMessage('👍');
+		else if (Object.keys(whitelist).includes(msgGuild.id))
+			sendMessage('👎');
+		else
+			sendMessage('👎 (Whole server)');
 	});
 
 	addCommand('lstc', () => {
@@ -136,13 +139,15 @@ function getLogLine (time, msg, client) {
 	const timeString = `[${time.toLocaleDateString('en-US')} ${time.toLocaleTimeString('en-US', {hour12: true})}]`;
 	const channel = `[${!msg.isPrivate ? msg.guild.name + ': #' + msg.channel.name : 'DM: ' + msg.channel.recipient.username}]`;
 	const sender = `${(msg.member || msg.author).username}:`; // IUser as substitute for the case of DMs
+	const content = resolveMessageContent(msg.content, msg.guild, client);
 	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');
 
 	return [
 		timeString,
 		channel,
 		sender,
-		resolveMessageContent(msg.content, msg.guild, client),
+		// Put to next line if content is multiple lines
+		(msg.content.includes('\n') ? '\n' : '') + content,
 		attachments
 	].join(' ');
 }

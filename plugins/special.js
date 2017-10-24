@@ -1,4 +1,5 @@
 const CommandHandler = require('../util/msgUtil');
+const toHex = require('colornames');
 const Discordie = require('discordie');
 const Events = Discordie.Events;
 
@@ -15,11 +16,9 @@ const config = require('../config');
  * @returns
  */
 function respond (msg, client) {
-	const { content: msgText, channel: msgChannel } = msg;
+	const { content: msgText, channel, guild, member: sender } = msg;
 	if (!msgText.startsWith(config.prefix)) return;
-	// const sender = msg.member || msg.author; // IUser as a substitute for DMs
-
-	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
+	const botMember = client.User.memberOf(guild);
 
 	/**
 	 * Sends a message
@@ -27,7 +26,7 @@ function respond (msg, client) {
 	 * @param {object} e Embed object
 	 * @returns {Promise<{}>}
 	 */
-	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
+	const sendMessage = (s, e) => channel.sendMessage(s, false, e);
 	// const sendEmbed = (e) => sendMessage('', e);
 
 	const command = msgText.slice(config.prefix.length);
@@ -90,6 +89,24 @@ function respond (msg, client) {
 		if (msgText.includes('<')) return;
 		if (/^<:.+?:\d+>$/.test(msgText)) return;
 		sendMessage(getCodePoint(a));
+	});
+
+	addCommandSentence('setColor', a => {
+		const coloredRoles = sender.roles.filter(r => r.color > 0);
+
+		for (const role in coloredRoles) {
+			const membersWithRole = guild.members.filter(m => m.hasRole(role));
+
+			if (membersWithRole.length > 1 || role.position > botMember.roles[0].position)
+				continue;
+			else {
+				if (!toHex.get(a))
+					return sendMessage(`I don't know of a color named \`${a}\``);
+				else
+					return role.commit(null, toHex(parseInt(a.slice(1), 16))).then(() =>
+						sendMessage(`Color of \`${role.name}\` changed to ${a}`));
+			}
+		}
 	});
 }
 

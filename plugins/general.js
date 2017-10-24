@@ -1,9 +1,9 @@
 const CommandHandler = require('../util/msgUtil');
+const { senderIsOwner, tryRequire } = require('../util/botUtil');
 const Permissions = require('discordie').Permissions;
-const math = require('mathjs');
+const math = tryRequire('mathjs');
 
 const { logToBoth } = require('./logger');
-const util = require('../util/botUtil');
 const { codeL, getCodePoint } = require('../util/stringUtil');
 const { rInAr } = require('../util/arrayUtil');
 
@@ -41,7 +41,7 @@ function respond (msg, client) {
 	const { addCommand, addCommandSentence, addCommandArgs } = handler;
 	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
 
-	const senderIsOwner = util.senderIsOwner(msg);
+	const senderIsOwner = senderIsOwner(msg);
 
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;
@@ -191,6 +191,7 @@ function respond (msg, client) {
 		});
 	});
 
+	if (math)
 	addCommandSentence('math', a => sendMessage(math.eval(a)));
 
 	addCommandArgs('emoji', a => {

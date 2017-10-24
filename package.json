@@ -19,7 +19,6 @@
     "discordie": "github:qeled/discordie#dev",
     "express": "^4.16.1",
     "fluent-ffmpeg": "^2.1.2",
-    "mathjs": "^3.16.4",
     "node-osu": "^1.3.0",
     "simple-get": "^2.7.0",
     "youtube-node": "^1.3.2",
@@ -31,6 +30,7 @@
     "eslint-plugin-async-await": "0.0.0"
   },
   "optionalDependencies": {
-    "colornames": "^1.1.1"
+    "colornames": "^1.1.1",
+    "mathjs": "^3.16.5"
   }
 }

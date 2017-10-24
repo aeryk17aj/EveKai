@@ -42,10 +42,25 @@ function log (s) {
 	process.stdout.write(s + '\n');
 }
 
+/**
+ * Requires a dependency if it exists, otherwise null
+ * 
+ * @param {string} name
+ * @returns any
+ */
+function tryRequire (name) {
+	try {
+		require.resolve(name);
+		return require(name);
+	} catch(e) { /* NO OP */ }
+	return null;
+}
+
 module.exports = {
 	// Message utility
 	senderIsOwner,
 	// General utility
 	ensureFoldersExist,
-	log
+	log,
+	tryRequire
 };

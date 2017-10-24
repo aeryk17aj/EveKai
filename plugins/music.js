@@ -237,15 +237,15 @@ function respond (msg, client) {
 	function playMusic (a) {
 		if (!guildQueue.length) return sendErrorMessage('There is nothing to play.');
 
-		if (!a || !a.length) {
 			const voiceChannel = client.User.getVoiceChannel(guild);
+
+		if (!a || !a.length)
 			/* if (!client.User.getVoiceChannel(guild)) return sendMessage('Not in a voice channel.');
 			else */
 			play(voiceChannel.getVoiceConnectionInfo());
-		} else {
+		else
 			play(voiceChannel.getVoiceConnectionInfo(), a);
 		}
-	}
 
 	['m p', 'music play', 'play'].forEach(s => addCommandSentence(s, playMusic));
 
@@ -287,9 +287,8 @@ function respond (msg, client) {
 	['m re all', 'repeat all'].forEach(s => addCommand(s, toggleRepeatAll));
 
 	function repeatOff () {
-		if (!(repeatOne || repeatAll)) {
+		if (!(repeatOne || repeatAll))
 			return sendErrorMessage('Not on repeat.');
-		}
 		else {
 			return sendMessage('Okie').then(() => {
 				repeatAll = false;

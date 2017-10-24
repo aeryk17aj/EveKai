@@ -20,10 +20,10 @@ const docLinks = require('../quotes/docs');
  * @param {Discordie} client description
  */
 function respond (msg, client) {
-	const { content: msgText, channel: msgChannel, guild: msgGuild } = msg;
+	const { content: msgText, channel: msgChannel, guild: msgGuild, member: sender } = msg;
 	if (!msgText.startsWith(prefix)) return;
-	const sender = msg.member || msg.author; // IUser as a substitute for DMs
 
+	/** @type {IUser | IGuildMember} */
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
 	/**
@@ -39,6 +39,10 @@ function respond (msg, client) {
 	const handler = new CommandHandler(command);
 
 	const { addCommand, addCommandSentence, addCommandArgs } = handler;
+	/**
+	 * @param {string} c
+	 * @param {string} r
+	 */
 	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
 
 	const senderIsOwner = senderIsOwner(msg);
@@ -57,8 +61,9 @@ function respond (msg, client) {
 
 	addCommandResponse('connections', `Connected to ${codeL(client.Guilds.length)} servers.`);
 	addCommandSentence('docs', a => {
-		if (docLinks.hasOwnProperty(a)) sendMessage(docLinks[a]);
-		else sendMessage('I don\'t have a link for ' + codeL(a));
+		sendMessage(docLinks.hasOwnProperty(a)
+			? docLinks[a]
+			: 'I don\'t have a link for ' + codeL(a));
 	});
 
 	const generalCommands = [
@@ -94,14 +99,14 @@ function respond (msg, client) {
 	// TODO: Help builder?
 	function showHelp (a) {
 		let help;
-		if (a === 'music') {
+		if (a === 'music')
 			help = [
 				'```ini',
 				'[Music Commands]', '',
 				...musicCommands.map(a => prefix + a),
 				'```'
 			].join('\n');
-		} else {
+		else
 			help = [
 				'```ini',
 				'[General Commands]', '',
@@ -109,7 +114,7 @@ function respond (msg, client) {
 				'', 'do \'' + prefix + '? music\' for music commands',
 				'```'
 			].join('\n');
-		}
+
 		sendMessage(help);
 	}
 
@@ -156,17 +161,18 @@ function respond (msg, client) {
 	});
 
 	addCommandSentence('8ball', a => {
-		if (a.endsWith('?')) {
+		if (a.endsWith('?'))
 			sendEmbed({
 				color: 0xFFB2C5,
 				author: {
-					name: (sender.nickname || sender.name),
+					name: (sender.name),
 					icon_url: sender.avatarURL
 				},
 				title: a,
 				description: 'Answer: ' + rInAr(ballQuotes)
 			});
-		} else sendMessage('Use a question mark.');
+		else
+			sendMessage('Use a question mark.');
 	});
 
 	addCommandSentence('eval', a => {
@@ -177,7 +183,6 @@ function respond (msg, client) {
 			if (result === msgText) reject();
 			else resolve();
 		}).catch(e => {
-			// sendMessage('\u{1F52B}'); // Peestol
 			process.stdout.write(`Failed eval in ${msgGuild.name} : ${msgChannel.name}\n\n${e}\n`);
 			sendMessage('It didn\'t work.');
 		}).then(() => {
@@ -186,13 +191,12 @@ function respond (msg, client) {
 					sendMessage(result); break;
 				default:
 					if (Array.isArray(result)) sendMessage(result.join(', '));
-					// else sendMessage('\u{1F44C}'); // Ok hand sign
-			}			
+			}
 		});
 	});
 
 	if (math)
-	addCommandSentence('math', a => sendMessage(math.eval(a)));
+		addCommandSentence('math', a => sendMessage(math.eval(a)));
 
 	addCommandArgs('emoji', a => {
 		const validCustomEmoji = /^<:.+?:(\d+)>$/;
@@ -200,17 +204,25 @@ function respond (msg, client) {
 		const invalidArgs = [];
 		a.forEach(e => { if (!validCustomEmoji.test(e)) invalidArgs.push(e); });
 		if (invalidArgs.length) {
-			if (invalidArgs.length === a.length) return sendMessage(invalidArgs.map(getCodePoint));
+			if (invalidArgs.length === a.length)
+				return sendMessage(invalidArgs.map(getCodePoint));
+
 			return sendMessage('There are some invalid inputs: ' + invalidArgs.join(' '));
 		}
 		else sendMessage(a.map(e => e.replace(/^<:.+?:(\d+)>$/, '$1')).map(i => `https://cdn.discordapp.com/emojis/${i}.png`).join('\n'));
 	});
 
+	/**
+	 * @param {string} a Name of the voice channel
+	 * @returns {Promise<IMessage> | {senderVC: IVoiceChannel, destinationVc: IVoiceChannel}}
+	 */
 	function verifyMoveQuery (a) {
 		const senderVc = sender.getVoiceChannel();
 		if (!senderVc) return sendMessage('You\'re not in a voice channel.');
+
 		const destinationVc = msgGuild.voiceChannels.find(vc => vc.name === a);
 		if (!destinationVc) return sendMessage(`There is no voice channel named \`${a}\``);
+
 		return { senderVc, destinationVc };
 	}
 
@@ -229,6 +241,26 @@ function respond (msg, client) {
 		const { destinationVc } = result;
 		return sender.setChannel(destinationVc);
 	});
+
+	// This is honestly a disaster
+
+	/* function fetchMore (amount, messages) {
+		if (amount !== 0) {
+			if (amount > 100) {
+				msgChannel.fetchMessages(100).then((m) => {
+					messageArray = [...messageArray, m.messages];
+					amount -= 100;
+					fetchMore(amount, messages);
+				});
+			} else {
+				msgChannel.fetchMessages(amount).then((m) => {
+					messageArray = [...messageArray, m.messages];
+					amount -= amount;
+					fetchMore(amount, messages);
+				});
+			}
+		}
+	} */
 
 	function fetchMoreMessages (channel, left) {
 		const before = channel.messages[0];
@@ -281,7 +313,7 @@ function respond (msg, client) {
 		// Bot can't delete or pin messages
 		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
 		// Empty args
-		if (!a.length) return sendMessage(prefix + 'prune <\'all\' or user mention> <amount>`');
+		if (!a.length) return sendMessage(`\`${prefix}prune <'all' or user mention> <amount>\``);
 
 		const mention = a.split(' ')[0];
 		const amount = parseInt(a.split(' ')[1]);
@@ -295,25 +327,21 @@ function respond (msg, client) {
 
 		if (amount > messages.length) {
 			// console.log(`about to delete ${amount} out of ${messages.length} in cache`);
-			if (allMsgs) {
-				const difference = amount - messages.length;
-				fetchMoreMessages(msgChannel, difference).then(() => {
+			if (allMsgs)
+				fetchMoreMessages(msgChannel, amount - messages.length).then(() => {
 					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
 					// console.log(`Post fetch: ${amount} out of ${messages.length} in cache`);
 					deleteMessages(messages.slice(-amount), msgChannel);
 				});
-			} else {
+			else
 				fetchMoreSpecificMessages(msgChannel, msg.mentions[0], amount).then(() => {
 					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted && m.author.id === msg.mentions[0].id);
 					deleteMessages(messages.slice(-amount), msgChannel);
 				});
-			}
 		} else deleteMessages(messages.slice(-amount), msgChannel);
 	});
 
-	addCommandSentence('roll', a => {
-		sendMessage(Math.ceil(Math.random() * (a || 100)));
-	});
+	addCommandSentence('roll', a => sendMessage(Math.ceil(Math.random() * (a || 100))));
 
 	// TODO: add timezone argument, otherwise EST
 	addCommand('time', () => {

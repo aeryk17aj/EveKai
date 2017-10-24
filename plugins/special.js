@@ -1,16 +1,14 @@
 const CommandHandler = require('../util/msgUtil');
-const toHex = require('colornames');
+const { log, tryRequire } = require('../util/botUtil');
+const { getCodePoint } = require('../util/stringUtil');
+
+const toHex = tryRequire('colornames');
 const Discordie = require('discordie');
 const Events = Discordie.Events;
-
-const { log } = require('../util/botUtil');
-const { getCodePoint } = require('../util/stringUtil');
 
 const config = require('../config');
 
 /**
- *
- *
  * @param {IMessage} msg
  * @param {Discordie} client
  * @returns
@@ -32,15 +30,7 @@ function respond (msg, client) {
 	const command = msgText.slice(config.prefix.length);
 	const handler = new CommandHandler(command);
 
-	const addCommand = (c, f) => handler.addCommand(c, f);
-	// const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
-	/**
-	 *
-	 * @param {string} c
-	 * @param {function(string)} f
-	 */
-	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
-	// const addCommandArgs = (c, f) => handler.addCommandArgs(c, f);
+	const { addCommand, addCommandSentence } = handler;
 
 	const Emojis = {
 		ONE: [0x31, 0x20E3],
@@ -94,18 +84,31 @@ function respond (msg, client) {
 	addCommandSentence('setColor', a => {
 		const coloredRoles = sender.roles.filter(r => r.color > 0);
 
-		for (const role in coloredRoles) {
-			const membersWithRole = guild.members.filter(m => m.hasRole(role));
+		const topSelfRole = coloredRoles.find(r => 
+			guild.members.filter(m => m.hasRole(r)).length > 1);
 
-			if (membersWithRole.length > 1 || role.position > botMember.roles[0].position)
-				continue;
-			else {
-				if (!toHex.get(a))
-					return sendMessage(`I don't know of a color named \`${a}\``);
-				else
-					return role.commit(null, toHex(parseInt(a.slice(1), 16))).then(() =>
-						sendMessage(`Color of \`${role.name}\` changed to ${a}`));
-			}
+		if (!topSelfRole)
+			return sendMessage('You don\'t have a self role.');
+
+		if (!toHex) {
+			let hexValue;
+
+			if (a.length === 6)
+				hexValue = parseInt(a, 16);
+			else if (a.length === 7)
+				hexValue = parseInt(a.slice(1), 16);
+
+			if (!hexValue)
+				return sendMessage('I\'m sorry, I didn\'t get that.');
+			else
+				return topSelfRole.commit(null, hexValue).then(() =>
+					sendMessage(`Color of \`${topSelfRole.name}\` changed to ${a}`));
+		} else {
+			if (!toHex.get(a))
+				return sendMessage(`I don't know of a color named \`${a}\``);
+			else
+				return topSelfRole.commit(null, parseInt(toHex(a).slice(1), 16)).then(() =>
+					sendMessage(`Color of \`${topSelfRole.name}\` changed to ${a}`));
 		}
 	});
 }

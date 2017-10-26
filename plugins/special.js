@@ -84,10 +84,12 @@ function respond (msg, client) {
 	addCommandSentence('setColor', a => {
 		const coloredRoles = sender.roles.filter(r => r.color > 0);
 
-		const topSelfRole = coloredRoles.find(r => 
-			guild.members.filter(m => m.hasRole(r)).length > 1);
+		const topEditableSelfRole = coloredRoles.find(r =>
+			guild.members.filter(m =>
+				m.hasRole(r)).length > 1 &&
+				r.position < botMember.roles[0].position);
 
-		if (!topSelfRole)
+		if (!topEditableSelfRole)
 			return sendMessage('You don\'t have a self role.');
 
 		if (!toHex) {
@@ -101,14 +103,14 @@ function respond (msg, client) {
 			if (!hexValue)
 				return sendMessage('I\'m sorry, I didn\'t get that.');
 			else
-				return topSelfRole.commit(null, hexValue).then(() =>
-					sendMessage(`Color of \`${topSelfRole.name}\` changed to ${a}`));
+				return topEditableSelfRole.commit(null, hexValue).then(() =>
+					sendMessage(`Color of \`${topEditableSelfRole.name}\` changed to ${a}`));
 		} else {
 			if (!toHex.get(a))
 				return sendMessage(`I don't know of a color named \`${a}\``);
 			else
-				return topSelfRole.commit(null, parseInt(toHex(a).slice(1), 16)).then(() =>
-					sendMessage(`Color of \`${topSelfRole.name}\` changed to ${a}`));
+				return topEditableSelfRole.commit(null, parseInt(toHex(a).slice(1), 16)).then(() =>
+					sendMessage(`Color of \`${topEditableSelfRole.name}\` changed to ${a}`));
 		}
 	});
 }

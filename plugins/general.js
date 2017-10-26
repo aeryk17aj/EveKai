@@ -36,7 +36,7 @@ function respond (msg, client) {
 	const sendEmbed = (e) => sendMessage('', e);
 
 	const command = msgText.slice(prefix.length);
-	const { addCommand, addCommandSentence, addCommandArgs } 
+	const { addCommand, addCommandSentence, addCommandArgs }
 		= new CommandHandler(command);
 
 	/**

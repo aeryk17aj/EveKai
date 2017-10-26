@@ -1,5 +1,5 @@
 const CommandHandler = require('../util/msgUtil');
-const { senderIsOwner, tryRequire } = require('../util/botUtil');
+const { senderIsOwner: _senderIsOwner, tryRequire } = require('../util/botUtil');
 const Permissions = require('discordie').Permissions;
 const math = tryRequire('mathjs');
 
@@ -36,16 +36,16 @@ function respond (msg, client) {
 	const sendEmbed = (e) => sendMessage('', e);
 
 	const command = msgText.slice(prefix.length);
-	const handler = new CommandHandler(command);
+	const { addCommand, addCommandSentence, addCommandArgs } 
+		= new CommandHandler(command);
 
-	const { addCommand, addCommandSentence, addCommandArgs } = handler;
 	/**
 	 * @param {string} c
 	 * @param {string} r
 	 */
 	const addCommandResponse = (c, r) => addCommand(c, () => sendMessage(r));
 
-	const senderIsOwner = senderIsOwner(msg);
+	const senderIsOwner = _senderIsOwner(msg);
 
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;

@@ -1,5 +1,5 @@
 const Canvas = require('canvas');
-const Image = Canvas.Image;
+// const Image = Canvas.Image;
 const get = require('simple-get');
 
 const fs = require('fs');
@@ -37,7 +37,7 @@ function respond (msg) {
 		const ctx = canvas.getContext('2d');
 		f(ctx, canvas, w, h);
 		canvas.toBuffer((err, buf) => {
-			if (err) return console.log('Error converting image to buffer');
+			if (err) return log('Error converting image to buffer');
 			uploadFile(buf);
 		});
 	});

@@ -166,7 +166,7 @@ function respond (msg, client) {
 	 */
 	function addToQueue (a) {
 		// Channel check
-		if (!client.User.getVoiceChannel(guild)) 
+		if (!client.User.getVoiceChannel(guild))
 			return sendErrorMessage('Not in a voice channel.');
 
 		const validLink = /https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?v=/;
@@ -222,9 +222,9 @@ function respond (msg, client) {
 
 	function removeTrack (a) {
 		const trackNumber = a; // Number(a);
-		if (!trackNumber) 
+		if (!trackNumber)
 			return sendErrorMessage('Not a valid track number.');
-		else if (trackNumber > guildQueue.length) 
+		else if (trackNumber > guildQueue.length)
 			return sendErrorMessage(`There are only ${guildQueue.length} songs in the queue.`);
 		else {
 			const deletedTrack = guildQueue.splice(trackNumber - 1, 1);
@@ -237,7 +237,7 @@ function respond (msg, client) {
 	function playMusic (a) {
 		if (!guildQueue.length) return sendErrorMessage('There is nothing to play.');
 
-			const voiceChannel = client.User.getVoiceChannel(guild);
+		const voiceChannel = client.User.getVoiceChannel(guild);
 
 		if (!a || !a.length)
 			/* if (!client.User.getVoiceChannel(guild)) return sendMessage('Not in a voice channel.');
@@ -245,7 +245,7 @@ function respond (msg, client) {
 			play(voiceChannel.getVoiceConnectionInfo());
 		else
 			play(voiceChannel.getVoiceConnectionInfo(), a);
-		}
+	}
 
 	['m p', 'music play', 'play'].forEach(s => addCommandSentence(s, playMusic));
 
@@ -330,7 +330,7 @@ function respond (msg, client) {
 	 */
 	function play (vcInfo, index) {
 		stopPlaying = false;
-		if (busy && !stopPlaying && guildQueue.length <= 1) 
+		if (busy && !stopPlaying && guildQueue.length <= 1)
 			return sendErrorMessage('Still processing your request(s)...');
 
 		const sampleRate = 48000;

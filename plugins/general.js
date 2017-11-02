@@ -26,18 +26,11 @@ function respond (msg, client) {
 	/** @type {IUser | IGuildMember} */
 	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
-	/**
-	 * Sends a message
-	 * @param {string} s Text
-	 * @param {object} e Embed object
-	 * @returns {Promise<IMessage>}
-	 */
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
-	const command = msgText.slice(prefix.length);
 	const { addCommand, addCommandSentence, addCommandArgs }
-		= new CommandHandler(command);
+		= new CommandHandler(msgText.slice(prefix.length));
 
 	/**
 	 * @param {string} c

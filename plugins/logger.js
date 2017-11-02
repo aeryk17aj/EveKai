@@ -36,9 +36,8 @@ function loggerCommands (msg) {
 	const { channel: msgChannel, guild: msgGuild} = msg;
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 
-	const handler = new CommandHandler(msg.content.slice((prefix + keyword).length + 1));
-
-	const { addCommand, addCommandSentence } = handler;
+	const { addCommand, addCommandSentence }
+		= new CommandHandler(msg.content.slice((prefix + keyword).length + 1));
 
 	if (!whitelist[msgGuild.id]) whitelist[msgGuild.id] = [];
 

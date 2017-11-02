@@ -9,7 +9,7 @@ const vcHandler = require('./handler/vcHandler');
 const { logToBoth } = require('./plugins/logger');
 
 // Utility
-const { ensureFoldersExist } = require('./util/botUtil');
+const { ensureFoldersExist, log } = require('./util/botUtil');
 
 /** @type {{ prefix: string, hide: boolean }} */
 const config = require('./config');
@@ -22,8 +22,6 @@ const rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
-
-function log (s) { process.stdout.write(s + '\n'); }
 
 process.on('unhandledRejection', (reason, promise) =>
 	log(`Unhandled Promise:\n${promise}\n\n${reason.stack}`));

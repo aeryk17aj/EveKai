@@ -17,9 +17,9 @@ yt.setKey(process.env.YT_KEY || require('../auth').yt);
 // Internal queue, stores position and id
 const queue = {};
 
-/** @type {ITextChannel | null} */
+/** @type {ITextChannel} */
 let boundTextChannel = null;
-/** @type {IVoiceChannel | null} */
+/** @type {IVoiceChannel} */
 let boundVoiceChannel = null;
 
 let repeatOne = false;
@@ -37,17 +37,15 @@ function respond (msg, client) {
 	const { content: msgText, member: sender, guild, channel: textChannel } = msg;
 	if (!msgText.startsWith(prefix) || sender.bot) return;
 
-	const command = msgText.slice(prefix.length);
-
-	if (boundTextChannel && boundVoiceChannel) {
+	if (boundTextChannel && boundVoiceChannel)
 		// Ignore music commands except for bound channel
 		if (boundTextChannel.id !== textChannel.id || sender.getVoiceChannel().id !== boundVoiceChannel.id) return;
-	}
 
 	const sendMessage = (m, e) => textChannel.sendMessage(m, false, e);
 	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(m.delete, 3000), () => {});
 
-	const { addCommand, addCommandSentence } = new CommandHandler(command);
+	const { addCommand, addCommandSentence }
+		= new CommandHandler(msgText.slice(prefix.length));
 
 	// Initialize queue
 	if (!queue[guild.id]) queue[guild.id] = [];
@@ -86,17 +84,16 @@ function respond (msg, client) {
 	});
 
 	function search (a, callback) {
-		const linkBase = 'https://www.youtube.com/watch?v=';
 		yt.search(a, 3, (err, res) => {
 			if (err) return log(`${err}\n`);
-			const links = res.items.map(i => linkBase + i.id.videoId);
-			const titles = res.items.map(i => `${i.snippet.title} (${i.snippet.channelTitle})`);
-			const songList = [
+			const links = res.items.map(i => 'https://www.youtube.com/watch?v=' + i.id.videoId);
+			const titleList = res.items.map((item, i) =>
+				`\t${i + 1} : ${item.snippet.title} (${item.snippet.channelTitle})`);
+			sendMessage([
 				'```ini', '[Search Results]', '',
-				...titles.map((t, i) => `\t${(i + 1)} : ${t}`),
+				...titleList,
 				'\tc : Cancel', '```'
-			].join('\n');
-			sendMessage(songList).then(() => {
+			].join('\n')).then(() => {
 				let pick = 0;
 				let canceled = false;
 				function trackListener (e) {
@@ -310,15 +307,13 @@ function respond (msg, client) {
 
 		const encoder = vcInfo.voiceConnection.createExternalEncoder({
 			type: 'ffmpeg',
-			source: path.resolve(__dirname, `./dl/${guild.id}/${songName}.mp3`),
-			debug: true
+			source: path.resolve(__dirname, `./dl/${guild.id}/${songName}.mp3`)
 		});
 
 		if (!encoder)
 			return log('Voice connection is no longer valid.\n');
 
 		encoder.play();
-
 		encoder.once('end', nextSong);
 	}
 

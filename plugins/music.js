@@ -5,23 +5,17 @@ const { Events } = require('discordie');
 
 const fs = require('fs');
 const path = require('path');
-const childProcess = require('child_process');
 
 const CommandHandler = require('../util/msgUtil');
+const { log } = require('../util/botUtil');
 
 const { prefix } = require('../config');
-// const userIds = require('../userIds');
 
 const yt = new YouTube();
 yt.setKey(process.env.YT_KEY || require('../auth').yt);
 
-let ffmpeg = null;
-
 // Internal queue, stores position and id
 const queue = {};
-
-// Might have to implement some per-server config and states
-let stopPlaying = false;
 
 /** @type {ITextChannel | null} */
 let boundTextChannel = null;
@@ -34,8 +28,8 @@ let repeatAll = false;
 let busy = false;
 
 /**
- * @param {IMessage} msg 
- * @param {Discordie} client 
+ * @param {IMessage} msg
+ * @param {Discordie} client
  * @returns void
  */
 function respond (msg, client) {
@@ -51,12 +45,14 @@ function respond (msg, client) {
 	}
 
 	const sendMessage = (m, e) => textChannel.sendMessage(m, false, e);
-	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(m.delete, 3000));
+	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(m.delete, 3000), () => {});
 
 	const { addCommand, addCommandSentence } = new CommandHandler(command);
 
 	// Initialize queue
 	if (!queue[guild.id]) queue[guild.id] = [];
+
+	/** @type {Array<string>} */
 	let guildQueue = queue[guild.id];
 
 	// Check for some leftovers if on an empty queue
@@ -66,8 +62,6 @@ function respond (msg, client) {
 			.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
 	}
 
-	// addCommand('m init', initFolders);
-
 	addCommand('join', () => {
 		boundTextChannel = textChannel;
 		const senderVc = sender.getVoiceChannel();
@@ -75,15 +69,18 @@ function respond (msg, client) {
 		senderVc.join().then(() => {
 			boundVoiceChannel = senderVc;
 			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
-			// initFolders();
 		});
 	});
 
 	addCommand('leave', () => {
+		stop();
+
 		const clientVc = client.User.getVoiceChannel(guild);
-		stop(clientVc.getVoiceConnectionInfo().voiceConnection.getEncoder());
-		if (!clientVc) return sendErrorMessage('Not in a voice channel.');
-		else clientVc.leave();
+		if (!clientVc)
+			return sendErrorMessage('Not in a voice channel.');
+		else
+			clientVc.leave();
+
 		boundTextChannel = null;
 		boundVoiceChannel = null;
 	});
@@ -91,7 +88,7 @@ function respond (msg, client) {
 	function search (a, callback) {
 		const linkBase = 'https://www.youtube.com/watch?v=';
 		yt.search(a, 3, (err, res) => {
-			if (err) return process.stdout.write(`${err}\n`);
+			if (err) return log(`${err}\n`);
 			const links = res.items.map(i => linkBase + i.id.videoId);
 			const titles = res.items.map(i => `${i.snippet.title} (${i.snippet.channelTitle})`);
 			const songList = [
@@ -112,7 +109,7 @@ function respond (msg, client) {
 					if (pick || canceled) {
 						client.Dispatcher.removeListener(Events.MESSAGE_CREATE, trackListener);
 						client.Dispatcher.emit(Events.MESSAGE_CREATE);
-						if (!canceled) callback(res, links, pick);
+						if (!canceled) callback({res, links, pick});
 					}
 				}
 				// Needs to listen more than once until it gets the right msg
@@ -128,11 +125,11 @@ function respond (msg, client) {
 	 * @param {string} a Search term
 	 */
 	function searchThenAdd (a) {
-		search(a, (_, links, pick) => addToQueue(links[pick - 1]));
+		search(a, ({links, pick}) => addToQueue(links[pick - 1]));
 	}
 
 	function searchOnly (a) {
-		search(a, (res, links, pick) => {
+		search(a, ({res, links, pick}) => {
 			const info = res.items[pick - 1].snippet;
 			sendMessage('', {
 				fields: [ {
@@ -171,8 +168,10 @@ function respond (msg, client) {
 
 		const validLink = /https?:\/\/(?:www\.|m\.)?youtube\.com\/watch\?v=/;
 
-		if (!validLink.test(a)) return searchThenAdd(a);
-		else if (a.startsWith('http:')) return sendMessage('Make sure it\'s HTTPS');
+		if (!validLink.test(a))
+			return searchThenAdd(a);
+		else if (a.startsWith('http:'))
+			a = a.replace(/^http:/, 'https');
 		else {
 			// Pre-download
 			const vidId = a.slice(a.match(validLink)[0].length);
@@ -220,43 +219,36 @@ function respond (msg, client) {
 
 	['m sh', 'music shuffle', 'shuffle'].forEach(s => addCommandSentence(s, shuffle));
 
+	// TODO: Test more
 	function removeTrack (a) {
-		const trackNumber = a; // Number(a);
-		if (!trackNumber)
+		if (!a)
 			return sendErrorMessage('Not a valid track number.');
-		else if (trackNumber > guildQueue.length)
+		else if (a > guildQueue.length)
 			return sendErrorMessage(`There are only ${guildQueue.length} songs in the queue.`);
 		else {
-			const deletedTrack = guildQueue.splice(trackNumber - 1, 1);
+			const deletedTrack = guildQueue.splice(a - 1, 1);
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${deletedTrack}.mp3`));
-		} // TODO: Also delete
+		}
 	}
 
 	['m r', 'music remove', 'remove'].forEach(s => addCommandSentence(s, removeTrack));
 
 	function playMusic (a) {
-		if (!guildQueue.length) return sendErrorMessage('There is nothing to play.');
+		if (!guildQueue.length)
+			return sendErrorMessage('There is nothing to play.');
 
 		const voiceChannel = client.User.getVoiceChannel(guild);
 
-		if (!a || !a.length)
-			/* if (!client.User.getVoiceChannel(guild)) return sendMessage('Not in a voice channel.');
-			else */
-			play(voiceChannel.getVoiceConnectionInfo());
-		else
-			play(voiceChannel.getVoiceConnectionInfo(), a);
+		if (!voiceChannel)
+			return sendMessage('Not in a voice channel.');
+
+		play(voiceChannel.getVoiceConnectionInfo(), Number(a));
 	}
 
 	['m p', 'music play', 'play'].forEach(s => addCommandSentence(s, playMusic));
 
 	function skip () {
-		const encoder = client.VoiceConnections.find(vc => vc.voiceConnection.guild === guild).voiceConnection.getEncoder();
-		if (encoder.disposed) return;
-		encoder.kill();
-		if (ffmpeg) {
-			ffmpeg.kill();
-			ffmpeg = null;
-		}
+		stop();
 		nextSong();
 	}
 
@@ -300,131 +292,70 @@ function respond (msg, client) {
 	['m re off', 'repeat off'].forEach(s => addCommand(s, repeatOff));
 
 	addCommand('stop', stop);
-	addCommand('dc', stop); // Stops the ffmpeg process before terminating
+	addCommand('dc', stop); // Unpipe before terminating
 
-	// TODO: Test this command more
+	// TODO: Test more
 	addCommand('clear', () => {
-		guildQueue.forEach(songName => {
-			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${songName}.mp3`));
-			// guildQueue.shift();
-		});
+		guildQueue.forEach(songName =>
+			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${songName}.mp3`)));
 
-		guildQueue = []; // Clear after all are deleted
+		guildQueue = [];
 	});
 
 	addCommand('list', () => {
-		sendMessage('```ini\n[Song List]\n\n' + (guildQueue.map((s, i) => '\t ' + (i + 1) + ' : ' + s).join('\n') || '\tNothing but just us...') + '```');
+		sendMessage(`\`\`\`ini\n[Song List]\n\n${guildQueue.map((s, i) => `\t ${i + 1} : ${s}`).join('\n') || '\tNothing but just us...'}\`\`\``);
 	});
 
 	addCommand('list2', () => {
 		sendMessage('', {
 			color: 0xEEDD33,
 			title: 'Song List',
-			description: guildQueue.map((s, i) => (i + 1) + ' : ' + s).join('\n') || 'Nothing but just us... /w\\'
+			description: guildQueue.map((s, i) => `${i + 1} : ${s}`).join('\n') || 'Nothing but just us...'
 		});
 	});
 
 	/**
-	 * @param {VoiceConnectionInfo} vcInfo 
-	 * @returns 
+	 * @param {VoiceConnectionInfo} vcInfo
+	 * @param {number} index
+	 * @returns {void}
 	 */
 	function play (vcInfo, index) {
-		stopPlaying = false;
-		if (busy && !stopPlaying && guildQueue.length <= 1)
+		if (busy && guildQueue.length <= 1)
 			return sendErrorMessage('Still processing your request(s)...');
 
-		const sampleRate = 48000;
-		const channels = 2;
-		const bitDepth = 16;
+		const songName = guildQueue[index ? index - 1 : 0];
 
-		const songName = guildQueue[index - 1 || 0];
 		sendMessage('Now playing: `' + songName + '`');
 
-		if (ffmpeg) ffmpeg.kill();
-		ffmpeg = childProcess.spawn('ffmpeg', [
-			'-re',
-			'-i', path.resolve(__dirname, `./dl/${guild.id}/${songName}.mp3`),
-			'-f', 's16le',
-			'-ar', sampleRate,
-			'-ac', channels,
-			'-'
-		], {stdio: ['pipe', 'pipe', 'ignore']});
-
-		const _ffmpeg = ffmpeg;
-		const ff_out = ffmpeg.stdout;
-
-		const options = {
-			frameDuration: 60,
-			sampleRate: sampleRate,
-			channels: channels,
-			float: false
-		};
-
-		const readSize =
-			sampleRate / 1000 *
-			options.frameDuration *
-			bitDepth / 8 *
-			channels;
-
-		ff_out.once('readable', () => {
-			// if (!client.VoiceConnections.length) return console.log('Voice not connected');
-			if (!vcInfo) vcInfo = client.VoiceConnections[0];
-			const voiceConnection = vcInfo.voiceConnection;
-
-			const encoder = voiceConnection.getEncoder(options);
-
-			let { onNeedBuffer: needBuffer } = encoder;
-			needBuffer = () => {
-				const chunk = ff_out.read(readSize);
-
-				if (_ffmpeg.killed) return;
-				if (stopPlaying) return stop(encoder);
-
-				if (!chunk) return setTimeout(needBuffer, options.frameDuration);
-
-				const sampleCount = readSize / channels / (bitDepth / 8);
-				encoder.enqueue(chunk, sampleCount);
-			};
-
-			needBuffer();
+		const encoder = vcInfo.voiceConnection.createExternalEncoder({
+			type: 'ffmpeg',
+			source: path.resolve(__dirname, `./dl/${guild.id}/${songName}.mp3`),
+			debug: true
 		});
 
-		ff_out.once('end', nextSong);
+		if (!encoder)
+			return log('Voice connection is no longer valid.\n');
+
+		encoder.play();
+
+		encoder.once('end', nextSong);
 	}
 
 	function nextSong () {
-		// Respect stop flag
-		if (stopPlaying) return;
+		if (!(repeatOne || repeatAll)) {
+			const firstSongName = guildQueue.shift();
+			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${firstSongName}.mp3`));
+		} else if (repeatAll) guildQueue.push(guildQueue.shift());
 
-		/**
-		 * No repeat: deletes first entry and moves on
-		 * Repeat all: puts first back to last
-		 * Repeat one: leaves queue untouched
-		 */
-		if (!(repeatOne || repeatAll)) { // If neither are on...
-			const firstSongName = guildQueue.shift(); // ..remove from internal queue
-			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${firstSongName}.mp3`)); // ...then delete the file
-		} else if (repeatAll) guildQueue.push(guildQueue.shift()); // ...or else push the finished song to the back
-
-		// Length check before attempting to play next track
 		if (!guildQueue.length) stop(); // TODO: Start timer for inactivity
-		else setTimeout(play, 100, client.User.getVoiceChannel(guild).getVoiceConnectionInfo()); // Play the next track
+		else setTimeout(play, 100, client.User.getVoiceChannel(guild).getVoiceConnectionInfo());
 	}
 
-	/**
-	 * @param {AudioEncoder} encoder 
-	 */
-	function stop (encoder) {
-		// Raise stop flag
-		stopPlaying = true;
-
-		// Kill encoder
-		encoder.kill();
-
-		// Kill reader process
-		if (!ffmpeg) return;
-		ffmpeg.kill();
-		ffmpeg = null;
+	function stop () {
+		client.VoiceConnections
+			.getForGuild(guild).voiceConnection
+			.getEncoderStream()
+			.unpipeAll();
 	}
 }
 

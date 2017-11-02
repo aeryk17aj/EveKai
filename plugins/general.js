@@ -67,30 +67,30 @@ function respond (msg, client) {
 	});
 
 	const generalCommands = [
-		'help/cmds/?',
+		'help | cmds | ?',
+		'helpAlt', // temp
 		'connections',
 		'docs',
-		// 'invite (bot invite)',
-		'roll <optional: max number>',
+		'invite',
 		'8ball <yes/no question, always ends with a question mark>',
-		'prune <\'all\' or user mention> <amount>',
-		'time',
-		'elwiki <page name / search query>',
 		'math <math expression>',
 		'emoji <server or native emoji>',
-		'moveUs',
-		'moveMe'
+		'moveUs <voice channel name>',
+		'moveMe <voice channel name>',
+		'prune <\'all\' or user mention> <amount>',
+		'roll <optional: max number>',
+		'time'
 	];
 
 	const musicCommands = [
-		'join',
-		'leave',
+		'm j  | join',
+		'm l  | leave',
 		'm q  | add [Search term | YouTube URL]',
 		'm rm | remove [number in queue]',
-		'm sh | shuffle',
 		'm p  | play',
-		'm s  | skip',
+		'm sk | skip',
 		'm re | repeat [\'one\' | \'all\' | \'off\']',
+		'm sh | shuffle',
 		'stop',
 		'clear',
 		'list'

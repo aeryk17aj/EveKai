@@ -254,42 +254,27 @@ function respond (msg, client) {
 
 	['m s', 'skip'].forEach(s => addCommand(s, skip));
 
-	function toggleRepeatOne () {
-		if (repeatOne) return sendErrorMessage('Already on.');
-		else {
-			return sendMessage('Okie').then(() => {
-				repeatAll = false;
-				repeatOne = true;
+	/**
+	 * @param {string} a 
+	 * @returns Promise<IMessage>
+	 */
+	function repeatCommand (a) {
+		const isAll = a === 'all';
+		const isOne = a === 'one';
+
+		if (a !== 'off') {
+			if (isAll && repeatAll || isOne && repeatOne)
+				return sendErrorMessage('Already on.');
+			else
+				return sendMessage('Ok').then(() => {
+					repeatAll = isAll;
+					repeatOne = isOne;
 			});
-		}
-	}
-
-	['m re one', 'repeat one'].forEach(s => addCommand(s, toggleRepeatOne));
-
-	function toggleRepeatAll () {
-		if (repeatAll) return sendErrorMessage('Already on.');
-		else {
-			return sendMessage('Okie').then(() => {
-				repeatAll = true;
-				repeatOne = false;
-			});
-		}
-	}
-
-	['m re all', 'repeat all'].forEach(s => addCommand(s, toggleRepeatAll));
-
-	function repeatOff () {
-		if (!(repeatOne || repeatAll))
+		} else if (!(repeatOne || repeatAll))
 			return sendErrorMessage('Not on repeat.');
-		else {
-			return sendMessage('Okie').then(() => {
-				repeatAll = false;
-				repeatOne = false;
-			});
-		}
 	}
 
-	['m re off', 'repeat off'].forEach(s => addCommand(s, repeatOff));
+	['m re', 'repeat'].forEach(s => addCommandSentence(s, repeatCommand));
 
 	addCommand('stop', stop);
 	addCommand('dc', stop); // Unpipe before terminating

@@ -288,10 +288,6 @@ function respond (msg, client) {
 	});
 
 	addCommand('list', () => {
-		sendMessage(`\`\`\`ini\n[Song List]\n\n${guildQueue.map((s, i) => `\t ${i + 1} : ${s}`).join('\n') || '\tNothing but just us...'}\`\`\``);
-	});
-
-	addCommand('list2', () => {
 		sendMessage('', {
 			color: 0xEEDD33,
 			title: 'Song List',

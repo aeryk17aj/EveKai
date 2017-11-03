@@ -262,10 +262,9 @@ function respond (msg, client) {
 		if (a !== 'off') {
 			if (isAll && repeatAll || isOne && repeatOne)
 				return sendErrorMessage('Already on.');
-			else
-				return sendMessage('Ok').then(() => {
-					repeatAll = isAll;
-					repeatOne = isOne;
+			else return sendMessage('Ok').then(() => {
+				repeatAll = isAll;
+				repeatOne = isOne;
 			});
 		} else if (!(repeatOne || repeatAll))
 			return sendErrorMessage('Not on repeat.');

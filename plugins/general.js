@@ -1,6 +1,5 @@
 const CommandHandler = require('../util/msgUtil');
 const { senderIsOwner: _senderIsOwner, tryRequire } = require('../util/botUtil');
-const Permissions = require('discordie').Permissions;
 const math = tryRequire('mathjs');
 
 const { logToBoth } = require('./logger');

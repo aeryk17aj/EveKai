@@ -34,7 +34,7 @@ let busy = false;
  */
 function respond (msg, client) {
 	if (msg.isPrivate) return;
-	const { content: msgText, member: sender, guild, channel: textChannel } = msg;
+	const { content: msgText, channel: textChannel, guild, member: sender } = msg;
 	if (!msgText.startsWith(prefix) || sender.bot) return;
 
 	if (boundTextChannel && boundVoiceChannel)
@@ -42,7 +42,7 @@ function respond (msg, client) {
 		if (boundTextChannel.id !== textChannel.id || sender.getVoiceChannel().id !== boundVoiceChannel.id) return;
 
 	const sendMessage = (m, e) => textChannel.sendMessage(m, false, e);
-	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(m.delete, 3000), () => {});
+	const sendErrorMessage = (m, e) => sendMessage(m, e).then(m => setTimeout(() => m.delete(), 3000), () => {});
 
 	const { addCommand, addCommandSentence }
 		= new CommandHandler(msgText.slice(prefix.length));
@@ -55,33 +55,36 @@ function respond (msg, client) {
 
 	// Check for some leftovers if on an empty queue
 	if (!guildQueue.length) {
-		guildQueue = fs.readdirSync(path.resolve(__dirname, './dl/' + guild.id + '/'))
-			.filter(f => f.endsWith('.mp3'))
-			.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
+		const fileList = fs.readdirSync(path.resolve(__dirname, './dl/' + guild.id + '/'));
+		if (fileList.length)
+			guildQueue = fileList
+				.filter(f => f.endsWith('.mp3'))
+				.map(f => f.slice(0, f.lastIndexOf('.'))); // Doesn't need the extension
 	}
 
-	addCommand('join', () => {
-		boundTextChannel = textChannel;
+	['m j', 'join'].forEach(s => addCommand(s, () => {
 		const senderVc = sender.getVoiceChannel();
 		if (!senderVc) return sendErrorMessage('You\'re not in a voice channel.');
 		senderVc.join().then(() => {
+			boundTextChannel = textChannel;
 			boundVoiceChannel = senderVc;
-			sendMessage('Bound text channel `' + boundTextChannel.name + '` with voice channel `' + boundVoiceChannel.name + '`.');
+			
+			sendMessage(`Bound text channel \`${boundTextChannel.name}\` with voice channel \`${boundVoiceChannel.name}\`.`);
 		});
-	});
+	}));
 
-	addCommand('leave', () => {
+	['m l', 'leave'].forEach(s => addCommand(s, () => {
 		stop();
 
 		const clientVc = client.User.getVoiceChannel(guild);
 		if (!clientVc)
 			return sendErrorMessage('Not in a voice channel.');
-		else
+		else {
 			clientVc.leave();
-
-		boundTextChannel = null;
-		boundVoiceChannel = null;
-	});
+			boundTextChannel = null;
+			boundVoiceChannel = null;
+		}
+	}));
 
 	function search (a, callback) {
 		yt.search(a, 3, (err, res) => {
@@ -125,7 +128,7 @@ function respond (msg, client) {
 		search(a, ({links, pick}) => addToQueue(links[pick - 1]));
 	}
 
-	function searchOnly (a) {
+	['m f', 'search'].forEach(s => addCommandSentence(s, a => {
 		search(a, ({res, links, pick}) => {
 			const info = res.items[pick - 1].snippet;
 			sendMessage('', {
@@ -144,9 +147,7 @@ function respond (msg, client) {
 				}
 			});
 		});
-	}
-
-	['m f', 'search'].forEach(s => addCommandSentence(s, searchOnly));
+	}));
 
 	/**
 	 * Link case:
@@ -179,7 +180,8 @@ function respond (msg, client) {
 			const downloadStream = ytdl(a, { filter: 'audioonly' });
 			downloadStream.on('info', async i => {
 				smsg = await sendMessage('Queuing: `' + i.title + '`. Don\'t play yet until ready.');
-				if (i['length_seconds'] >= 15 * 60) sendMessage('The video is 15 minutes or longer. This might take a while.');
+				if (i['length_seconds'] >= 15 * 60)
+					sendMessage('The video is 15 minutes or longer. This might take a while.');
 				guildQueue.push(i.title.replace(/[\\/:*?"<>|]/g, '')); // File name safe
 			});
 
@@ -205,19 +207,17 @@ function respond (msg, client) {
 
 	['m q', 'music queue', 'add'].forEach(s => addCommandSentence(s, addToQueue));
 
-	function shuffle () {
+	['m sh', 'music shuffle', 'shuffle'].forEach(s => addCommandSentence(s, () => {
 		const a = guildQueue;
 		for (let i = a.length; i; i--) {
 			const j = Math.floor(Math.random() * i);
 			[a[i - 1], a[j]] = [a[j], a[i - 1]];
 		}
 		return a;
-	}
-
-	['m sh', 'music shuffle', 'shuffle'].forEach(s => addCommandSentence(s, shuffle));
+	}));
 
 	// TODO: Test more
-	function removeTrack (a) {
+	['m r', 'music remove', 'remove'].forEach(s => addCommandSentence(s, a => {
 		if (!a)
 			return sendErrorMessage('Not a valid track number.');
 		else if (a > guildQueue.length)
@@ -226,11 +226,9 @@ function respond (msg, client) {
 			const deletedTrack = guildQueue.splice(a - 1, 1);
 			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${deletedTrack}.mp3`));
 		}
-	}
+	}));
 
-	['m r', 'music remove', 'remove'].forEach(s => addCommandSentence(s, removeTrack));
-
-	function playMusic (a) {
+	['m p', 'music play', 'play'].forEach(s => addCommandSentence(s, a => {
 		if (!guildQueue.length)
 			return sendErrorMessage('There is nothing to play.');
 
@@ -240,19 +238,15 @@ function respond (msg, client) {
 			return sendMessage('Not in a voice channel.');
 
 		play(voiceChannel.getVoiceConnectionInfo(), Number(a));
-	}
+	}));
 
-	['m p', 'music play', 'play'].forEach(s => addCommandSentence(s, playMusic));
-
-	function skip () {
+	['m s', 'skip'].forEach(s => addCommand(s, () => {
 		stop();
 		nextSong();
-	}
-
-	['m s', 'skip'].forEach(s => addCommand(s, skip));
+	}));
 
 	/**
-	 * @param {string} a 
+	 * @param {string} a
 	 * @returns Promise<IMessage>
 	 */
 	function repeatCommand (a) {
@@ -301,8 +295,7 @@ function respond (msg, client) {
 			return sendErrorMessage('Still processing your request(s)...');
 
 		const songName = guildQueue[index ? index - 1 : 0];
-
-		sendMessage('Now playing: `' + songName + '`');
+		sendMessage(`Now playing \`${songName}\``);
 
 		const encoder = vcInfo.voiceConnection.createExternalEncoder({
 			type: 'ffmpeg',

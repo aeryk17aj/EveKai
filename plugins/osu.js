@@ -16,15 +16,12 @@ const osuApi = new osu.Api(process.env.OSU_KEY || require('../auth').osuKey, {
  * @returns void
  */
 function respond (msg) {
-	const { content: msgText, channel: msgChannel } = msg;
+	const { content: msgText } = msg;
 
-	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
+	const sendMessage = (s, e) => msg.channel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
-	const command = msgText.slice(prefix.length);
-	const handler = new CommandHandler(command);
-
-	const { addCommandSentence } = handler;
+	const { addCommandSentence } = new CommandHandler(msgText.slice(prefix.length));
 
 	/**
 	 * Group 1 `(\d+)` Set ID

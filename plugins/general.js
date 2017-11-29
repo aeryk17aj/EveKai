@@ -6,7 +6,7 @@ const { logToBoth } = require('./logger');
 const { codeL, getCodePoint } = require('../util/stringUtil');
 const { rInAr } = require('../util/arrayUtil');
 
-/** @type {{prefix: string}} */
+/** @type {{ prefix: string }} */
 const { prefix } = require('../config');
 
 const ballQuotes = require('../quotes/8ball');
@@ -19,13 +19,13 @@ const docLinks = require('../quotes/docs');
  * @param {Discordie} client description
  */
 function respond (msg, client) {
-	const { content: msgText, channel: msgChannel, guild: msgGuild, member: sender } = msg;
+	const { content: msgText, channel: textChannel, guild, member: sender } = msg;
 	if (!msgText.startsWith(prefix)) return;
 
 	/** @type {IUser | IGuildMember} */
 	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(guild);
 
-	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
+	const sendMessage = (s, e) => textChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
 
 	const { addCommand, addCommandSentence, addCommandArgs }
@@ -175,7 +175,7 @@ function respond (msg, client) {
 			if (result === msgText) reject();
 			else resolve();
 		}).catch(e => {
-			process.stdout.write(`Failed eval in ${msgGuild.name} : ${msgChannel.name}\n\n${e}\n`);
+			process.stdout.write(`Failed eval in ${guild.name} : ${textChannel.name}\n\n${e}\n`);
 			sendMessage('It didn\'t work.');
 		}).then(() => {
 			switch (typeof result) {
@@ -212,7 +212,7 @@ function respond (msg, client) {
 		const senderVc = sender.getVoiceChannel();
 		if (!senderVc) return sendMessage('You\'re not in a voice channel.');
 
-		const destinationVc = msgGuild.voiceChannels.find(vc => vc.name === a);
+		const destinationVc = guild.voiceChannels.find(vc => vc.name === a);
 		if (!destinationVc) return sendMessage(`There is no voice channel named \`${a}\``);
 
 		return { senderVc, destinationVc };

@@ -24,7 +24,7 @@ function respond (msg, client) {
 	if (!msgText.startsWith(prefix)) return;
 
 	/** @type {IUser | IGuildMember} */
-	const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
+	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(guild);
 
 	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
 	const sendEmbed = (e) => sendMessage('', e);
@@ -254,85 +254,6 @@ function respond (msg, client) {
 			}
 		}
 	} */
-
-	function fetchMoreMessages (channel, left) {
-		const before = channel.messages[0];
-		return channel.fetchMessages(Math.min(left, 100), before)
-			.then(e => onFetch(e, channel, left));
-	}
-
-	function onFetch (e, channel, left) {
-		if (!e.messages.length) return Promise.resolve();
-		left -= e.messages.length;
-		if (left <= 0) return Promise.resolve();
-		return fetchMoreMessages(channel, left);
-	}
-
-	function fetchMoreSpecificMessages (channel, user, left) {
-		const before = channel.messages.filter(m => m.author.id === user.id)[0];
-		return channel.fetchMessages(100, before)
-			.then(e => onFetchUser(e, channel, user, left));
-	}
-
-	function onFetchUser (e, channel, user, left) {
-		if (!e.messages.length) return Promise.resolve();
-		left -= e.messages.filter(m => m.author.id === user.id).length;
-		if (left <= 0) return Promise.resolve();
-		return fetchMoreSpecificMessages(channel, user, left);
-	}
-
-	function deleteMessages (msgs, channel, left) {
-		if (!left) left = msgs.length;
-		const removeCount = Math.min(100, left);
-		return client.Messages.deleteMessages(msgs.slice(0, removeCount), channel)
-			.then(() => onDeleteMore(msgs, channel, left - removeCount))
-			// .catch(() => console.log('What, why can\'t it delete?'));
-			.catch(() => sendMessage(`
-				Deleting past 100 is broken at the moment.\n
-				Please prune by 100s while Aeryk gets this fixed.
-			`));
-	}
-
-	function onDeleteMore (msgs, channel, left) {
-		// Messages are fetched when insufficient before deletion so...
-		// If there's nothing to delete, it's done deleting
-		if (!msgs.length || left <= 0) return Promise.resolve();
-		return deleteMessages(msg, channel, left);
-	}
-
-	addCommandSentence('prune', a => {
-		// Sender can't delete or pin messages
-		if (!sender.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return;
-		// Bot can't delete or pin messages
-		if (!botUser.can(Permissions.Text.MANAGE_MESSAGES, msgGuild)) return sendMessage('I don\'t have permission.');
-		// Empty args
-		if (!a.length) return sendMessage(`\`${prefix}prune <'all' or user mention> <amount>\``);
-
-		const mention = a.split(' ')[0];
-		const amount = parseInt(a.split(' ')[1]);
-
-		let allMsgs = false;
-
-		let messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
-		if (msg.mentions.length) messages = messages.filter(m => m.author.id === msg.mentions[0].id);
-		else if (mention === 'all') allMsgs = true;
-		else return sendMessage('Has to be `all` or a user mention.');
-
-		if (amount > messages.length) {
-			// console.log(`about to delete ${amount} out of ${messages.length} in cache`);
-			if (allMsgs)
-				fetchMoreMessages(msgChannel, amount - messages.length).then(() => {
-					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted);
-					// console.log(`Post fetch: ${amount} out of ${messages.length} in cache`);
-					deleteMessages(messages.slice(-amount), msgChannel);
-				});
-			else
-				fetchMoreSpecificMessages(msgChannel, msg.mentions[0], amount).then(() => {
-					messages = client.Messages.forChannel(msgChannel).filter(m => !m.deleted && m.author.id === msg.mentions[0].id);
-					deleteMessages(messages.slice(-amount), msgChannel);
-				});
-		} else deleteMessages(messages.slice(-amount), msgChannel);
-	});
 
 	addCommandSentence('roll', a => sendMessage(Math.ceil(Math.random() * (a || 100))));
 

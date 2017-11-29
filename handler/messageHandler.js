@@ -7,6 +7,7 @@ const music = require('../plugins/music');
 const drawing = require('../plugins/drawing');
 const special = require('../plugins/special');
 const autoVcCommands = require('./vcHandler');
+const prune = require('../plugins/pruneCommand');
 
 // Game-related
 const osu = require('../plugins/osu');
@@ -19,15 +20,21 @@ const osu = require('../plugins/osu');
 function handle (e, client) {
 	if (!e) return;
 	const msg = e.message;
-	logger.init(msg, client);
-	general.respond(msg, client);
 	if (!msg || !msg.content) return;
-	osu.respond(msg);
-	music.respond(msg, client);
-	special.respond(msg, client);
-	drawing.respond(msg, client);
-	autoVcCommands.respond(msg);
-	// TODO: Separate prune command and put them here at the bottom
+
+	const handlers = [
+		logger,
+		general,
+		osu,
+		music,
+		special,
+		drawing,
+		autoVcCommands,
+		prune
+	];
+
+	for (const h of handlers)
+		h.respond(msg, client);
 }
 
 exports.handle = handle;

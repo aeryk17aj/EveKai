@@ -57,6 +57,7 @@ client.Dispatcher.on(Events.GATEWAY_RESUMED, () => {
 
 client.Dispatcher.on(Events.GUILD_CREATE, e => {
 	logToBoth('[GUILD_CREATE] ' + e.guild.name);
+	ensureFoldersExist(client);
 });
 
 // TODO: Make it cuztomizable, per guild

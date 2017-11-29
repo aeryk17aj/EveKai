@@ -20,7 +20,7 @@ function senderIsOwner (msg) {
 function makeGuildFolder (path) {
 	fs.mkdirSync(path);
 	fs.mkdirSync(path + '/_vid');
-	fs.mkdirSync(path + '/_img');
+	fs.mkdirSync(path + '/img');
 }
 
 /**

@@ -320,8 +320,9 @@ function respond (msg, client) {
 	}
 
 	function stop () {
-		client.VoiceConnections
-			.getForGuild(guild).voiceConnection
+		const guildVc = client.VoiceConnections.getForGuild(guild);
+		if (guildVc) guildVc
+			.voiceConnection
 			.getEncoderStream()
 			.unpipeAll();
 	}

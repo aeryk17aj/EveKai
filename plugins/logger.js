@@ -28,43 +28,64 @@ async function updateWhitelist () {
 /**
  * Commands for the chat logger
  * @param {IMessage} msg Message object
+ * @param {Discordie} client
  */
-function loggerCommands (msg) {
-	const keyword = 'log';
-	if (!msg.content.startsWith(prefix)) return;
-	if (msg.isPrivate || !util.senderIsOwner(msg)) return;
-	const { channel: msgChannel, guild: msgGuild} = msg;
-	const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
+function loggerCommands (msg, client) {
+	const { channel, guild } = msg;
+	const ignoreConditions = [
+		msg.isPrivate,
+		!util.senderIsOwner(msg),
+		!msg.content.startsWith(prefix)
+	];
+	if (ignoreConditions.reduce((a, b) => a || b)) return;
+
+	const rootCommand = 'log';
+
+	const sendMessage = (s, e) => channel.sendMessage(s, false, e);
 
 	const { addCommand, addCommandSentence }
-		= new CommandHandler(msg.content.slice((prefix + keyword).length + 1));
+		= new CommandHandler(msg.content.slice((prefix + rootCommand).length + 1));
 
-	if (!whitelist[msgGuild.id]) whitelist[msgGuild.id] = [];
+	if (!whitelist[guild.id]) whitelist[guild.id] = [];
 
 	addCommand('status', () => {
-		if (whitelist[msgGuild.id].includes(msgChannel.id))
+		if (whitelist[guild.id].includes(channel.id))
 			sendMessage('👍');
-		else if (Object.keys(whitelist).includes(msgGuild.id))
+		else if (Object.keys(whitelist).includes(guild.id))
 			sendMessage('👎');
 		else
 			sendMessage('👎 (Whole server)');
 	});
 
-	addCommand('lstc', () => {
-		sendMessage(Object.keys(whitelist).includes(msgGuild.id)
-			? [
+	addCommandSentence('lsg', () => {
+		const guildList = Object.keys(whitelist).map(g =>
+			client.Guilds.find(cg => cg.id === g).name || `Unknown Guild ${g}`);
+
+		sendMessage(guildList);
+	});
+
+	addCommandSentence('lstc', a => {
+		const selectedGuild = a ? client.Guilds.find(g => g.name === a) : guild;
+
+		let channelList;
+		if (Object.keys(whitelist).includes(selectedGuild.id)) {
+			channelList = [
 				'```ini',
-				...whitelist[msgGuild.id].map(i =>
-					'#' + msgGuild.textChannels.find(tc =>
-						tc.id === i).name),
+				...whitelist[selectedGuild.id].map(i => {
+					const txc = selectedGuild.textChannels.find(tc => tc.id === i);
+					return txc ? '#' + txc.name : `Unknown channel (${i})`;
+				}),
 				'```'
-			].join('\n')
-			: 'There are no logged channels'
-		);
+			].join('\n');
+		} else
+			channelList = 'There are no logged channels';
+
+		sendMessage(channelList);
 	});
 
 	addCommand('start', () => {
-		if (logMessages) sendMessage('Logging is already enabled');
+		if (logMessages)
+			sendMessage('Logging is already enabled');
 		else {
 			logMessages = true;
 			sendMessage('Logging enabled');
@@ -72,7 +93,8 @@ function loggerCommands (msg) {
 	});
 
 	addCommand('stop', () => {
-		if (!logMessages) sendMessage('Logging is already disabled');
+		if (!logMessages)
+			sendMessage('Logging is already disabled');
 		else {
 			sendMessage('Logging disabled');
 			logMessages = false;
@@ -81,25 +103,26 @@ function loggerCommands (msg) {
 
 	addCommandSentence('whitelist', a => {
 		if (a === 'add') {
-			if (!whitelist[msgGuild.id].length) {
+			if (!whitelist[guild.id].length) {
 				// 'Create Guild + Channel' case
-				whitelist[msgGuild.id] = [msgChannel.id];
+				whitelist[guild.id] = [channel.id];
 			} else {
 				// 'Already whitelisted' case
-				if (whitelist[msgGuild.id].includes(msgChannel.id)) return sendMessage('This channel is already being logged');
+				if (whitelist[guild.id].includes(channel.id))
+					return sendMessage('This channel is already being logged');
 				// 'Additional Channel' case
 				else {
-					whitelist[msgGuild.id].push(msgChannel.id);
+					whitelist[guild.id].push(channel.id);
 					updateWhitelist().then(() => sendMessage('This channel is now being logged'));
 				}
 			}
 		} else if (a === 'remove') {
-			if (!whitelist[msgGuild.id] || !whitelist[msgGuild.id].includes(msgChannel.id)) {
+			if (!whitelist[guild.id] || !whitelist[guild.id].includes(channel.id)) {
 				// 'Already not whitelisted' case
 				return sendMessage('This channel is already not being logged');
 			} else {
 				// 'Remove channel' case
-				whitelist[msgGuild.id].splice(whitelist[msgGuild.id].indexOf(msgChannel.id), 1);
+				whitelist[guild.id].splice(whitelist[guild.id].indexOf(channel.id), 1);
 				updateWhitelist().then(() => sendMessage('Logging of this channel has now stopped'));
 			}
 		}
@@ -182,14 +205,14 @@ function resolveMessageContent (content, guild, client) {
 	});
 }
 
-function init (msg, client) {
+function respond (msg, client) {
 	logMsg(msg, client);
-	loggerCommands(msg);
+	loggerCommands(msg, client);
 }
 
 module.exports = {
 	whitelist,
-	init,
+	respond,
 	addToLog,
 	logToBoth
 };

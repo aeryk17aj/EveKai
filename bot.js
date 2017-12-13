@@ -60,12 +60,15 @@ client.Dispatcher.on(Events.GUILD_CREATE, e => {
 	ensureFoldersExist(client);
 });
 
-// TODO: Make it cuztomizable, per guild
-client.Dispatcher.on(Events.GUILD_MEMBER_ADD, e =>
-	e.guild.generalChannel.sendMessage(`Welcome, **${e.member.name}** to **${e.guild.name}**.`));
+client.Dispatcher.on(Events.GUILD_MEMBER_ADD, e => {
+	const channel = e.guild.generalChannel || e.guild.textChannels.find(tc => tc.name === 'general');
+	channel && channel.sendMessage(`Welcome, **${e.member.name}** to **${e.guild.name}**.`);
+});
 
-client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e =>
-	e.guild.generalChannel.sendMessage(`**${e.user.username}** has left **${e.guild.name}**.`));
+client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e => {
+	const channel = e.guild.generalChannel || e.guild.textChannels.find(tc => tc.name === 'general');
+	channel && channel.sendMessage(`**${e.user.username}** has left **${e.guild.name}**.`)
+});
 
 // Message related
 

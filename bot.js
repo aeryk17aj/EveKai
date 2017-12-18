@@ -14,7 +14,7 @@ const { ensureFoldersExist, log } = require('./util/botUtil');
 /** @type {{ prefix: string, hide: boolean }} */
 const config = require('./config');
 
-const Events = Discordie.Events;
+const { Events } = Discordie;
 const client = new Discordie({
 	autoReconnect: true
 });
@@ -24,7 +24,7 @@ const rl = readline.createInterface({
 });
 
 process.on('unhandledRejection', (reason, promise) =>
-	log(`Unhandled Promise:\n${promise}\n\n${reason.stack}`));
+	log(`Unhandled Promise: ${promise.name || 'anonymous Promise'}\n\n${reason}`));
 
 rl.on('line', c =>
 	consoleHandler.respond(c, client));
@@ -67,7 +67,7 @@ client.Dispatcher.on(Events.GUILD_MEMBER_ADD, e => {
 
 client.Dispatcher.on(Events.GUILD_MEMBER_REMOVE, e => {
 	const channel = e.guild.generalChannel || e.guild.textChannels.find(tc => tc.name === 'general');
-	channel && channel.sendMessage(`**${e.user.username}** has left **${e.guild.name}**.`)
+	channel && channel.sendMessage(`**${e.user.username}** has left **${e.guild.name}**.`);
 });
 
 // Message related

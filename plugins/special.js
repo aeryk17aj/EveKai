@@ -81,34 +81,37 @@ function respond (msg, client) {
 		sendMessage(getCodePoint(a));
 	});
 
+	addCommandSentence('whatHex', a => {
+		if (!toHex) return;
+		sendMessage(toHex.get(a));
+	});
+
 	addCommandSentence('setColor', a => {
 		const coloredRoles = sender.roles.filter(r => r.color > 0);
 
-		const topEditableSelfRole = coloredRoles.find(r =>
-			guild.members.filter(m =>
-				m.hasRole(r)).length > 1 &&
-				r.position < botMember.roles[0].position);
+		const topEditableSelfRole = coloredRoles.find(r => {
+			const membersWithRole = guild.members.filter(m => m.hasRole(r));
+			const botTopRoles = botMember.roles.sort((a, b) => a.position > b.position ? -1 : 1);
+
+			return membersWithRole.length === 1 && r.position < botTopRoles[0].position;
+		});
 
 		if (!topEditableSelfRole)
 			return sendMessage('You don\'t have a self role.');
 
 		if (!toHex) {
-			let hexValue;
-
-			if (a.length === 6)
-				hexValue = parseInt(a, 16);
-			else if (a.length === 7)
-				hexValue = parseInt(a.slice(1), 16);
+			const hexValue = parseInt(a.slice(-6), 16);
 
 			if (!hexValue)
-				return sendMessage('I\'m sorry, I didn\'t get that.');
+				return sendMessage('Not a hex color.');
 			else
 				return topEditableSelfRole.commit(null, hexValue).then(() =>
 					sendMessage(`Color of \`${topEditableSelfRole.name}\` changed to ${a}`));
 		} else {
 			if (!toHex.get(a))
-				return sendMessage(`I don't know of a color named \`${a}\``);
+				return sendMessage(`Unknown color: \`${a}\``);
 			else
+				// TODO: See if it's a hex code first before processing colors
 				return topEditableSelfRole.commit(null, parseInt(toHex(a).slice(1), 16)).then(() =>
 					sendMessage(`Color of \`${topEditableSelfRole.name}\` changed to ${a}`));
 		}

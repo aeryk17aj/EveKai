@@ -32,7 +32,7 @@ class CommandHandler {
 	 * Adds a command that takes one, space-safe argument
 	 *
 	 * @param {string} c - Command string
-	 * @param {Function} f - Callback function
+	 * @param {(a: string) => void} f - Callback function
 	 *
 	 * @memberOf CommandHandler
 	 */
@@ -48,7 +48,7 @@ class CommandHandler {
 	 * Adds a command that takes arguments separated by spaces
 	 *
 	 * @param {string} c Command string
-	 * @param {Function} f Callback function
+	 * @param {(a: string[]) => void} f Callback function
 	 *
 	 * @memberOf CommandHandler
 	 */

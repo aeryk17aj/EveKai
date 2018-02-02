@@ -136,30 +136,37 @@ function loggerCommands (msg, client) {
  * @param {Discordie} client
  */
 function logMsg (msg, client) {
-	// So it changes on midnight
+	// So it changes on midnight or after
 	const logDate = msg.createdAt.toLocaleDateString('en-US').replace(/[/\\]/g, '-');
 	logFile = fs.createWriteStream('logs/chatlog-' + logDate + '.txt', {flags: 'a'});
+
 	const possibleCommand = msg.content.startsWith(prefix);
 	const logLine = getLogLine(msg.createdAt, msg, client);
 
-	if (!msg.isPrivate) { // Guild only
-		// Guild not a property
-		if (whitelist.hasOwnProperty(msg.guild.id) && logMessages) {
-			// Guild doesn't have channel
-			if (whitelist[msg.guild.id].includes(msg.channel.id)) logToBoth(logLine);
-			else if (possibleCommand) logToBoth(logLine);
-		} else if (possibleCommand) logToBoth(logLine);
-	}
+	// Assumed commands and DMs take priority
+	let shouldLog = possibleCommand || msg.isPrivate;
+
+	// If neither were true, log whitelisted channels
+	if (!shouldLog)
+		// Whitelist and config check
+		if (msg.guild.id in whitelist && logMessages)
+			// Second whitelist check
+			if (whitelist[msg.guild.id].includes(msg.channel.id))
+				shouldLog = true;
+
+	if (shouldLog)
+		logToBoth(logLine);
 }
 
 /**
  * @param {Date} time 
  * @param {IMessage} msg 
+ * @param {Discordie} client
  * @returns {String}
  */
 function getLogLine (time, msg, client) {
-	const timeString = `[${time.toLocaleDateString('en-US')} ${time.toLocaleTimeString('en-US', {hour12: true})}]`;
-	const channel = `[${!msg.isPrivate ? msg.guild.name + ': #' + msg.channel.name : 'DM: ' + msg.channel.recipient.username}]`;
+	const timeString = `[${time.toLocaleDateString('en-US')} ${time.toLocaleTimeString('en-US', { hour12: true })}]`;
+	const channel = `[${!msg.isPrivate ? `${msg.guild.name}: #${msg.channel.name}` : 'DM: ' + msg.channel.recipient.username}]`;
 	const sender = `${(msg.member || msg.author).username}:`; // IUser as substitute for the case of DMs
 	const content = resolveMessageContent(msg.content, msg.guild, client);
 	const attachments = !msg.attachments.length ? '' : ['', ...msg.attachments].map(a => a.url).join('\n');

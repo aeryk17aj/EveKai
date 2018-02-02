@@ -104,9 +104,10 @@ function respond (msg) {
 
 			sendEmbed({
 				color: 0xFFB2C5,
-				thumbnail: {url: 'https://a.ppy.sh/' + user.id},
-				url: 'https://osu.ppy.sh/u/' + user.id,
-				author: {name: user.name, icon_url: 'https://a.ppy.sh/' + user.id},
+				thumbnail: { url: 'https://a.ppy.sh/' + user.id },
+				// url: 'https://osu.ppy.sh/u/' + user.id,
+				author: { name: user.name, icon_url: 'https://a.ppy.sh/' + user.id },
+				description: `Profile: [Current](https://osu.ppy.sh/u/${user.id}) | [New](https://osu.ppy.sh/users/${user.id})`,
 				fields: [
 					{
 						name: `Performance (${['osu!', 'Taiko', 'Catch', 'Mania'][mode]})`,

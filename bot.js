@@ -32,7 +32,7 @@ rl.on('line', c =>
 client.connect({ token: process.env.BOT_TOKEN || require('./auth').loginToken });
 
 function getCurrentTime () {
-	const now = new Date(Date.now())
+	const now = new Date(Date.now());
 	return `${now.toLocaleDateString('en-US')} ${now.toLocaleTimeString('en-US', { hour12: true })}`;
 }
 

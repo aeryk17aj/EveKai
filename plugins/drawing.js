@@ -1,6 +1,6 @@
 const Canvas = require('canvas');
 // const Image = Canvas.Image;
-const get = require('simple-get');
+const request = require('request');
 
 const fs = require('fs');
 const path = require('path');
@@ -14,24 +14,20 @@ const { prefix } = require('../config');
 
 /**
  * Primary message listener
- * @param  {IMessage} msg Message object to be used
+ * @param {IMessage} msg Message object to be used
  */
 function respond (msg) {
-	const { content: msgText, channel: msgChannel } = msg;
-	const sender = msg.member || msg.author; // IUser as a substitute for DMs
-	const senderPfp = sender.staticAvatarURL;
+	const { content: msgText, channel, member: sender } = msg;
+	if (!msgText.startsWith(prefix)) return;
+	const { staticAvatarURL: senderPfp } = sender;
 
 	// const botUser = msg.isPrivate ? client.User : client.User.memberOf(msgGuild);
 
 	// const sendMessage = (s, e) => msgChannel.sendMessage(s, false, e);
-	const uploadFile = (s, n) => msgChannel.uploadFile(s, n || 'drawing.jpg');
+	const uploadFile = (s, n) => channel.uploadFile(s, n || 'drawing.jpg');
 
-	const command = msgText.slice(prefix.length);
-	const handler = new CommandHandler(command);
+	const { addCommand } = new CommandHandler(msgText.slice(prefix.length));
 	
-	if (!msgText.startsWith(prefix)) return;
-	
-	const { addCommand } = handler;
 	const addDrawCommandSync = (c, f, w, h) => addCommand(c, () => {
 		const canvas = Canvas.createCanvas(w || 640, h || 480);
 		const ctx = canvas.getContext('2d');
@@ -53,7 +49,6 @@ function respond (msg) {
 	const addCommandSentence = (c, f) => handler.addCommandSentence(c, f);
 	const addCommandArgs = (c, f) => handler.addCommandArgs(c, f); */
 
-	// TODO: Dynamic width :thinking:
 	addDrawCommandSync('testDraw', (ctx, canvas, w, h) => {
 		ctx.fillStyle = '#FFB2C5';
 		ctx.fillRect(0, 0, w, h);
@@ -63,12 +58,23 @@ function respond (msg) {
 	}, 300, 100);
 
 	const guildFolder = './dl/' + msg.guild.id;
-	const imgOut = path.resolve(__dirname, `${guildFolder}/_img/${sender.id} - ${sender.avatar}.jpg`);
-	const hasAvatar = fs.readdirSync(path.resolve(__dirname, guildFolder + '/_img')).includes(`${sender.id} - ${sender.avatar}.jpg`);
+	const imgOutR = `${guildFolder}/img/${sender.id} - ${sender.avatar}.jpg`;
+	const imgOut = path.resolve(__dirname, imgOutR);
+	const hasAvatar = fs.readdirSync(path.resolve(__dirname, guildFolder + '/img')).includes(`${sender.id} - ${sender.avatar}.jpg`);
 
 	async function getPfp () {
-		if (fs.existsSync(imgOut)) return;
-		get({ url: senderPfp, headers: { 'Content-Type': 'image/jpeg' } }, (err, stream) => downloadPicture(err, stream, () => Promise.resolve));
+		return new Promise((resolve, reject) => {
+			log('Checking again!');
+			if (fs.existsSync(imgOut)) resolve();
+			log('Starting fetch.');
+
+			request(senderPfp)
+				.pipe(fs.createWriteStream(imgOut))
+				.on('close', () => {
+					log('Finished fetch.');
+					resolve();
+				});
+		});
 	}
 
 	/**
@@ -78,20 +84,30 @@ function respond (msg) {
 	 */
 	function downloadPicture (err, stream, cb) {
 		if (err) log(err);
+
+		log('Fetching..');
 		const write = stream.pipe(fs.createWriteStream(imgOut));
 		
-		write.on('finish', cb);
+		write.on('close', cb);
 	}
 
 	addDrawCommandSync('drawMe', async (ctx, canvas, w, h) => {
-		if (!hasAvatar) await getPfp();
+		log('Checking for pfp');
+		if (!hasAvatar) {
+			log('pfp not found. Fetching...');
+			await getPfp();
+		}
 		ctx.fillStyle = '#FFB2C5';
 		ctx.fillRect(0, 0, w, h);
 		ctx.fillStyle = 'white';
 		ctx.font = '16px serif';
 		ctx.fillText(sender.nick || sender.username, 10, 17, 140);
-		const pfp = Canvas.loadImage(await readFile(imgOut));
-		ctx.drawImage(await pfp, 21, 51, 128, 128); // FIXME:
+		log(imgOut);
+		if (!fs.existsSync(imgOutR)) log('Picture doesn\'t exist, wtf?!');
+		log('Getting Image');
+		const file = await readFile(imgOut);
+		const pfp = await Canvas.loadImage(file);
+		ctx.drawImage(pfp, 21, 51, 128, 128); // FIXME:
 	}, 170, 200);
 
 	addCommand('dlpfp', () => {

@@ -4,8 +4,8 @@ html, body {
 	font-family: 'Roboto', sans-serif;
 }
 
-.header {
-	position: fixed;
+#header {
+	position: relative;
 	top: 0;
 	left: 0;
 	right: 0;
@@ -14,7 +14,7 @@ html, body {
 	border-bottom: 3px solid #ffb2c5;
 }
 
-.header > div {
+#header > div {
 	padding: 10px;
 	margin: 0 auto;
 }
@@ -68,14 +68,12 @@ html, body {
 	vertical-align: middle;
 	/* width: calc(100% - 280px); */
 	padding: 0;
-	margin: 0;
-	margin-left: 10px;
+	margin: 0 0 0 10px;
 	list-style: none;
 }
 
 .page-nav li {
-	margin: 0;
-	margin-right: 15px;
+	margin: 0 15px 0 0;
 	text-align: center;
 	display: inline-block;
 }
@@ -90,4 +88,19 @@ html, body {
 	font-size: 20px;
 	font-family: Whitney, Helvetica Neue, Helvetica, Arial, sans-serif;
 	text-decoration: none;
+
+	box-shadow: 3px 3px 2px #aaa;
+}
+
+#main {
+	margin-left: 10px;
+}
+
+#main p {
+	width: fit-content;
+	padding: 10px;
+	border: 3px solid white;
+	border-radius: 0 20px 0 20px;
+	background: #0008;
+	color: white;
 }

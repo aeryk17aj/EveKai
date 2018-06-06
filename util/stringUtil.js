@@ -22,7 +22,7 @@ function commaPad (s) {
  *     > `textGoesHere`
  */
 function codeL (s) {
-	return '`' + s + '`';
+	return `\`${s}\``;
 }
 
 /**
@@ -35,7 +35,7 @@ function codeB (s) {
 		// Array case
 		? ['```', ...s, '```'].join('\n')
 		// String case
-		: '```' + s + '```';
+		: `\`\`\`${s}\`\`\``;
 }
 
 /**
@@ -45,15 +45,17 @@ function codeB (s) {
  */
 function getCodePoint (a) {
 	a = a.replace(/\ufe0f|\u200d/gm, ''); // strips unicode variation selector and zero-width joiner
-	let i = 0, c = 0, p = 0;
 	const r = [];
-	while (i < a.length) {
-		c = a.charCodeAt(i++);
+	let index = 0;
+	let currentChar = 0;
+	let p = 0;
+	while (index < a.length) {
+		currentChar = a.charCodeAt(index++);
 		if (p) {
-			r.push((65536 + (p - 55296 << 10) + (c - 56320)).toString(16));
+			r.push((65536 + (p - 55296 << 10) + (currentChar - 56320)).toString(16));
 			p = 0;
-		} else if (55296 <= c && c <= 56319) p = c;
-		else r.push(c.toString(16));
+		} else if (55296 <= currentChar && currentChar <= 56319) p = currentChar;
+		else r.push(currentChar.toString(16));
 	}
 
 	return r.join('-');

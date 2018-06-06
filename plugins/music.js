@@ -35,7 +35,10 @@ let busy = false;
 function respond (msg, client) {
 	if (msg.isPrivate) return;
 	const { content: msgText, channel: textChannel, guild, member: sender } = msg;
-	if (!msgText.startsWith(prefix) || sender.bot) return;
+
+	if (!msgText.startsWith(prefix) ||
+		sender.bot)
+		return;
 
 	if (boundTextChannel && boundVoiceChannel)
 		// Ignore music commands except for bound channel
@@ -264,15 +267,15 @@ function respond (msg, client) {
 			return sendErrorMessage('Not on repeat.');
 	}
 
-	['m re', 'repeat'].forEach(s => addCommandSentence(s, repeatCommand));
+	['m re', 'music repeat', 'repeat'].forEach(s => addCommandSentence(s, repeatCommand));
 
 	addCommand('stop', stop);
 	addCommand('dc', stop); // Unpipe before terminating
 
 	// TODO: Test more
 	addCommand('clear', () => {
-		guildQueue.forEach(songName =>
-			fs.unlinkSync(path.resolve(__dirname, `./dl/${guild.id}/${songName}.mp3`)));
+		for (const songName of guildQueue)
+			fs.unlinkSync(path.resolve(__dirname, `./dl/${msg.guild.id}/${songName}.mp3`));
 
 		guildQueue = [];
 	});

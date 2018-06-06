@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const util = require('../util/botUtil');
+const { refreshConfig, senderIsOwner } = require('../util/botUtil');
 const CommandHandler = require('../util/msgUtil');
 
 const config = require('../config');
@@ -22,7 +22,7 @@ function logToBoth (s) {
 }
 
 async function updateWhitelist () {
-	fs.writeFileSync('./whitelist.json', JSON.stringify(whitelist, null, 4), 'utf-8');
+	fs.writeFileSync('./whitelist.json', JSON.stringify(whitelist, null, 4));
 }
 
 /**
@@ -34,7 +34,7 @@ function loggerCommands (msg, client) {
 	const { channel, guild } = msg;
 	const ignoreConditions = [
 		msg.isPrivate,
-		!util.senderIsOwner(msg),
+		!senderIsOwner(msg),
 		!msg.content.startsWith(prefix)
 	];
 	if (ignoreConditions.reduce((a, b) => a || b)) return;
@@ -88,6 +88,7 @@ function loggerCommands (msg, client) {
 			sendMessage('Logging is already enabled');
 		else {
 			logMessages = true;
+			refreshConfig(config);
 			sendMessage('Logging enabled');
 		}
 	});
@@ -98,6 +99,7 @@ function loggerCommands (msg, client) {
 		else {
 			sendMessage('Logging disabled');
 			logMessages = false;
+			refreshConfig(config);
 		}
 	});
 
@@ -159,8 +161,8 @@ function logMsg (msg, client) {
 }
 
 /**
- * @param {Date} time 
- * @param {IMessage} msg 
+ * @param {Date} time
+ * @param {IMessage} msg
  * @param {Discordie} client
  * @returns {String}
  */
@@ -182,12 +184,14 @@ function getLogLine (time, msg, client) {
 }
 
 /**
- * Similar to `IMessage.resolveContent()` / `IMessageCollection.resolveContent(c, g?)` but:
+ * Modified version of `IMessage.resolveContent()` / `IMessageCollection.resolveContent(c, g?)`:
  * 
+ * Differences:
  * - User / nickname mention: includes discriminator and id
  * - Channel and Role: indicates if channel or role
  * 
  * @param {String} content
+ * @param {IGuild} guild
  * @param {Discordie} client
  * @returns {String}
  */
@@ -195,17 +199,19 @@ function resolveMessageContent (content, guild, client) {
 	return content.replace(/<(@!?|#|@&)([0-9]+)>/g, (match, type, id) => {
 		if (type === '@' || type === '@!') { // user
 			const user = client.Users.get(id);
-			if (!user) return match;
+			if (!user)
+				return match;
 			if (guild && type === '@!') {
 				const member = user.memberOf(guild);
-				return (member && ('@' + member.name + `#${member.discriminator}(${member.id})`)) || match;
+				return (member && (`@${member.name}#${member.discriminator}(${member.id})`)) || match;
 			}
 			return (user && ('@' + user.username + `(${user.id})`)) || match;
 		} else if (type === '#') { // channel
 			const channel = client.Channels.get(id);
 			return (channel && ('#' + channel.name + '(Channel)')) || match;
 		} else if (type === '@&') { // role
-			if (!guild || !guild.roles) return match;
+			if (!guild || !guild.roles)
+				return match;
 			const role = guild.roles.find(r => r.id === id);
 			return (role && ('@' + role.name + '(Role)')) || match;
 		}

@@ -56,11 +56,16 @@ function tryRequire (name) {
 	return null;
 }
 
+function refreshConfig (config) {
+	fs.writeFileSync('../config.json', JSON.stringify(config, null, 4));
+}
+
 module.exports = {
 	// Message utility
 	senderIsOwner,
 	// General utility
 	ensureFoldersExist,
 	log,
+	refreshConfig,
 	tryRequire
 };

@@ -4,7 +4,7 @@ const math = tryRequire('mathjs');
 
 const { logToBoth } = require('./logger');
 const { codeL, getCodePoint } = require('../util/stringUtil');
-const { rInAr } = require('../util/arrayUtil');
+const { chunk, rInAr } = require('../util/arrayUtil');
 
 /** @type {{ prefix: string }} */
 const { prefix } = require('../config');
@@ -39,6 +39,11 @@ function respond (msg, client) {
 
 	const senderIsOwner = _senderIsOwner(msg);
 
+	addCommand('ping', () => {
+		const delay = msg.createdAt.valueOf() - Date.now();
+		return sendMessage(`Pong! (${delay}ms)`);
+	});
+
 	addCommand('dc', () => {
 		if (!senderIsOwner) return;
 
@@ -51,7 +56,7 @@ function respond (msg, client) {
 		}, 2000);
 	});
 
-	addCommandResponse('connections', `Connected to ${codeL(client.Guilds.length)} servers.`);
+	addCommandResponse('cxs', `Connected to ${codeL(client.Guilds.length)} servers.`);
 	addCommandSentence('docs', a => {
 		sendMessage(docLinks.hasOwnProperty(a)
 			? docLinks[a]
@@ -61,7 +66,7 @@ function respond (msg, client) {
 	const generalCommands = [
 		'help | cmds | ?',
 		'helpAlt', // temp
-		'connections',
+		'cxs',
 		'docs',
 		'invite',
 		'8ball <yes/no question, always ends with a question mark>',
@@ -71,21 +76,30 @@ function respond (msg, client) {
 		'moveMe <voice channel name>',
 		'prune <\'all\' or user mention> <amount>',
 		'roll <optional: max number>',
-		'time'
+		'time',
+		'choose <arguments separated by \'|\'>'
 	];
 
 	const musicCommands = [
 		'm j  | join',
 		'm l  | leave',
-		'm q  | add [Search term | YouTube URL]',
-		'm rm | remove [number in queue]',
+		'm f  | find',
+		'm q  | add <Search term | YouTube URL>',
+		'm rm | remove <number in queue>',
 		'm p  | play',
 		'm sk | skip',
-		'm re | repeat [\'one\' | \'all\' | \'off\']',
+		'm re | repeat <\'one\' | \'all\' | \'off\'>',
 		'm sh | shuffle',
 		'stop',
 		'clear',
 		'list'
+	];
+
+	const betaComands = [
+		'panel',
+		'unicode <any character or emoji>',
+		'whatHex <color name>',
+		'setColor <color name or hex code>'
 	];
 
 	// TODO: Help builder?
@@ -98,12 +112,20 @@ function respond (msg, client) {
 				...musicCommands.map(a => prefix + a),
 				'```'
 			].join('\n');
+		else if (a === 'beta')
+			help = [
+				'```ini',
+				'[Beta Commands]', 'These commands are WIP. Use at your discretion', '',
+				...betaComands.map(a => prefix + a),
+				'```'
+			].join('\n');
 		else
 			help = [
 				'```ini',
 				'[General Commands]', '',
 				...generalCommands.map(a => prefix + a),
-				'', 'do \'' + prefix + '? music\' for music commands',
+				'', '\'' + prefix + '? music\' for music commands',
+				'\'' + prefix + '? beta\' for beta commands',
 				'```'
 			].join('\n');
 
@@ -124,7 +146,7 @@ function respond (msg, client) {
 	}
 
 	addCommand('helpAlt', () => {
-		sendMessage('', {
+		sendEmbed({
 			color: 0x2ECC71,
 			fields: [ {
 				name: 'General',
@@ -153,18 +175,18 @@ function respond (msg, client) {
 	});
 
 	addCommandSentence('8ball', a => {
-		if (a.endsWith('?'))
-			sendEmbed({
-				color: 0xFFB2C5,
-				author: {
-					name: (sender.name),
-					icon_url: sender.avatarURL
-				},
-				title: a,
-				description: 'Answer: ' + rInAr(ballQuotes)
-			});
-		else
-			sendMessage('Use a question mark.');
+		// if (a.endsWith('?'))
+		sendEmbed({
+			color: 0xFFB2C5,
+			author: {
+				name: (sender.name),
+				icon_url: sender.avatarURL
+			},
+			title: a,
+			description: 'Answer: ' + rInAr(ballQuotes)
+		});
+		// else
+		//	sendMessage('Use a question mark.');
 	});
 
 	addCommandSentence('eval', a => {
@@ -187,8 +209,12 @@ function respond (msg, client) {
 		});
 	});
 
-	if (math)
-		addCommandSentence('math', a => sendMessage(math.eval(a)));
+	if (math) {
+		addCommandSentence('math', a => {
+			const res = math.eval(a);
+			sendMessage(res || 'Error');
+		});
+	}
 
 	addCommandArgs('emoji', a => {
 		const validCustomEmoji = /^<:.+?:(\d+)>$/;
@@ -259,8 +285,12 @@ function respond (msg, client) {
 	// TODO: add timezone argument, otherwise EST
 	addCommand('time', () => {
 		const currentTime = new Date(Date.now()).toLocaleTimeString('en-US', {hour12: true});
-		const timeShort = currentTime.replace(/([\d]+:[\d]{2})(:[\d]{2})(.*)/, '$1$3');
-		sendMessage(`It's ${codeL(timeShort)} EST.`);
+		// const timeShort = currentTime.replace(/([\d]+:[\d]{2})(:[\d]{2})(.*)/, '$1$2$3');
+		sendMessage(`It's ${codeL(currentTime)} EST.`);
+	});
+
+	addCommandSentence('choose', a => {
+		sendMessage(`I pick... **${rInAr(a.split(/ ?\| ?/))}**`);
 	});
 }
 

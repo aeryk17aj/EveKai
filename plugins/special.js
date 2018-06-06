@@ -15,7 +15,8 @@ const config = require('../config');
  */
 function respond (msg, client) {
 	const { content: msgText, channel, guild, member: sender } = msg;
-	if (!msgText.startsWith(config.prefix)) return;
+	if (!msgText.startsWith(config.prefix))
+		return;
 	const botMember = client.User.memberOf(guild);
 
 	/**
@@ -96,6 +97,9 @@ function respond (msg, client) {
 			return membersWithRole.length === 1 && r.position < botTopRoles[0].position;
 		});
 
+		const success = () =>
+			sendMessage(`Color of \`${topEditableSelfRole.name}\` changed to ${a}`);
+
 		if (!topEditableSelfRole)
 			return sendMessage('You don\'t have a self role.');
 
@@ -105,15 +109,16 @@ function respond (msg, client) {
 			if (!hexValue)
 				return sendMessage('Not a hex color.');
 			else
-				return topEditableSelfRole.commit(null, hexValue).then(() =>
-					sendMessage(`Color of \`${topEditableSelfRole.name}\` changed to ${a}`));
+				return topEditableSelfRole.commit(null, hexValue).then(() => success);
 		} else {
 			if (!toHex.get(a))
 				return sendMessage(`Unknown color: \`${a}\``);
-			else
-				// TODO: See if it's a hex code first before processing colors
-				return topEditableSelfRole.commit(null, parseInt(toHex(a).slice(1), 16)).then(() =>
-					sendMessage(`Color of \`${topEditableSelfRole.name}\` changed to ${a}`));
+			else {
+				if (a.length === 6 || a.length === 7)
+					return topEditableSelfRole.commit(null, parseInt(a.slice(-6), 16)).then(() => success);
+				else
+					return topEditableSelfRole.commit(null, parseInt(toHex(a).slice(1), 16)).then(() => success);
+			}
 		}
 	});
 }

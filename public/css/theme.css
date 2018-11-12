@@ -4,7 +4,7 @@ html, body {
 	font-family: 'Roboto', sans-serif;
 }
 
-#header {
+header {
 	position: relative;
 	top: 0;
 	left: 0;
@@ -14,7 +14,7 @@ html, body {
 	border-bottom: 3px solid #ffb2c5;
 }
 
-#header > div {
+header > div {
 	padding: 10px;
 	margin: 0 auto;
 }
@@ -92,11 +92,11 @@ html, body {
 	box-shadow: 3px 3px 2px #aaa;
 }
 
-#main {
+main {
 	margin-left: 10px;
 }
 
-#main p {
+main p {
 	width: fit-content;
 	padding: 10px;
 	border: 3px solid white;
